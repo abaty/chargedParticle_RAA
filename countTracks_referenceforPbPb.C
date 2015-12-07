@@ -27,7 +27,7 @@ void countTracks(bool isPP, int nFiles)
 ///RpPb plots
   float xbins[30] = { 0.5 , 0.6 , 0.7 , 0.8 , 0.9 , 1.0 , 1.1 , 1.2 , 1.4 , 1.6 , 1.8 , 2.0 , 2.2 , 2.4 , 3.2 , 4.0 , 4.8 , 5.6 , 6.4 , 7.2 , 9.6 , 12.0, 14.4,19.2, 24.0, 28.8, 35.2, 41.6, 48.0, 60.8};
   float yvals[29] = {4.1202/0.5946, 2.8116/0.6211, 1.9778/0.6552, 1.4330/0.6984 , 1.0405/0.7219, 0.7719/0.7515, 0.5816/0.7809, 0.3893/0.825, 0.23381/0.866, 0.14395/0.901, 0.09103/0.925, 0.05937/0.965, 0.03906/0.984, 0.014787/1.023, 0.003806/1.052, 0.001181/1.056, 0.0004290/1.048, 0.0001787/1.054, 0.00008152/1.031, 0.00002216/1.023, 0.000004653/1.036, 0.000001402/1.054, 0.0000003180/1.072, 0.00000006850/1.142, 0.00000001971/1.189, 0.000000006013/1.259, 0.000000001910/1.308, 0.0000000007181/1.342, 0.0000000002083/1.382 };
-  TH1D * RpPb = new TH1D("RpPb",";1/N dN/dPt;pt",29,xbins);
+  TH1D * RpPb = new TH1D("RpPb",";pt;1/N dN/dPt",29,xbins);
   for(int i=1; i<30; i++) RpPb->SetBinContent(i,yvals[i-1]);
 
 
@@ -196,7 +196,7 @@ void countTracks(bool isPP, int nFiles)
   outF->cd();
   RpPb->Write();
   nMBTrig->Write();
-  s[0]->Scale(1/((float)nMBTrig->GetEntries()));
+  //s[0]->Scale(1/((float)nMBTrig->GetEntries()));
   float scale = 1;
   scale = RpPb->GetBinContent(1)/s[0]->GetBinContent(1);
   std::cout << RpPb->GetBinContent(1) << " " << s[0]->GetBinContent(1) << " " << scale << std::endl;
