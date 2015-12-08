@@ -48,7 +48,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   float jtpt[200];
   float jteta[200];
 
-  int MB=0;
+  int MB[20]={0};
   int j40=0;
   int j60=0;
   int j80=0;
@@ -76,7 +76,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   trkCh->SetBranchAddress("trkDz1",&trkDz1);
   trkCh->SetBranchAddress("trkDzError1",&trkDzError1);
 
-  jetCh = new TChain("ak4CaloJetAnalzer/t");
+  jetCh = new TChain("ak4CaloJetAnalyzer/t");
   for(unsigned int i = 0; i<inputFiles.size(); i++)  jetCh->Add(inputFiles.at(i).c_str());
   jetCh->SetBranchAddress("nref",&nref);
   jetCh->SetBranchAddress("jtpt",&jtpt);
@@ -92,7 +92,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   
   hltCh = new TChain("hltanalysis/HltTree");
   for(unsigned int i = 0; i<inputFiles.size(); i++)  hltCh->Add(inputFiles.at(i).c_str());
-  hltCh->SetBranchAddress("HLT_L1MinimumBiasHF1OR_part0_v1",&MB);
+  for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_L1MinimumBiasHF1OR_part%d_v1",i),&(MB[i]));
   hltCh->SetBranchAddress("HLT_AK4CaloJet40_Eta5p1_v1",&j40);
   hltCh->SetBranchAddress("HLT_AK4CaloJet60_Eta5p1_v1",&j60);
   hltCh->SetBranchAddress("HLT_AK4CaloJet80_Eta5p1_v1",&j80);
@@ -101,12 +101,15 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
 //***********************************************************************
   std::cout << "starting event loop" << std::endl;
   std::cout << trkCh->GetEntries() << std::endl;
-  for(int i = 0; i<100000;i++)//trkCh->GetEntries(); i++)
+  for(int i = 0; i<trkCh->GetEntries(); i++)
   {
     if(i%50000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<std::endl;
     trkCh->GetEntry(i);
     if(!NoiseFilter || !pVtx || !pBeamScrape) continue;
-    if(!MB && !j40 && !j60 && !j80) continue;
+
+    bool MinBias = 0;
+    for(int j = 0; j<20; j++) MinBias = MinBias || (bool)MB[j];
+    if(!MinBias && !j40 && !j60 && !j80) continue;
     //**************************************************
     //for trigger combination with jet triggers
     float maxJtPt = 0;
@@ -114,7 +117,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     {
       if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<5.1) maxJtPt = jtpt[j];
     }
-    if(MB) evtCount[0]->Fill(maxJtPt); 
+    if(MinBias)  evtCount[0]->Fill(maxJtPt); 
     if(j40) evtCount[1]->Fill(maxJtPt);  
     if(j60) evtCount[2]->Fill(maxJtPt);   
     if(j80) evtCount[3]->Fill(maxJtPt);  
@@ -128,10 +131,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue; //Calo Matching 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
-      if(MB) spec[0]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
-      if(j40) spec[1]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
-      if(j60) spec[2]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
-      if(j80) spec[3]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
+      if(MinBias) spec[0]->Fill(trkPt[j],correction/trkPt[j]); 
+      if(j40) spec[1]->Fill(trkPt[j],correction/trkPt[j]); 
+      if(j60) spec[2]->Fill(trkPt[j],correction/trkPt[j]); 
+      if(j80) spec[3]->Fill(trkPt[j],correction/trkPt[j]); 
     }
   }
 
@@ -147,7 +150,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   //for pp
   TFile * outF = TFile::Open(Form("output_%d.root",jobNum),"recreate");
   outF->cd();
-  for(int i = 0; i<nTriggers; i++) spec[i]->Write();
+  for(int i = 0; i<nTriggers; i++)
+  {
+    spec[i]->Write();
+    evtCount[i]->Write();
+  }
   outF->Close(); 
 }
 

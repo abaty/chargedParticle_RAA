@@ -8,7 +8,7 @@ now="Rpp_$(date +"%Y_%m_%d__%H_%M_%S")"
 njobs=50
 
 mkdir $now
-cp MinBiasPD_1_6.txt $now 
+cp fileList.txt $now 
 cp TrkCorrInputFile.txt $now
 cp trkCorrections/* $now
 cp run.sh $now
