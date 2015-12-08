@@ -9,13 +9,21 @@
 #include <vector>
 #include <string>
 
-void countTracks(std::vector<std::string> inputFiles, int jobNum)
+void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = false)
 {
-///RpPb plots
-  float xbins[34] = { 0.5 , 0.6 , 0.7 , 0.8 , 0.9 , 1.0 , 1.1 , 1.2 , 1.4 , 1.6 , 1.8 , 2.0 , 2.2 , 2.4 , 3.2 , 4.0 , 4.8 , 5.6 , 6.4 , 7.2 , 9.6 , 12.0, 14.4,19.2, 24.0, 28.8, 35.2, 41.6, 48.0, 60.8,73.6,86.4,103.6,120.8};
   TH1D::SetDefaultSumw2();
+  const int nBins = 42;
+  float xbins[nBins+1] = { 0.5 , 0.6 , 0.7 , 0.8 , 0.9 , 1.0 , 1.1 , 1.2 , 1.4 , 1.6 , 1.8 , 2.0 , 2.2 , 2.4 , 3.2 , 4.0 , 4.8 , 5.6 , 6.4 , 7.2 , 9.6 , 12.0, 14.4,19.2, 24.0, 28.8, 35.2, 41.6, 48.0, 60.8,73.6,86.4,103.6,120.8,140,165,190,220,250,280,310,350,400};
+  const int nTriggers = 4;
+  
+  TH1D * spec[nTriggers];
+  TH1D * evtCount[nTriggers];
 
-  TH1D * s[1];
+  for(int i = 0; i<nTriggers; i++)
+  {
+    spec[i] = new TH1D(Form("spectrum_trigger%d",i),";1/N dN/dp_T;p_T",nBins,xbins);
+    evtCount[i] = new TH1D(Form("evtCount%d",i),";N;max jet p_T",200,0,1000);
+  }
 
   int nTrk;
   float trkPt[75000];
@@ -35,6 +43,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum)
   int pVtx;
   int pBeamScrape;
   int NoiseFilter;
+
+  int nref;
+  float jtpt[200];
+  float jteta[200];
 
   int MB=0;
   int j40=0;
@@ -63,8 +75,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum)
   trkCh->SetBranchAddress("trkDxyError1",&trkDxyError1);
   trkCh->SetBranchAddress("trkDz1",&trkDz1);
   trkCh->SetBranchAddress("trkDzError1",&trkDzError1);
-  std::cout << trkCh->GetEntries() << std::endl;
 
+  jetCh = new TChain("ak4CaloJetAnalzer/t");
+  for(unsigned int i = 0; i<inputFiles.size(); i++)  jetCh->Add(inputFiles.at(i).c_str());
+  jetCh->SetBranchAddress("nref",&nref);
+  jetCh->SetBranchAddress("jtpt",&jtpt);
+  jetCh->SetBranchAddress("jteta",&jteta);  
+  trkCh->AddFriend(jetCh);
 
   evtCh = new TChain("skimanalysis/HltTree");
   for(unsigned int i = 0; i<inputFiles.size(); i++)  evtCh->Add(inputFiles.at(i).c_str());
@@ -76,42 +93,69 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum)
   hltCh = new TChain("hltanalysis/HltTree");
   for(unsigned int i = 0; i<inputFiles.size(); i++)  hltCh->Add(inputFiles.at(i).c_str());
   hltCh->SetBranchAddress("HLT_L1MinimumBiasHF1OR_part0_v1",&MB);
+  hltCh->SetBranchAddress("HLT_AK4CaloJet40_Eta5p1_v1",&j40);
+  hltCh->SetBranchAddress("HLT_AK4CaloJet60_Eta5p1_v1",&j60);
+  hltCh->SetBranchAddress("HLT_AK4CaloJet80_Eta5p1_v1",&j80);
   trkCh->AddFriend(hltCh);
 
 //***********************************************************************
-  //TH1D * nMBTrig = new TH1D("nMBTrig","nMBTrig",2,-0.5,1.5);
   std::cout << "starting event loop" << std::endl;
   std::cout << trkCh->GetEntries() << std::endl;
-  for(int i = 0; i<trkCh->GetEntries(); i++)
+  for(int i = 0; i<100000;i++)//trkCh->GetEntries(); i++)
   {
     if(i%50000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<std::endl;
     trkCh->GetEntry(i);
     if(!NoiseFilter || !pVtx || !pBeamScrape) continue;
-
+    if(!MB && !j40 && !j60 && !j80) continue;
     //**************************************************
+    //for trigger combination with jet triggers
+    float maxJtPt = 0;
+    for(int j=0; j<nref; j++)
+    {
+      if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<5.1) maxJtPt = jtpt[j];
+    }
+    if(MB) evtCount[0]->Fill(maxJtPt); 
+    if(j40) evtCount[1]->Fill(maxJtPt);  
+    if(j60) evtCount[2]->Fill(maxJtPt);   
+    if(j80) evtCount[3]->Fill(maxJtPt);  
+
     for(int j = 0; j<nTrk; j++)
     {
       if(TMath::Abs(trkEta[j])>1) continue;
       if(trkPt[j]<0.5 || trkPt[j]>=300) continue;
       if(highPurity[j]!=1) continue;
       if((trkMVA[j]<0.5 && trkMVA[j]!=-99) || (int)trkNHit[j]<8 || trkPtError[j]/trkPt[j]>0.3 || trkDz1[j]/trkDzError1[j]>3 || trkDxy1[j]/trkDxyError1[j]>3) continue;
-      if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue; //Calo Matching 
+      //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue; //Calo Matching 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
-      s[0]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
+      if(MB) spec[0]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
+      if(j40) spec[1]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
+      if(j60) spec[2]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
+      if(j80) spec[3]->Fill(trkPt[j],correction/trkPt[j]);  //for minbias
     }
   }
-  for(int i=1; i<34; i++) s[0]->SetBinContent(i,s[0]->GetBinContent(i)/(xbins[i]-xbins[i-1]));
-  for(int i=1; i<34; i++) s[0]->SetBinError(i,s[0]->GetBinError(i)/(xbins[i]-xbins[i-1]));
+
+  for(int i = 0; i<nTriggers; i++)
+  {
+     for(int j=1; j<nBins+1; j++)
+     {
+       spec[i]->SetBinContent(j,spec[i]->GetBinContent(j)/(xbins[j]-xbins[j-1]));
+       spec[i]->SetBinError(j,spec[i]->GetBinError(j)/(xbins[j]-xbins[j-1]));
+     }
+  }
 
   //for pp
   TFile * outF = TFile::Open(Form("output_%d.root",jobNum),"recreate");
   outF->cd();
-  s[0]->Write();
-
+  for(int i = 0; i<nTriggers; i++) spec[i]->Write();
   outF->Close(); 
 }
 
+
+
+//*************************************************************************************
+//*************************************************************************************
+//*************************************************************************************
 int main(int argc, const char* argv[])
 {
   if(argc != 4)
