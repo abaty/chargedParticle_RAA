@@ -3,6 +3,8 @@
 #include "TFile.h"
 #include "TBranch.h"
 #include "TMath.h"
+#include "TAttMarker.h"
+#include "TAttLine.h"
 #include "getTrkCorr_simple.h"
 #include <iostream>
 #include <fstream>
@@ -21,8 +23,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
 
   for(int i = 0; i<nTriggers; i++)
   {
-    spec[i] = new TH1D(Form("spectrum_trigger%d",i),";1/N dN/dp_T;p_T",nBins,xbins);
-    evtCount[i] = new TH1D(Form("evtCount%d",i),";N;max jet p_T",200,0,1000);
+    spec[i] = new TH1D(Form("spectrum_trigger%d",i),";p_{T};1/N dN/dp_{T}",nBins,xbins);
+    evtCount[i] = new TH1D(Form("evtCount%d",i),";max jet p_{T};N",240,0,1200);
+    spec[i]->SetLineColor(i); 
+    evtCount[i]->SetMarkerColor(i);
   }
 
   int nTrk;
@@ -103,7 +107,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   std::cout << trkCh->GetEntries() << std::endl;
   for(int i = 0; i<trkCh->GetEntries(); i++)
   {
-    if(i%50000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<std::endl;
+    if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<std::endl;
     trkCh->GetEntry(i);
     if(!NoiseFilter || !pVtx || !pBeamScrape) continue;
 
@@ -148,7 +152,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   }
 
   //for pp
-  TFile * outF = TFile::Open(Form("output_%d.root",jobNum),"recreate");
+  TFile * outF = TFile::Open(Form("RAA_pp_output_%d.root",jobNum),"recreate");
   outF->cd();
   for(int i = 0; i<nTriggers; i++)
   {
