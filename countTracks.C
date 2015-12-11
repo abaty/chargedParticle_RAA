@@ -18,19 +18,21 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
  
-  Settings s(); 
+  Settings s; 
   TH2D * spec[s.nTriggers];
   TH1D * evtCount[s.nTriggers];
+  TH1D * nVtxMB;
 
   for(int i = 0; i<s.nTriggers; i++)
   {
-    spec[i] = new TH2D(Form("spectrum_trigger%d",i),";p_{T};1/N dN/dp_{T}",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
+    spec[i] = new TH2D(Form("spectrum_trigger%d",i),"",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
     evtCount[i] = new TH1D(Form("evtCount%d",i),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
-    spec[i]->SetLineColor(i); 
     evtCount[i]->SetMarkerColor(i);
+    nVtxMB = new TH1D("nVtxMB","nVtx;N Events",12,0,12);
   }
 
   int nTrk;
+  int nVtx;
   float trkPt[75000];
   float trkPtError[75000];
   float trkEta[75000];
@@ -80,6 +82,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   trkCh->SetBranchAddress("trkDxyError1",&trkDxyError1);
   trkCh->SetBranchAddress("trkDz1",&trkDz1);
   trkCh->SetBranchAddress("trkDzError1",&trkDzError1);
+  trkCh->SetBranchAddress("nVtx",&nVtx);
 
   jetCh = new TChain("ak4CaloJetAnalyzer/t");
   for(unsigned int i = 0; i<inputFiles.size(); i++)  jetCh->Add(inputFiles.at(i).c_str());
@@ -122,7 +125,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     {
       if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<5.1) maxJtPt = jtpt[j];
     }
-    if(MinBias)  evtCount[0]->Fill(maxJtPt); 
+    if(MinBias)
+    {
+      evtCount[0]->Fill(maxJtPt); 
+      nVtxMB->Fill(nVtx);
+    }
     if(j40) evtCount[1]->Fill(maxJtPt);  
     if(j60) evtCount[2]->Fill(maxJtPt);   
     if(j80) evtCount[3]->Fill(maxJtPt);  
@@ -150,6 +157,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   {
     spec[i]->Write();
     evtCount[i]->Write();
+    nVtxMB->Write();
   }
   outF->Close(); 
 }
