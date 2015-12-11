@@ -1,4 +1,5 @@
 #include "TH1D.h"
+#include "TH2D.h"
 #include "TChain.h"
 #include "TFile.h"
 #include "TBranch.h"
@@ -6,6 +7,7 @@
 #include "TAttMarker.h"
 #include "TAttLine.h"
 #include "getTrkCorr_simple.h"
+#include "Settings.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -14,17 +16,16 @@
 void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = false)
 {
   TH1D::SetDefaultSumw2();
-  const int nBins = 42;
-  float xbins[nBins+1] = { 0.5 , 0.6 , 0.7 , 0.8 , 0.9 , 1.0 , 1.1 , 1.2 , 1.4 , 1.6 , 1.8 , 2.0 , 2.2 , 2.4 , 3.2 , 4.0 , 4.8 , 5.6 , 6.4 , 7.2 , 9.6 , 12.0, 14.4,19.2, 24.0, 28.8, 35.2, 41.6, 48.0, 60.8,73.6,86.4,103.6,120.8,140,165,190,220,250,280,310,350,400};
-  const int nTriggers = 4;
-  
-  TH1D * spec[nTriggers];
-  TH1D * evtCount[nTriggers];
+  TH2D::SetDefaultSumw2();
+ 
+  Settings s(); 
+  TH2D * spec[s.nTriggers];
+  TH1D * evtCount[s.nTriggers];
 
-  for(int i = 0; i<nTriggers; i++)
+  for(int i = 0; i<s.nTriggers; i++)
   {
-    spec[i] = new TH1D(Form("spectrum_trigger%d",i),";p_{T};1/N dN/dp_{T}",nBins,xbins);
-    evtCount[i] = new TH1D(Form("evtCount%d",i),";max jet p_{T};N",240,0,1200);
+    spec[i] = new TH2D(Form("spectrum_trigger%d",i),";p_{T};1/N dN/dp_{T}",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
+    evtCount[i] = new TH1D(Form("evtCount%d",i),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
     spec[i]->SetLineColor(i); 
     evtCount[i]->SetMarkerColor(i);
   }
@@ -135,26 +136,17 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue; //Calo Matching 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
-      if(MinBias) spec[0]->Fill(trkPt[j],correction/trkPt[j]); 
-      if(j40) spec[1]->Fill(trkPt[j],correction/trkPt[j]); 
-      if(j60) spec[2]->Fill(trkPt[j],correction/trkPt[j]); 
-      if(j80) spec[3]->Fill(trkPt[j],correction/trkPt[j]); 
+      if(MinBias) spec[0]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j40) spec[1]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j60) spec[2]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j80) spec[3]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
     }
-  }
-
-  for(int i = 0; i<nTriggers; i++)
-  {
-     for(int j=1; j<nBins+1; j++)
-     {
-       spec[i]->SetBinContent(j,spec[i]->GetBinContent(j)/(xbins[j]-xbins[j-1]));
-       spec[i]->SetBinError(j,spec[i]->GetBinError(j)/(xbins[j]-xbins[j-1]));
-     }
   }
 
   //for pp
   TFile * outF = TFile::Open(Form("RAA_pp_output_%d.root",jobNum),"recreate");
   outF->cd();
-  for(int i = 0; i<nTriggers; i++)
+  for(int i = 0; i<s.nTriggers; i++)
   {
     spec[i]->Write();
     evtCount[i]->Write();
