@@ -9,6 +9,7 @@ njobs=100
 
 mkdir $now
 cp fileList.txt $now 
+cp testFileList.txt $now 
 cp TrkCorrInputFile.txt $now
 cp trkCorrections/* $now
 cp run.sh $now

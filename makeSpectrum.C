@@ -10,18 +10,26 @@ void makeSpectrum()
   Settings s;
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
-  
+//input hist  
   TH2D * spec[s.nTriggers];
   TH1D * evtCount[s.nTriggers];
   TH1D * nVtxMB;
+
+//output hist
   TH1D * pp = new TH1D("ppTrackSpectrum","ppSpectrum",s.ntrkBins,s.xtrkbins);
+  TH1D * ppByTrigger[s.nTriggers];
+  for(int i = 0; i<s.nTriggers; i++) ppByTrigger[i] = new TH1D(Form("ppTrackSpectrumByTrigger%d",i),"",s.ntrkBins,s.xtrkbins);
+  TH1D * ppJets = new TH1D("ppJetSpectrum","",s.njetBins,0,s.maxJetBin);
+  TH1D * ppJetsByTrigger[s.nTriggers];
+  for(int i = 0; i<s.nTriggers; i++) ppJetsByTrigger[i] = new TH1D(Form("ppJetSpectrumByTrigger%d",i),"",s.njetBins,0,s.maxJetBin);
+ 
 
   //loading files
   TFile * inFile = TFile::Open("countTracks.root","read");
   for(int i = 0; i<s.nTriggers; i++)
   {
-    spec[i] = (TH2D*) inFile->Get(Form("spectrum_trigger%d",i));
-    evtCount[i] = (TH1D*) inFile->Get(Form("evtCount%d",i));
+    spec[i] = (TH2D*) inFile->Get(Form("spectrum_trigger%d",(i==0)?i:i+1));
+    evtCount[i] = (TH1D*) inFile->Get(Form("evtCount%d",(i==0)?i:i+1));
     spec[i]->SetDirectory(0);
     evtCount[i]->SetDirectory(0);
   }
@@ -42,7 +50,9 @@ void makeSpectrum()
       scale[i] = scale[i]*evtCount[j]->Integral(evtCount[j]->FindBin(s.triggerBins[j+1]),evtCount[j]->FindBin(s.triggerBins[j+2]))/(double)evtCount[j+1]->Integral(evtCount[j+1]->FindBin(s.triggerBins[j+1]),evtCount[j+1]->FindBin(s.triggerBins[j+2]));
     }
     spec[i]->Scale(scale[i]);
+    evtCount[i]->Scale(scale[i]);
 
+    //total spectrum
     for(int j = evtCount[i]->FindBin(s.triggerBins[i]); j<evtCount[i]->FindBin(s.triggerBins[i+1]); j++)
     {
       for(int k = 1; k<pp->GetSize()+1; k++)
@@ -50,6 +60,20 @@ void makeSpectrum()
         pp->SetBinContent(k,pp->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
         pp->SetBinError(k,TMath::Power(TMath::Power(pp->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
       }
+      ppJets->SetBinContent(j,evtCount[i]->GetBinContent(j));
+      ppJets->SetBinError(j,evtCount[i]->GetBinError(j));
+    }
+    
+    //spectrum for each trigger
+    for(int j = evtCount[i]->FindBin(0); j<evtCount[i]->FindBin(s.maxJetBin); j++)
+    {
+      for(int k = 1; k<ppByTrigger[i]->GetSize()+1; k++)
+      {
+        ppByTrigger[i]->SetBinContent(k,ppByTrigger[i]->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
+        ppByTrigger[i]->SetBinError(k,TMath::Power(TMath::Power(ppByTrigger[i]->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
+      }
+      ppJetsByTrigger[i]->SetBinContent(j,evtCount[i]->GetBinContent(j));
+      ppJetsByTrigger[i]->SetBinError(j,evtCount[i]->GetBinError(j));
     }
   }
 
@@ -57,10 +81,21 @@ void makeSpectrum()
   for(int i = 1; i<pp->GetSize()+1; i++)
   {
     pp->SetBinContent(i,pp->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
-    pp->SetBinError(i,pp->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
+    pp->SetBinError(i,pp->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
+    for(int j = 0; j<s.nTriggers; j++)
+    {
+      ppByTrigger[j]->SetBinContent(i,ppByTrigger[j]->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
+      ppByTrigger[j]->SetBinError(i,ppByTrigger[j]->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
+    } 
   } 
   
   TFile * outF = TFile::Open("ppSpectrum.root","recreate");
   pp->Write();
+  ppJets->Write();
+  for(int j = 0; j<s.nTriggers; j++)
+  {
+    ppByTrigger[j]->Write();
+    ppJetsByTrigger[j]->Write();
+  }
   outF->Close();
 }
