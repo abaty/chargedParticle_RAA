@@ -125,12 +125,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     {
       if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<5.1) maxJtPt = jtpt[j];
     }
+
     if(MinBias)
     {
       evtCount[0]->Fill(maxJtPt); 
       nVtxMB->Fill(nVtx);
     }
-    if(j40) evtCount[1]->Fill(maxJtPt);  
+    if(j40) evtCount[1]->Fill(maxJtPt);   
     if(j60) evtCount[2]->Fill(maxJtPt);   
     if(j80) evtCount[3]->Fill(maxJtPt);  
 
