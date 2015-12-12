@@ -117,7 +117,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
 
     bool MinBias = 0;
     for(int j = 0; j<20; j++) MinBias = MinBias || (bool)MB[j];
-    if(!MinBias && !j60 && !j80) continue;
+    if(!MinBias  && !j80) continue;
     //**************************************************
     //for trigger combination with jet triggers
     float maxJtPt = 0;
@@ -131,8 +131,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       evtCount[0]->Fill(maxJtPt); 
       nVtxMB->Fill(nVtx);
     }
-    if(j60) evtCount[1]->Fill(maxJtPt);   
-    if(j80) evtCount[2]->Fill(maxJtPt);  
+    if(j80) evtCount[1]->Fill(maxJtPt);  
 
     for(int j = 0; j<nTrk; j++)
     {
@@ -144,8 +143,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
       if(MinBias) spec[0]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j60) spec[1]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j80) spec[2]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j80) spec[1]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
     }
   }
 

@@ -49,8 +49,8 @@ void makeSpectrum()
     for(int j = 0; j<i; j++){
       scale[i] = scale[i]*evtCount[j]->Integral(evtCount[j]->FindBin(s.triggerBins[j+1]),evtCount[j]->FindBin(s.triggerBins[j+2]))/(double)evtCount[j+1]->Integral(evtCount[j+1]->FindBin(s.triggerBins[j+1]),evtCount[j+1]->FindBin(s.triggerBins[j+2]));
     }
+    std::cout << scale[i] << std::endl;
     spec[i]->Scale(scale[i]);
-    evtCount[i]->Scale(scale[i]);
 
     //total spectrum
     for(int j = evtCount[i]->FindBin(s.triggerBins[i]); j<evtCount[i]->FindBin(s.triggerBins[i+1]); j++)
@@ -72,8 +72,8 @@ void makeSpectrum()
         ppByTrigger[i]->SetBinContent(k,ppByTrigger[i]->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
         ppByTrigger[i]->SetBinError(k,TMath::Power(TMath::Power(ppByTrigger[i]->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
       }
-      ppJetsByTrigger[i]->SetBinContent(j,evtCount[i]->GetBinContent(j));
-      ppJetsByTrigger[i]->SetBinError(j,evtCount[i]->GetBinError(j));
+      ppJetsByTrigger[i]->SetBinContent(j,evtCount[i]->GetBinContent(j)/scale[i]);
+      ppJetsByTrigger[i]->SetBinError(j,evtCount[i]->GetBinError(j)/scale[i]);
     }
   }
 
