@@ -14,9 +14,10 @@ void makeSpectrum()
   TH2D * spec[s.nTriggers];
   TH1D * evtCount[s.nTriggers];
   TH1D * nVtxMB;
+  TH1D * pp = new TH1D("ppTrackSpectrum","ppSpectrum",s.ntrkBins,s.xtrkbins);
 
   //loading files
-  TFile * inFile = TFile::Open("Dec11_tracks.root","read");
+  TFile * inFile = TFile::Open("countTracks.root","read");
   for(int i = 0; i<s.nTriggers; i++)
   {
     spec[i] = (TH2D*) inFile->Clone(Form("spectrum_trigger%d",i));
@@ -41,5 +42,18 @@ void makeSpectrum()
       scale[i] = scale[i]*evtCount[j]->Integral(evtCount[j]->FindBin(s.triggerBins[j+1]),evtCount[j]->FindBin(s.triggerBins[j+2]))/(double)evtCount[j+1]->Integral(evtCount[j+1]->FindBin(s.triggerBins[j+1]),evtCount[j+1]->FindBin(s.triggerBins[j+2]))
     }
     spec[i]->Scale(scale[i]);
+
+    for(int j = evtCount->FindBin(s.triggerBins[i]); j<evtCount->FindBin(s.triggerBins[i+1]); j++)
+    {
+      for(int k = 1; k<ppSpectrum->GetSize()+1; k++)
+      {
+        ppSpectrum->SetBinContent(k,ppSpectrum->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
+        ppSpectrum->SetBinError(k,TMath::Power(TMath::Power(ppSpectrum->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
+      }
+    }
   }
+  
+  TFile * outF = TFile::Open("ppSpectrum.root","recreate");
+  ppSpectrum->Write();
+  outF->Close();
 }
