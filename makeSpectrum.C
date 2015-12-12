@@ -28,8 +28,8 @@ void makeSpectrum()
   TFile * inFile = TFile::Open("countTracks.root","read");
   for(int i = 0; i<s.nTriggers; i++)
   {
-    spec[i] = (TH2D*) inFile->Get(Form("spectrum_trigger%d",(i==0)?i:i+1));
-    evtCount[i] = (TH1D*) inFile->Get(Form("evtCount%d",(i==0)?i:i+1));
+    spec[i] = (TH2D*) inFile->Get(Form("spectrum_trigger%d",i));
+    evtCount[i] = (TH1D*) inFile->Get(Form("evtCount%d",i));
     spec[i]->SetDirectory(0);
     evtCount[i]->SetDirectory(0);
   }
