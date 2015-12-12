@@ -28,8 +28,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     spec[i] = new TH2D(Form("spectrum_trigger%d",i),"",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
     evtCount[i] = new TH1D(Form("evtCount%d",i),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
     evtCount[i]->SetMarkerColor(i);
-    nVtxMB = new TH1D("nVtxMB","nVtx;N Events",12,0,12);
   }
+  nVtxMB = new TH1D("nVtxMB","nVtx;N Events",12,0,12);
 
   int nTrk;
   int nVtx;
