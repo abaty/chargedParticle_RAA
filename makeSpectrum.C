@@ -181,6 +181,24 @@ void makeSpectrum()
   c1->SaveAs("plots/ppJets_FullSpectrum_XZoom.png"); 
   c1->SaveAs("plots/ppJets_FullSpectrum_XZoom.pdf"); 
 
+  c1->SetLogy(0);
+  for(int i = 0; i<s.nTriggers-1; i++) ppJetsByTrigger[s.nTriggers-1-i]->Divide(ppJetsByTrigger[s.nTriggers-2-i]);
+  ppJetsByTrigger[1]->GetYaxis()->SetRangeUser(0,2);
+  ppJetsByTrigger[1]->GetXaxis()->SetRangeUser(20,140);
+  ppJetsByTrigger[1]->GetXaxis()->SetTitle("Leading jet p_{T}");
+  ppJetsByTrigger[1]->Draw();
+  ppJetsByTrigger[2]->Draw("same");
+  ppJetsByTrigger[3]->Draw("same");
+  TLegend * leg2 = new TLegend(0.2,0.6,0.5,0.9);
+  leg2->AddEntry(ppJetsByTrigger[1],"Jet40/MB","p");
+  leg2->AddEntry(ppJetsByTrigger[2],"Jet60/Jet40","p");
+  leg2->AddEntry(ppJetsByTrigger[3],"Jet80/Jet60","p");
+  leg2->Draw("same");
+  c1->SaveAs("plots/JetRelativeTurnOnes.png");
+  c1->SaveAs("plots/JetRelativeTurnOnes.pdf");
+  
+
+  c1->SetLogy();
   c1->SetLogx();
   pp->SetMarkerSize(0.8);
   pp->Draw();
