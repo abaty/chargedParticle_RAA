@@ -66,7 +66,15 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   TChain * evtCh;
   TChain * hltCh;
 
-  
+  //for documenting which PD a file comes out of to avoid overlaps between PDs
+  //0 is MB, 1 is jet40/60, 2 is jet80
+  int PDindx[1000];
+  for(unsigned int i = 0; i<inputFiles.size(); i++)
+  {
+    if(inputFiles.at(i).find("MinimumBias") != std::string::npos) PDindx[i]=0;
+    if(inputFiles.at(i).find("HighPtLowerJets") != std::string::npos) PDindx[i]=1;
+    if(inputFiles.at(i).find("HighPtJet80") != std::string::npos) PDindx[i]=2;
+  }
 
   trkCh = new TChain("ppTrack/trackTree");
   for(unsigned int i = 0; i<inputFiles.size(); i++)  trkCh->Add(inputFiles.at(i).c_str());
@@ -113,7 +121,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   std::cout << trkCh->GetEntries() << std::endl;
   for(int i = 0; i<trkCh->GetEntries(); i++)
   {
-    if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<std::endl;
+    if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
     trkCh->GetEntry(i);
     if(!NoiseFilter || !pVtx || !pBeamScrape) continue;
 
@@ -128,14 +136,15 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<5.1) maxJtPt = jtpt[j];
     }
 
-    if(MinBias)
+    int PD = PDindx[trkCh->GetTreeNumber()];
+    if(MinBias && PD==0)
     {
       evtCount[0]->Fill(maxJtPt); 
       nVtxMB->Fill(nVtx);
     }
-    if(j40) evtCount[1]->Fill(maxJtPt);  
-    if(j60) evtCount[2]->Fill(maxJtPt);  
-    if(j80) evtCount[3]->Fill(maxJtPt);  
+    if(j40 && PD==1) evtCount[1]->Fill(maxJtPt);  
+    if(j60 && PD==1) evtCount[2]->Fill(maxJtPt);  
+    if(j80 && PD==2) evtCount[3]->Fill(maxJtPt);  
 
     for(int j = 0; j<nTrk; j++)
     {
@@ -146,10 +155,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
-      if(MinBias) spec[0]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j40) spec[1]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j60) spec[2]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j80) spec[3]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(MinBias && PD==0) spec[0]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j40 && PD==1)     spec[1]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j60 && PD==1)     spec[2]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j80 && PD==2)     spec[3]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
     }
   }
 
