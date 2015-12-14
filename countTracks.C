@@ -169,8 +169,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   {
     spec[i]->Write();
     evtCount[i]->Write();
-    nVtxMB->Write();
   }
+  nVtxMB->Write();
   outF->Close(); 
 }
 

@@ -3,6 +3,9 @@
 #include "TH2D.h"
 #include "TFile.h"
 #include "TCanvas.h"
+#include "TColor.h"
+#include "TAttMarker.h"
+#include "TAttLine.h"
 #include "TMath.h"
 
 void makeSpectrum()
@@ -94,7 +97,11 @@ void makeSpectrum()
   ppJets->Write();
   for(int j = 0; j<s.nTriggers; j++)
   {
+    ppByTrigger[j]->SetLineColor(j+1);
+    ppByTrigger[j]->SetMarkerColor(j+1);
     ppByTrigger[j]->Write();
+    ppJetsByTrigger[j]->SetLineColor(j+1);
+    ppJetsByTrigger[j]->SetMarkerColor(j+1);
     ppJetsByTrigger[j]->Write();
   }
   outF->Close();
