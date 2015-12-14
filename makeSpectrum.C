@@ -47,7 +47,7 @@ void makeSpectrum()
   {
     scale[i] = 68/((float)nVtx);//using 68mb as inelastic pp xsection
     for(int j = 0; j<i; j++){
-      scale[i] = scale[i]*evtCount[j]->Integral(evtCount[j]->FindBin(s.triggerBins[j+1]),evtCount[j]->FindBin(s.triggerBins[j+2]))/(double)evtCount[j+1]->Integral(evtCount[j+1]->FindBin(s.triggerBins[j+1]),evtCount[j+1]->FindBin(s.triggerBins[j+2]));
+      scale[i] = scale[i]*evtCount[j]->Integral(evtCount[j]->FindBin(s.triggerOverlapBins[j+1]),evtCount[j]->FindBin(s.triggerOverlapBins[j+2]))/(double)evtCount[j+1]->Integral(evtCount[j+1]->FindBin(s.triggerOverlapBins[j+1]),evtCount[j+1]->FindBin(s.triggerOverlapBins[j+2]));
     }
     std::cout << scale[i] << std::endl;
     spec[i]->Scale(scale[i]);
@@ -60,8 +60,8 @@ void makeSpectrum()
         pp->SetBinContent(k,pp->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
         pp->SetBinError(k,TMath::Power(TMath::Power(pp->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
       }
-      ppJets->SetBinContent(j,evtCount[i]->GetBinContent(j));
-      ppJets->SetBinError(j,evtCount[i]->GetBinError(j));
+      ppJets->SetBinContent(j,evtCount[i]->GetBinContent(j)*scale[i]);
+      ppJets->SetBinError(j,evtCount[i]->GetBinError(j)*scale[i]);
     }
     
     //spectrum for each trigger
@@ -72,8 +72,8 @@ void makeSpectrum()
         ppByTrigger[i]->SetBinContent(k,ppByTrigger[i]->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
         ppByTrigger[i]->SetBinError(k,TMath::Power(TMath::Power(ppByTrigger[i]->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
       }
-      ppJetsByTrigger[i]->SetBinContent(j,evtCount[i]->GetBinContent(j)/scale[i]);
-      ppJetsByTrigger[i]->SetBinError(j,evtCount[i]->GetBinError(j)/scale[i]);
+      ppJetsByTrigger[i]->SetBinContent(j,evtCount[i]->GetBinContent(j)*scale[i]);
+      ppJetsByTrigger[i]->SetBinError(j,evtCount[i]->GetBinError(j)*scale[i]);
     }
   }
 

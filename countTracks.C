@@ -66,6 +66,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   TChain * evtCh;
   TChain * hltCh;
 
+  
+
   trkCh = new TChain("ppTrack/trackTree");
   for(unsigned int i = 0; i<inputFiles.size(); i++)  trkCh->Add(inputFiles.at(i).c_str());
   trkCh->SetBranchAddress("nTrk",&nTrk);
@@ -117,7 +119,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
 
     bool MinBias = 0;
     for(int j = 0; j<20; j++) MinBias = MinBias || (bool)MB[j];
-    if(!MinBias  && !j80) continue;
+    if(!MinBias && !j40 && !j60 && !j80) continue;
     //**************************************************
     //for trigger combination with jet triggers
     float maxJtPt = 0;
@@ -131,7 +133,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       evtCount[0]->Fill(maxJtPt); 
       nVtxMB->Fill(nVtx);
     }
-    if(j80) evtCount[1]->Fill(maxJtPt);  
+    if(j40) evtCount[1]->Fill(maxJtPt);  
+    if(j60) evtCount[2]->Fill(maxJtPt);  
+    if(j80) evtCount[3]->Fill(maxJtPt);  
 
     for(int j = 0; j<nTrk; j++)
     {
@@ -139,11 +143,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       if(trkPt[j]<0.5 || trkPt[j]>=300) continue;
       if(highPurity[j]!=1) continue;
       if((trkMVA[j]<0.5 && trkMVA[j]!=-99) || (int)trkNHit[j]<8 || trkPtError[j]/trkPt[j]>0.3 || trkDz1[j]/trkDzError1[j]>3 || trkDxy1[j]/trkDxyError1[j]>3) continue;
-      //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue; //Calo Matching 
+      //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
       if(MinBias) spec[0]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j80) spec[1]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j40) spec[1]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j60) spec[2]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      if(j80) spec[3]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
     }
   }
 
