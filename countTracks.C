@@ -133,10 +133,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     float maxJtPt = 0;
     for(int j=0; j<nref; j++)
     {
-      if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<5.1) maxJtPt = jtpt[j];
+      if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<2) maxJtPt = jtpt[j];
     }
 
     int PD = PDindx[trkCh->GetTreeNumber()];
+    if(maxJtPt==0 && PD!=0) continue;//remove jet events where no jets are in barrel  
     if(MinBias && PD==0)
     {
       evtCount[0]->Fill(maxJtPt); 

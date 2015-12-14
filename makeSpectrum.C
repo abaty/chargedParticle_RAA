@@ -21,7 +21,9 @@ void makeSpectrum()
 //output hist
   TH1D * pp = new TH1D("ppTrackSpectrum","ppSpectrum",s.ntrkBins,s.xtrkbins);
   TH1D * ppByTrigger[s.nTriggers];
+  TH1D * ppUsedByTrigger[s.nTriggers];
   for(int i = 0; i<s.nTriggers; i++) ppByTrigger[i] = new TH1D(Form("ppTrackSpectrumByTrigger%d",i),"",s.ntrkBins,s.xtrkbins);
+  for(int i = 0; i<s.nTriggers; i++) ppUsedByTrigger[i] = new TH1D(Form("ppUsedTrackSpectrumByTrigger%d",i),"",s.ntrkBins,s.xtrkbins);
   TH1D * ppJets = new TH1D("ppJetSpectrum","",s.njetBins,0,s.maxJetBin);
   TH1D * ppJetsByTrigger[s.nTriggers];
   for(int i = 0; i<s.nTriggers; i++) ppJetsByTrigger[i] = new TH1D(Form("ppJetSpectrumByTrigger%d",i),"",s.njetBins,0,s.maxJetBin);
@@ -50,7 +52,7 @@ void makeSpectrum()
   {
     scale[i] = 68/((float)nVtx);//using 68mb as inelastic pp xsection
     for(int j = 0; j<i; j++){
-      scale[i] = scale[i]*evtCount[j]->Integral(evtCount[j]->FindBin(s.triggerOverlapBins[j+1]),evtCount[j]->FindBin(s.triggerOverlapBins[j+2]))/(double)evtCount[j+1]->Integral(evtCount[j+1]->FindBin(s.triggerOverlapBins[j+1]),evtCount[j+1]->FindBin(s.triggerOverlapBins[j+2]));
+      scale[i] = scale[i]*evtCount[j]->Integral(evtCount[j]->FindBin(s.triggerOverlapBins[j+1]),evtCount[j]->FindBin(s.maxJetBin))/(double)evtCount[j+1]->Integral(evtCount[j+1]->FindBin(s.triggerOverlapBins[j+1]),evtCount[j+1]->FindBin(s.maxJetBin));
     }
     std::cout << scale[i] << std::endl;
     spec[i]->Scale(scale[i]);
@@ -62,6 +64,8 @@ void makeSpectrum()
       {
         pp->SetBinContent(k,pp->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
         pp->SetBinError(k,TMath::Power(TMath::Power(pp->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
+        ppUsedByTrigger[i]->SetBinContent(k,ppUsedByTrigger[i]->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
+        ppUsedByTrigger[i]->SetBinError(k,TMath::Power(TMath::Power(ppUsedByTrigger[i]->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
       }
       ppJets->SetBinContent(j,evtCount[i]->GetBinContent(j)*scale[i]);
       ppJets->SetBinError(j,evtCount[i]->GetBinError(j)*scale[i]);
@@ -89,6 +93,8 @@ void makeSpectrum()
     {
       ppByTrigger[j]->SetBinContent(i,ppByTrigger[j]->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
       ppByTrigger[j]->SetBinError(i,ppByTrigger[j]->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
+      ppUsedByTrigger[j]->SetBinContent(i,ppByTrigger[j]->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
+      ppUsedByTrigger[j]->SetBinError(i,ppByTrigger[j]->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
     } 
   } 
   
@@ -100,6 +106,9 @@ void makeSpectrum()
     ppByTrigger[j]->SetLineColor(j+1);
     ppByTrigger[j]->SetMarkerColor(j+1);
     ppByTrigger[j]->Write();
+    ppUsedByTrigger[j]->SetLineColor(j+1);
+    ppUsedByTrigger[j]->SetMarkerColor(j+1);
+    ppUsedByTrigger[j]->Write();
     ppJetsByTrigger[j]->SetLineColor(j+1);
     ppJetsByTrigger[j]->SetMarkerColor(j+1);
     ppJetsByTrigger[j]->Write();
