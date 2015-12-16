@@ -152,7 +152,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       if(TMath::Abs(trkEta[j])>1) continue;
       if(trkPt[j]<0.5 || trkPt[j]>=300) continue;
       if(highPurity[j]!=1) continue;
-      if((trkMVA[j]<0.5 && trkMVA[j]!=-99) || (int)trkNHit[j]<8 || trkPtError[j]/trkPt[j]>0.3 || trkDz1[j]/trkDzError1[j]>3 || trkDxy1[j]/trkDxyError1[j]>3) continue;
+      if((trkMVA[j]<0.5 && trkMVA[j]!=-99) || (int)trkNHit[j]<8 || trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
       //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
