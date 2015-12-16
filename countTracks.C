@@ -162,7 +162,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
       //dividing by pt at bin center instead of track by track pt (just a convention)
-      float binCenter = spec[0]->getBinCenter(spec[0]->FindBin(trkPt[j]));
+      float binCenter = spec[0]->GetYaxis()->GetBinCenter(spec[0]->GetYaxis()->FindBin(trkPt[j]));
       if(MinBias && PD==0) spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
       if(j40 && PD==1)     spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
       if(j60 && PD==1)     spec[2]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
