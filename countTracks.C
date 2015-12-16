@@ -156,10 +156,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
 
       float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
-      if(MinBias && PD==0) spec[0]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j40 && PD==1)     spec[1]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j60 && PD==1)     spec[2]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
-      if(j80 && PD==2)     spec[3]->Fill(maxJtPt,trkPt[j],correction/trkPt[j]); 
+      //dividing by pt at bin center instead of track by track pt (just a convention)
+      float binCenter = spec[0]->getBinCenter(spec[0]->FindBin(trkPt[j]));
+      if(MinBias && PD==0) spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+      if(j40 && PD==1)     spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+      if(j60 && PD==1)     spec[2]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+      if(j80 && PD==2)     spec[3]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
     }
   }
 

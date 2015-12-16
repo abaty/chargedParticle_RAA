@@ -203,10 +203,10 @@ void makeSpectrum()
   pp->Draw();
   ppUsedByTrigger[0]->SetFillColor(kGray);
   ppUsedByTrigger[3]->SetFillColor(kCyan+2);
-  ppUsedByTrigger[1]->Add(ppUsedByTrigger[0]);
-  ppUsedByTrigger[2]->Add(ppUsedByTrigger[1]);
-  ppUsedByTrigger[3]->Add(ppUsedByTrigger[2]);
-  for(int i = 0; i<s.nTriggers; i++) ppUsedByTrigger[s.nTriggers-1-i]->Draw("HIST same");
+  ppUsedByTrigger[2]->Add(ppUsedByTrigger[3]);
+  ppUsedByTrigger[1]->Add(ppUsedByTrigger[2]);
+  ppUsedByTrigger[0]->Add(ppUsedByTrigger[1]);
+  for(int i = 0; i<s.nTriggers; i++) ppUsedByTrigger[i]->Draw("HIST same");
   pp->Draw("sameaxis");
   pp->Draw("same");
   leg->Clear();
@@ -222,21 +222,7 @@ void makeSpectrum()
   c1->SaveAs("plots/ppTrack_FullSpectrum.pdf");
 
   //RpPb bin shift correction
-/*  TFile * binShift = TFile::Open("BinningAndResolutionCorrection_TrackTrigger.root","read");
-  TH1D *hBinningAndResol_extendedPt = (TH1D*)f_binningAndResol_extendedPt->Get("hPt_pseudo2_copy1");
-  hBinningAndResol_extendedPt->SetDirectory(0);
-  binShift->Close();
-  TH1D *pp_BinShift = (TH1D*)pp->Clone("pp_BinShift"); 
-  for(int i = 2; i<hBinningAndResol_extendedPt->GetSize()+1; i++)
-  {
-    pp_BinShift->SetBinContent(i-1,hBinningAndResol_extendedPt->GetBinContent(i));
-    pp_BinShift->SetBinError(i-1,hBinningAndResol_extendedPt->GetBinError(i));
-  }
-  for(int i = 1; i<pp_binShift->GetSize()+1; i++)
-  {
-    if(pp_binShift
-  }*/
-
+  
   //interpolation points
   float ppintyvals[s.ntrkBins+1] = {4.1202/0.5946*0.999, 2.8116/0.6211*1.003, 1.9778/0.6552*1.002, 1.4330/0.6984*0.994 , 1.0405/0.7219*1.002, 0.7719/0.7515*1.002, 0.5816/0.7809*1.002, 0.3893/0.825*1.001, 0.23381/0.866*1.000, 0.14395/0.901*1.004, 0.09103/0.925*1.005, 0.05937/0.965*0.997, 0.03906/0.984*0.998, 0.014787/1.023*1.062, 0.003806/1.052*1.042, 0.001181/1.056*1.033, 0.0004290/1.048*1.024, 0.0001787/1.054*1.018, 0.00008152/1.031*1.015, 0.00002216/1.023* 1.109, 0.000004653/1.036*1.061, 0.000001402/1.054*1.040, 0.0000003180/1.072*1.111, 0.00000006850/1.142*1.065, 0.00000001971/1.189*1.044, 0.000000006013/1.259*1.051, 0.000000001910/1.308*1.033, 0.0000000007181/1.342*1.024, 0.0000000002083/1.382*1.078,0.00000000005311/1.407*1.05,0.00000000001639/1.363*1.034386,0.000000000005354/1.381*1.047316,0.000000000001709/1.316*1.032760,0,0,0,0,0,0,0,0,0 };
   float ppintyvals_pPb[s.ntrkBins+1] = {4.1202*0.999, 2.8116*1.003, 1.9778*1.002, 1.4330*0.994 , 1.0405*1.002, 0.7719*1.002, 0.5816*1.002, 0.3893*1.001, 0.23381*1.000, 0.14395*1.004, 0.09103*1.005, 0.05937*0.997, 0.03906*0.998, 0.014787*1.062, 0.003806*1.042, 0.001181*1.033, 0.0004290*1.024, 0.0001787*1.018, 0.00008152*1.015, 0.00002216* 1.109, 0.000004653*1.061, 0.000001402*1.040, 0.0000003180*1.111, 0.00000006850*1.065, 0.00000001971*1.044, 0.000000006013*1.051, 0.000000001910*1.033, 0.0000000007181*1.024, 0.0000000002083*1.078,0.00000000005311*1.05,0.00000000001639*1.034386,0.000000000005354*1.047316,0.000000000001709*1.032760,0,0,0,0,0,0,0,0,0 };
@@ -253,10 +239,29 @@ void makeSpectrum()
   for(int i=1; i<s.ntrkBins+1; i++) pPbSpectrum->SetBinContent(i,ppintyvals_pPb[i-1]);
   for(int i=1; i<s.ntrkBins+1; i++) pPbSpectrum->SetBinError(i,ppintyvals_pPb[i-1]*ppintyerr_pPb[i-1]);
   
-  pp->Divide(RpPb);
-  float ppScale = 1/pp->GetBinContent(1);
-  pp->Scale(ppScale);
+  float ppScale = RpPb->GetBinContent(17)/pp->GetBinContent(17);
+  pp->Scale(ppScale); 
+
+  TFile * binShift = TFile::Open("BinningAndResolutionCorrection_TrackTrigger.root","read");
+  TH1D *hBinningAndResol_extendedPt = (TH1D*)binShift->Get("hPt_pseudo2_copy1");
+  hBinningAndResol_extendedPt->SetDirectory(0);
+  binShift->Close();
+  TH1D *pp_BinShift = (TH1D*)pp->Clone("pp_BinShift"); 
+  for(int i = 2; i<hBinningAndResol_extendedPt->GetSize()+1; i++)
+  {
+    pp_BinShift->SetBinContent(i-1,pp_BinShift->GetBinContent(i-1)/hBinningAndResol_extendedPt->GetBinContent(i));
+    pp_BinShift->SetBinError(i-1,pp_BinShift->GetBinError(i-1)/hBinningAndResol_extendedPt->GetBinError(i));
+  }
+  TFile * outBinF = TFile::Open("ppSpectrum.root","update");
+  pp_BinShift->Write();
+  outBinF->Close();
+  
   c1->SetLogy(0);
+  pPbSpectrum->Divide(pp);
+  pPbSpectrum->Draw();
+  c1->SaveAs("plots/pp_RpPb.png");
+  
+  pp->Divide(RpPb);
   pp->GetYaxis()->SetTitle("data/interp");
   pp->Draw(); 
   c1->SaveAs("plots/pp_dataVsInterp.png");
