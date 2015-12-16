@@ -54,6 +54,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   int nref;
   float jtpt[200];
   float jteta[200];
+  float rawpt[200];
+  float chargedSum[200];
 
   int MB[20]={0};
   int j40=0;
@@ -99,6 +101,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   jetCh->SetBranchAddress("nref",&nref);
   jetCh->SetBranchAddress("jtpt",&jtpt);
   jetCh->SetBranchAddress("jteta",&jteta);  
+  jetCh->SetBranchAddress("rawpt",&rawpt);
+  jetCh->SetBranchAddress("chargedSum",&chargedSum);  
   trkCh->AddFriend(jetCh);
 
   evtCh = new TChain("skimanalysis/HltTree");
@@ -133,6 +137,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     float maxJtPt = 0;
     for(int j=0; j<nref; j++)
     {
+      if(chargedSum[j]/rawpt[j]<0.01) continue;
       if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<2) maxJtPt = jtpt[j];
     }
 
