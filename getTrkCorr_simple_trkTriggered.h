@@ -43,7 +43,7 @@ TrkCorr_trkTriggered::TrkCorr_trkTriggered()
   dMapR = 0.1;
   nEtaBin = 192;
   nPhiBin = 251;
-  localDensity_trkTriggered = new TH2D("densityMap","densityMap:eta:phi",nEtaBin,-2.4,2.4,nPhiBin,-TMath::Pi(),TMath::Pi());
+  localDensity_trkTriggered = new TH2D("densityMaptrkTriggered","densityMap:eta:phi",nEtaBin,-2.4,2.4,nPhiBin,-TMath::Pi(),TMath::Pi());
 
   TFile * f[nFiles];
   for(int i = 0; i<nFiles; i++)
