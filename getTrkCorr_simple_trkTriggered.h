@@ -15,8 +15,8 @@ class TrkCorr_trkTriggered{
   public:
     void UpdateEventInfo(float *pt, float *eta, float *phi, int nTrk);
     double getTrkCorr(float pt, float eta,  int correction=0);
-    TrkCorr();
-    ~TrkCorr();    
+    TrkCorr_trkTriggered();
+    ~TrkCorr_trkTriggered();    
 
   private:
     const static int nFiles = 5;
