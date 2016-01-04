@@ -24,7 +24,7 @@ class TrkCorr_trkTriggered{
     
     double getArea(double eta1, double R);
 
-    TH2D * localDensity;
+    TH2D * localDensity_trkTriggered;
     TH1D *       eff[nFiles][nSteps];
     TH1D *      fake[nFiles][nSteps];
     TH2D *      eff2[nFiles][nSteps];
@@ -43,7 +43,7 @@ TrkCorr_trkTriggered::TrkCorr_trkTriggered()
   dMapR = 0.1;
   nEtaBin = 192;
   nPhiBin = 251;
-  localDensity = new TH2D("densityMap","densityMap:eta:phi",nEtaBin,-2.4,2.4,nPhiBin,-TMath::Pi(),TMath::Pi());
+  localDensity_trkTriggered = new TH2D("densityMap","densityMap:eta:phi",nEtaBin,-2.4,2.4,nPhiBin,-TMath::Pi(),TMath::Pi());
 
   TFile * f[nFiles];
   for(int i = 0; i<nFiles; i++)
@@ -90,7 +90,7 @@ double TrkCorr_trkTriggered::getArea(double eta1, double R)
 //updating the event by event properties (centrality, local density, jets, etc)
 void TrkCorr_trkTriggered::UpdateEventInfo(float pt[], float eta[], float phi[], int nTrk)
 {
-  localDensity->Reset();
+  localDensity_trkTriggered->Reset();
 
   //Filling density histogram (tracks with >3 GeV)
   for(int j = 0; j<nTrk; j++)
@@ -100,34 +100,34 @@ void TrkCorr_trkTriggered::UpdateEventInfo(float pt[], float eta[], float phi[],
     //for case where we don't have to worry about wrap around
     if(TMath::Pi()-TMath::Abs(phi[j])>dMapR)
     {
-      for(int phi_iter = localDensity->GetYaxis()->FindBin(phi[j]-dMapR); phi_iter<=localDensity->GetYaxis()->FindBin(phi[j]+dMapR); phi_iter++)
+      for(int phi_iter = localDensity_trkTriggered->GetYaxis()->FindBin(phi[j]-dMapR); phi_iter<=localDensity_trkTriggered->GetYaxis()->FindBin(phi[j]+dMapR); phi_iter++)
       {
-        float dEtaMax = TMath::Power(dMapR*dMapR-TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity->GetYaxis()->GetBinCenter(phi_iter))),2),0.5);
+        float dEtaMax = TMath::Power(dMapR*dMapR-TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity_trkTriggered->GetYaxis()->GetBinCenter(phi_iter))),2),0.5);
         //loop over the eta bins needed
-        for(int eta_iter = localDensity->GetXaxis()->FindBin(eta[j]-dEtaMax); eta_iter<=localDensity->GetXaxis()->FindBin(eta[j]+dEtaMax); eta_iter++)
+        for(int eta_iter = localDensity_trkTriggered->GetXaxis()->FindBin(eta[j]-dEtaMax); eta_iter<=localDensity_trkTriggered->GetXaxis()->FindBin(eta[j]+dEtaMax); eta_iter++)
         {
-          if(TMath::Power(eta[j]-localDensity->GetXaxis()->GetBinCenter(eta_iter),2)+TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity->GetYaxis()->GetBinCenter(phi_iter))),2)<dMapR*dMapR ) localDensity->SetBinContent(eta_iter,phi_iter,localDensity->GetBinContent(eta_iter,phi_iter)+1); 
+          if(TMath::Power(eta[j]-localDensity_trkTriggered->GetXaxis()->GetBinCenter(eta_iter),2)+TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity_trkTriggered->GetYaxis()->GetBinCenter(phi_iter))),2)<dMapR*dMapR ) localDensity_trkTriggered->SetBinContent(eta_iter,phi_iter,localDensity_trkTriggered->GetBinContent(eta_iter,phi_iter)+1); 
         }
       }
     }
     else
     //for case with -pi and pi wrap around 
-    for(int phi_iter = 1; phi_iter<=localDensity->GetYaxis()->FindBin(phi[j]+dMapR-(phi[j]>0?2*TMath::Pi():0)); phi_iter++) 
+    for(int phi_iter = 1; phi_iter<=localDensity_trkTriggered->GetYaxis()->FindBin(phi[j]+dMapR-(phi[j]>0?2*TMath::Pi():0)); phi_iter++) 
     {
       //loop over the eta bins needed
-      float dEtaMax = TMath::Power(dMapR*dMapR-TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity->GetYaxis()->GetBinCenter(phi_iter))),2),0.5);
-      for(int eta_iter = localDensity->GetXaxis()->FindBin(eta[j]-dEtaMax); eta_iter<=localDensity->GetXaxis()->FindBin(eta[j]+dEtaMax); eta_iter++)
+      float dEtaMax = TMath::Power(dMapR*dMapR-TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity_trkTriggered->GetYaxis()->GetBinCenter(phi_iter))),2),0.5);
+      for(int eta_iter = localDensity_trkTriggered->GetXaxis()->FindBin(eta[j]-dEtaMax); eta_iter<=localDensity_trkTriggered->GetXaxis()->FindBin(eta[j]+dEtaMax); eta_iter++)
       {
-        if(TMath::Power(eta[j]-localDensity->GetXaxis()->GetBinCenter(eta_iter),2)+TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity->GetYaxis()->GetBinCenter(phi_iter))),2)<dMapR*dMapR ) localDensity->SetBinContent(eta_iter,phi_iter,localDensity->GetBinContent(eta_iter,phi_iter)+1); 
+        if(TMath::Power(eta[j]-localDensity_trkTriggered->GetXaxis()->GetBinCenter(eta_iter),2)+TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity_trkTriggered->GetYaxis()->GetBinCenter(phi_iter))),2)<dMapR*dMapR ) localDensity_trkTriggered->SetBinContent(eta_iter,phi_iter,localDensity_trkTriggered->GetBinContent(eta_iter,phi_iter)+1); 
       }
     }
-    for(int phi_iter = localDensity->GetYaxis()->FindBin(phi[j]-dMapR+(phi[j]<0?2*TMath::Pi():0)); phi_iter<=nPhiBin; phi_iter++) 
+    for(int phi_iter = localDensity_trkTriggered->GetYaxis()->FindBin(phi[j]-dMapR+(phi[j]<0?2*TMath::Pi():0)); phi_iter<=nPhiBin; phi_iter++) 
     {  
       //loop over the eta bins needed
-      float dEtaMax = TMath::Power(dMapR*dMapR-TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity->GetYaxis()->GetBinCenter(phi_iter))),2),0.5);
-      for(int eta_iter = localDensity->GetXaxis()->FindBin(eta[j]-dEtaMax); eta_iter<=localDensity->GetXaxis()->FindBin(eta[j]+dEtaMax); eta_iter++)
+      float dEtaMax = TMath::Power(dMapR*dMapR-TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity_trkTriggered->GetYaxis()->GetBinCenter(phi_iter))),2),0.5);
+      for(int eta_iter = localDensity_trkTriggered->GetXaxis()->FindBin(eta[j]-dEtaMax); eta_iter<=localDensity_trkTriggered->GetXaxis()->FindBin(eta[j]+dEtaMax); eta_iter++)
       {
-        if(TMath::Power(eta[j]-localDensity->GetXaxis()->GetBinCenter(eta_iter),2)+TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity->GetYaxis()->GetBinCenter(phi_iter))),2)<dMapR*dMapR ) localDensity->SetBinContent(eta_iter,phi_iter,localDensity->GetBinContent(eta_iter,phi_iter)+1); 
+        if(TMath::Power(eta[j]-localDensity_trkTriggered->GetXaxis()->GetBinCenter(eta_iter),2)+TMath::Power(TMath::ACos(TMath::Cos(phi[j]-localDensity_trkTriggered->GetYaxis()->GetBinCenter(phi_iter))),2)<dMapR*dMapR ) localDensity_trkTriggered->SetBinContent(eta_iter,phi_iter,localDensity_trkTriggered->GetBinContent(eta_iter,phi_iter)+1); 
       }
     }
   }
@@ -146,7 +146,7 @@ double TrkCorr_trkTriggered::getTrkCorr(float pt, float eta, int correction)
   float netSec = 0;
   float netMult = 0; 
 
-  //float density = localDensity->GetBinContent(localDensity->GetXaxis()->FindBin(eta), localDensity->GetYaxis()->FindBin(phi))/getArea(eta,dMapR);
+  //float density = localDensity_trkTriggered->GetBinContent(localDensity_trkTriggered->GetXaxis()->FindBin(eta), localDensity_trkTriggered->GetYaxis()->FindBin(phi))/getArea(eta,dMapR);
  
   //calculating what file to take corrections out of 
   int coarseBin = 0;
