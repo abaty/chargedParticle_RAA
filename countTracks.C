@@ -7,6 +7,7 @@
 #include "TAttMarker.h"
 #include "TAttLine.h"
 #include "getTrkCorr_simple.h"
+#include "getTrkCorr_simple_trkTriggered.h"
 #include "Settings.h"
 #include <iostream>
 #include <fstream>
@@ -50,16 +51,16 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   bool highPurity[75000];
   float trkMVA[75000];
   float pfHcal[75000];
-  float trkDxy1[100000];
-  float trkDxyError1[100000];
-  float trkDz1[100000];
-  float trkDzError1[100000];
+  float trkDxy1[60000];
+  float trkDxyError1[60000];
+  float trkDz1[60000];
+  float trkDzError1[60000];
   float pfEcal[75000];
   unsigned char trkNHit[75000];
-  float trkChi2[100000];
-  unsigned char trkNlayers[100000];
-  unsigned char trkNdof[100000];
-  unsigned char trkAlgo[100000];
+  float trkChi2[60000];
+  unsigned char trkNlayers[60000];
+  unsigned char trkNdof[60000];
+  unsigned char trkAlgo[60000];
 
   int pVtx;
   int pBeamScrape;
@@ -82,6 +83,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   int t53=0;
 
   TrkCorr* trkCorr = new TrkCorr();
+  TrkCorr_trkTriggered* trkCorr_trkTriggered = new TrkCorr_trkTriggered();
   TChain * trkCh;
   TChain * jetCh;
   TChain * evtCh;
@@ -199,23 +201,46 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     if(t45 && PD==3) evtCount_trk[4]->Fill(maxTrackPt);  
     if(t53 && PD==3) evtCount_trk[5]->Fill(maxTrackPt);  
     
-    for(int j = 0; j<nTrk; j++)
+    if(PD!=3)
     {
-      if(TMath::Abs(trkEta[j])>1) continue;
-      if(trkPt[j]<0.5 || trkPt[j]>=300) continue;
-      if(highPurity[j]!=1) continue;
-      if((trkMVA[j]<0.5 && trkMVA[j]!=-99) || (int)trkNHit[j]<8 || trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-      //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
+      for(int j = 0; j<nTrk; j++)
+      { 
+        if(TMath::Abs(trkEta[j])>1) continue;
+        if(trkPt[j]<0.5 || trkPt[j]>=300) continue;
+        if(highPurity[j]!=1) continue;
+        if((trkMVA[j]<0.5 && trkMVA[j]!=-99) || (int)trkNHit[j]<8 || trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+        //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
 
-      float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
-      //dividing by pt at bin center instead of track by track pt (just a convention)
-      float binCenter = spec[0]->GetYaxis()->GetBinCenter(spec[0]->GetYaxis()->FindBin(trkPt[j]));
-      if(MinBias && PD==0) spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-      if(j40 && PD==1)     spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-      if(j60 && PD==1)     spec[2]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-      if(j80 && PD==2)     spec[3]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-    }
-  }
+        float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
+        //dividing by pt at bin center instead of track by track pt (just a convention)
+        float binCenter = spec[0]->GetYaxis()->GetBinCenter(spec[0]->GetYaxis()->FindBin(trkPt[j]));
+        if(MinBias && PD==0) spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+        if(j40 && PD==1)     spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+        if(j60 && PD==1)     spec[2]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+        if(j80 && PD==2)     spec[3]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+      } //end trk loop
+    }//end if statement  
+ 
+    if(PD!=1 && PD!=2)
+    { 
+      for(int j = 0; j<nTrk; j++)
+      {
+        if(trkPt[j]<0.5 || trkPt[j]>=300) continue;
+        if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayers[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+        //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
+
+        float correction = trkCorr_trkTriggered->getTrkCorr(trkPt[j],trkEta[j]);
+        //dividing by pt at bin center instead of track by track pt (just a convention)
+        float binCenter = spec_trk[0]->GetYaxis()->GetBinCenter(spec_trk[0]->GetYaxis()->FindBin(trkPt[j]));
+        if(MinBias && PD==0) spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+        if(t18 && PD==3)     spec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+        if(t24 && PD==3)     spec_trk[2]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+        if(t34 && PD==3)     spec_trk[3]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+        if(t45 && PD==3)     spec_trk[4]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+        if(t53 && PD==3)     spec_trk[5]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+      }//end trk loop
+    }//end if statement
+  }//end event loop
 
   //for pp
   TFile * outF = TFile::Open(Form("RAA_pp_output_%d.root",jobNum),"recreate");
@@ -225,7 +250,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     spec[i]->Write();
     evtCount[i]->Write();
   }
+  for(int i = 0; i<s.nTriggers_trk; i++)
+  {
+    spec_trk[i]->Write();
+    evtCount_trk[i]->Write();
+  }
   nVtxMB->Write();
+  nVtxMB_trk->Write();
   outF->Close(); 
 }
 

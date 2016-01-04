@@ -38,3 +38,6 @@
 /mnt/hadoop/cms/store/user/dgulhan/MinimumBias1/HiForest_MinimumBias1_Run2015E_PromptReco_pp_5020GeV/151201_113508/0000/HiForest_315.root
 /mnt/hadoop/cms/store/user/abaty/PromptReco_2015pp_HighPtLowerJets_Forest/HiForestAOD_50.root
 /mnt/hadoop/cms/store/user/abaty/PromptReco_2015pp_HighPtJet80_Forest/HiForestAOD_12.root
+root://eoscms.cern.ch///store/group/phys_heavyions/abaty/2015pp_TrackTrigger_Forest/FullTrack/crab_20151228_071058/151228_061111/0000/HiForestAOD_104.root
+root://eoscms.cern.ch///store/group/phys_heavyions/abaty/2015pp_TrackTrigger_Forest/FullTrack/crab_20151228_071058/151228_061111/0000/HiForestAOD_105.root
+

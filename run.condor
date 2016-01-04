@@ -11,6 +11,6 @@ Rank         = Mips
 +AccountingGroup = "group_cmshi.user_flag"
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = transfer_filelist,fileList.txt,TrkCorrInputFile.txt,corrHists_job0.root,corrHists_job1.root,corrHists_job2.root,corrHists_job3.root,corrHists_job4.root
+transfer_input_files = transfer_filelist,fileList.txt,corrHists_job0.root,corrHists_job1.root,corrHists_job2.root,corrHists_job3.root,corrHists_job4.root
  
 Queue njobs
