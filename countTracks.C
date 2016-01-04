@@ -58,7 +58,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   float pfEcal[75000];
   unsigned char trkNHit[75000];
   float trkChi2[60000];
-  unsigned char trkNlayers[60000];
+  unsigned char trkNlayer[60000];
   unsigned char trkNdof[60000];
   unsigned char trkAlgo[60000];
 
@@ -118,7 +118,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   trkCh->SetBranchAddress("trkDzError1",&trkDzError1);
   trkCh->SetBranchAddress("nVtx",&nVtx);
   trkCh->SetBranchAddress("trkChi2",&trkChi2);
-  trkCh->SetBranchAddress("trkNlayers",&trkNlayers);
+  trkCh->SetBranchAddress("trkNlayer",&trkNlayer);
   trkCh->SetBranchAddress("trkNdof",&trkNdof);
   trkCh->SetBranchAddress("trkAlgo",&trkAlgo);
 
@@ -178,7 +178,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     float maxTrackPt = 0;
     for(int j=0; j<nTrk; j++)
     {
-      if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayers[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+      if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
       if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
     }
 
@@ -226,7 +226,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
       for(int j = 0; j<nTrk; j++)
       {
         if(trkPt[j]<0.5 || trkPt[j]>=300) continue;
-        if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayers[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+        if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
         //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
 
         float correction = trkCorr_trkTriggered->getTrkCorr(trkPt[j],trkEta[j]);
