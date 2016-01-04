@@ -22,6 +22,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   TH2D * spec[s.nTriggers];
   TH1D * evtCount[s.nTriggers];
   TH1D * nVtxMB;
+  TH2D * spec_trk[s.nTriggers_trk];
+  TH1D * evtCount_trk[s.nTriggers_trk];
+  TH1D * nVtxMB_trk;
 
   for(int i = 0; i<s.nTriggers; i++)
   {
@@ -30,6 +33,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     evtCount[i]->SetMarkerColor(i);
   }
   nVtxMB = new TH1D("nVtxMB","nVtx;N Events",12,0,12);
+  for(int i = 0; i<s.nTriggers_trk; i++)
+  {
+    spec_trk[i] = new TH2D(Form("spectrum_trigger%d_trk",i),"",s.nTrktriggerBins,0,s.maxTrktriggerBin,s.ntrkBins,s.xtrkbins);
+    evtCount_trk[i] = new TH1D(Form("evtCount%d_trk",i),";max jet p_{T};N",s.nTrktriggerBins,0,s.maxTrktriggerBin);
+    evtCount_trk[i]->SetMarkerColor(i);
+  }
+  nVtxMB_trk = new TH1D("nVtxMB_trk","nVtx;N Events",12,0,12);
 
   int nTrk;
   int nVtx;
@@ -46,6 +56,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   float trkDzError1[100000];
   float pfEcal[75000];
   unsigned char trkNHit[75000];
+  float trkChi2[100000];
+  unsigned char trkNlayers[100000];
+  unsigned char trkNdof[100000];
+  unsigned char trkAlgo[100000];
 
   int pVtx;
   int pBeamScrape;
@@ -61,6 +75,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   int j40=0;
   int j60=0;
   int j80=0;
+  int t18=0;
+  int t24=0;
+  int t34=0;
+  int t45=0;
+  int t53=0;
 
   TrkCorr* trkCorr = new TrkCorr();
   TChain * trkCh;
@@ -76,6 +95,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     if(inputFiles.at(i).find("MinimumBias") != std::string::npos) PDindx[i]=0;
     if(inputFiles.at(i).find("HighPtLowerJets") != std::string::npos) PDindx[i]=1;
     if(inputFiles.at(i).find("HighPtJet80") != std::string::npos) PDindx[i]=2;
+    if(inputFiles.at(i).find("FullTrack") != std::string::npos) PDindx[i]=3;
   }
 
   trkCh = new TChain("ppTrack/trackTree");
@@ -95,6 +115,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   trkCh->SetBranchAddress("trkDz1",&trkDz1);
   trkCh->SetBranchAddress("trkDzError1",&trkDzError1);
   trkCh->SetBranchAddress("nVtx",&nVtx);
+  trkCh->SetBranchAddress("trkChi2",&trkChi2);
+  trkCh->SetBranchAddress("trkNlayers",&trkNlayers);
+  trkCh->SetBranchAddress("trkNdof",&trkNdof);
+  trkCh->SetBranchAddress("trkAlgo",&trkAlgo);
 
   jetCh = new TChain("ak4CaloJetAnalyzer/t");
   for(unsigned int i = 0; i<inputFiles.size(); i++)  jetCh->Add(inputFiles.at(i).c_str());
@@ -118,6 +142,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   hltCh->SetBranchAddress("HLT_AK4CaloJet40_Eta5p1_v1",&j40);
   hltCh->SetBranchAddress("HLT_AK4CaloJet60_Eta5p1_v1",&j60);
   hltCh->SetBranchAddress("HLT_AK4CaloJet80_Eta5p1_v1",&j80);
+  
+  //track triggers
+  hltCh->SetBranchAddress("HLT_FullTrack18ForPPRef_v3",&t18);
+  hltCh->SetBranchAddress("HLT_FullTrack24ForPPRef_v3",&t24);
+  hltCh->SetBranchAddress("HLT_FullTrack34ForPPRef_v4",&t34);
+  hltCh->SetBranchAddress("HLT_FullTrack45ForPPRef_v3",&t45);
+  hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v3",&t53);
   trkCh->AddFriend(hltCh);
 
 //***********************************************************************
@@ -132,26 +163,42 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
     bool MinBias = 0;
     for(int j = 0; j<20; j++) MinBias = MinBias || (bool)MB[j];
     if(!MinBias && !j40 && !j60 && !j80) continue;
+
     //**************************************************
     //for trigger combination with jet triggers
     float maxJtPt = 0;
     for(int j=0; j<nref; j++)
     {
-      if(chargedSum[j]/rawpt[j]<0.01) continue;
-      if(jtpt[j]>maxJtPt && TMath::Abs(jteta[j])<2) maxJtPt = jtpt[j];
+      if(chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>2) continue;
+      if(jtpt[j]>maxJtPt) maxJtPt = jtpt[j];
+    }
+
+    float maxTrackPt = 0;
+    for(int j=0; j<nTrk; j++)
+    {
+      if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayers[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+      if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
     }
 
     int PD = PDindx[trkCh->GetTreeNumber()];
-    if(maxJtPt==0 && PD!=0) continue;//remove jet events where no jets are in barrel  
+    if(maxJtPt==0 && (PD==1 || PD==2)) continue;//remove jet events where no jets are in barrel  
+    if(maxTrackPt==0 && PD==3) continue;//remove jet events where no tracks are in barrel  
     if(MinBias && PD==0)
     {
       evtCount[0]->Fill(maxJtPt); 
       nVtxMB->Fill(nVtx);
+      evtCount_trk[0]->Fill(maxTrackPt); 
+      nVtxMB_trk->Fill(nVtx);
     }
     if(j40 && PD==1) evtCount[1]->Fill(maxJtPt);  
     if(j60 && PD==1) evtCount[2]->Fill(maxJtPt);  
     if(j80 && PD==2) evtCount[3]->Fill(maxJtPt);  
-
+    if(t18 && PD==3) evtCount_trk[1]->Fill(maxTrackPt);  
+    if(t24 && PD==3) evtCount_trk[2]->Fill(maxTrackPt);  
+    if(t34 && PD==3) evtCount_trk[3]->Fill(maxTrackPt);  
+    if(t45 && PD==3) evtCount_trk[4]->Fill(maxTrackPt);  
+    if(t53 && PD==3) evtCount_trk[5]->Fill(maxTrackPt);  
+    
     for(int j = 0; j<nTrk; j++)
     {
       if(TMath::Abs(trkEta[j])>1) continue;

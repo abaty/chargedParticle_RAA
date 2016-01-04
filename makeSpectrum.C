@@ -258,6 +258,8 @@ void makeSpectrum()
   
   c1->SetLogy(0);
   pPbSpectrum->Divide(pp);
+  pPbSpectrum->GetYaxis()->SetTitle("RpPb");
+  pPbSpectrum->GetYaxis()->SetRangeUser(0.5,1.5);
   pPbSpectrum->Draw();
   c1->SaveAs("plots/pp_RpPb.png");
   
