@@ -46,8 +46,8 @@ void makeSpectrum()
   for(int i = 0; i<s.nTriggers_trk; i++) ppByTrigger_trk[i] = new TH1D(Form("ppTrackSpectrumByTrigger%d_trk",i),"",s.ntrkBins,s.xtrkbins);
   for(int i = 0; i<s.nTriggers_trk; i++) ppUsedByTrigger_trk[i] = new TH1D(Form("ppUsedTrackSpectrumByTrigger%d_trk",i),"",s.ntrkBins,s.xtrkbins);
   TH1D * ppMaxtrk = new TH1D("ppMaxtrkSpectrum",";Leading Track P_{T} (GeV);#sigma (mb)",s.nTrktriggerBins,0,s.maxTrktriggerBin);
-  TH1D * ppMaxtrkByTrigger_trk[s.nTriggers_trk];
-  for(int i = 0; i<s.nTriggers_trk; i++) ppJetsByTrigger_trk[i] = new TH1D(Form("ppMaxtrkSpectrumByTrigger%d",i),"",s.nTrktriggerBins,0,s.maxTrktriggerBin);
+  TH1D * ppMaxtrkByTrigger[s.nTriggers_trk];
+  for(int i = 0; i<s.nTriggers_trk; i++) ppMaxtrkByTrigger[i] = new TH1D(Form("ppMaxtrkSpectrumByTrigger%d",i),"",s.nTrktriggerBins,0,s.maxTrktriggerBin);
 
   //loading files
   TFile * inFile = TFile::Open("countTracks.root","read");
@@ -100,8 +100,8 @@ void makeSpectrum()
         ppUsedByTrigger[i]->SetBinContent(k,ppUsedByTrigger[i]->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
         ppUsedByTrigger[i]->SetBinError(k,TMath::Power(TMath::Power(ppUsedByTrigger[i]->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
       }
-      ppJet->SetBinContent(j,evtCount[i]->GetBinContent(j)*scale[i]);
-      ppJet->SetBinError(j,evtCount[i]->GetBinError(j)*scale[i]);
+      ppJets->SetBinContent(j,evtCount[i]->GetBinContent(j)*scale[i]);
+      ppJets->SetBinError(j,evtCount[i]->GetBinError(j)*scale[i]);
     }
     
     //spectrum for each trigger
@@ -440,7 +440,7 @@ void makeSpectrum()
   pp_trk->Draw();
   ppUsedByTrigger_trk[0]->SetFillColor(kGray);
   ppUsedByTrigger_trk[3]->SetFillColor(kCyan+2);
-  ppUsedByTrigger_trk[4]->SetFillColor(kPurple);
+  ppUsedByTrigger_trk[4]->SetFillColor(kViolet);
   ppUsedByTrigger_trk[5]->SetFillColor(kBlue+1);
   ppUsedByTrigger_trk[4]->Add(ppUsedByTrigger_trk[5]);
   ppUsedByTrigger_trk[3]->Add(ppUsedByTrigger_trk[4]);
