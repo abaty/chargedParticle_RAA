@@ -146,11 +146,17 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   hltCh->SetBranchAddress("HLT_AK4CaloJet80_Eta5p1_v1",&j80);
   
   //track triggers
-  hltCh->SetBranchAddress("HLT_FullTrack18ForPPRef_v3",&t18);
-  hltCh->SetBranchAddress("HLT_FullTrack24ForPPRef_v3",&t24);
-  hltCh->SetBranchAddress("HLT_FullTrack34ForPPRef_v4",&t34);
-  hltCh->SetBranchAddress("HLT_FullTrack45ForPPRef_v3",&t45);
-  hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v3",&t53);
+  //FIXME
+  //FIXME
+  //FIXME
+  //NEED TO CHANGE TO V3,4 WHEN FULL CERTIFICATION IS USED
+  //FIXME
+  //FIXME
+  hltCh->SetBranchAddress("HLT_FullTrack18ForPPRef_v2",&t18);
+  hltCh->SetBranchAddress("HLT_FullTrack24ForPPRef_v2",&t24);
+  hltCh->SetBranchAddress("HLT_FullTrack34ForPPRef_v3",&t34);
+  hltCh->SetBranchAddress("HLT_FullTrack45ForPPRef_v2",&t45);
+  hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v2",&t53);
   trkCh->AddFriend(hltCh);
 
 //***********************************************************************
