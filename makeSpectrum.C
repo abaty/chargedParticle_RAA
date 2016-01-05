@@ -25,8 +25,11 @@ void makeSpectrum()
   TH2D * spec[s.nTriggers];
   TH1D * evtCount[s.nTriggers];
   TH1D * nVtxMB;
+  TH2D * spec_trk[s.nTriggers_trk];
+  TH1D * evtCount_trk[s.nTriggers_trk];
+  TH1D * nVtxMB_trk;
 
-//output hist
+//output hist for jet triggered
   TH1D * pp = new TH1D("ppTrackSpectrum",";p_{T} (GeV);E#frac{d^{3}#sigma}{d^{3}p} (mb/GeV^{2})",s.ntrkBins,s.xtrkbins);
   TH1D * ppByTrigger[s.nTriggers];
   TH1D * ppUsedByTrigger[s.nTriggers];
@@ -35,7 +38,16 @@ void makeSpectrum()
   TH1D * ppJets = new TH1D("ppJetSpectrum",";Leading Jet P_{T} (GeV);#sigma (mb)",s.njetBins,0,s.maxJetBin);
   TH1D * ppJetsByTrigger[s.nTriggers];
   for(int i = 0; i<s.nTriggers; i++) ppJetsByTrigger[i] = new TH1D(Form("ppJetSpectrumByTrigger%d",i),"",s.njetBins,0,s.maxJetBin);
- 
+
+//output hist for track triggers 
+  TH1D * pp_trk = new TH1D("ppTrackSpectrum_trk",";p_{T} (GeV);E#frac{d^{3}#sigma}{d^{3}p} (mb/GeV^{2})",s.ntrkBins,s.xtrkbins);
+  TH1D * ppByTrigger_trk[s.nTriggers_trk];
+  TH1D * ppUsedByTrigger_trk[s.nTriggers_trk];
+  for(int i = 0; i<s.nTriggers_trk; i++) ppByTrigger_trk[i] = new TH1D(Form("ppTrackSpectrumByTrigger%d_trk",i),"",s.ntrkBins,s.xtrkbins);
+  for(int i = 0; i<s.nTriggers_trk; i++) ppUsedByTrigger_trk[i] = new TH1D(Form("ppUsedTrackSpectrumByTrigger%d_trk",i),"",s.ntrkBins,s.xtrkbins);
+  TH1D * ppMaxtrk = new TH1D("ppMaxtrkSpectrum",";Leading Track P_{T} (GeV);#sigma (mb)",s.nTrktriggerBins,0,s.maxTrktriggerBin);
+  TH1D * ppMaxtrkByTrigger_trk[s.nTriggers_trk];
+  for(int i = 0; i<s.nTriggers_trk; i++) ppJetsByTrigger_trk[i] = new TH1D(Form("ppMaxtrkSpectrumByTrigger%d",i),"",s.nTrktriggerBins,0,s.maxTrktriggerBin);
 
   //loading files
   TFile * inFile = TFile::Open("countTracks.root","read");
@@ -46,16 +58,29 @@ void makeSpectrum()
     spec[i]->SetDirectory(0);
     evtCount[i]->SetDirectory(0);
   }
+  for(int i = 0; i<s.nTriggers_trk; i++)
+  {
+    spec_trk[i] = (TH2D*) inFile->Get(Form("spectrum_trigger%d_trk",i));
+    evtCount_trk[i] = (TH1D*) inFile->Get(Form("evtCount%d_trk",i));
+    spec_trk[i]->SetDirectory(0);
+    evtCount_trk[i]->SetDirectory(0);
+  }
   nVtxMB = (TH1D*) inFile->Get("nVtxMB");
   nVtxMB->SetDirectory(0);
+  nVtxMB_trk = (TH1D*) inFile->Get("nVtxMB");
+  nVtxMB_trk->SetDirectory(0);
   inFile->Close();
 
   //calculation of overlaps
   float scale[s.nTriggers];
+  float scale_trk[s.nTriggers_trk];
   //calculate total number of verticies from MB events
   int nVtx = 0;
+  int nVtx_trk = 0;
   for(int i = 1; i<nVtxMB->GetSize()+1;i++) nVtx = nVtx+i*nVtxMB->GetBinContent(nVtxMB->FindBin(i));
+  for(int i = 1; i<nVtxMB_trk->GetSize()+1;i++) nVtx_trk = nVtx_trk+i*nVtxMB_trk->GetBinContent(nVtxMB_trk->FindBin(i));
   
+  //jet triggers
   for(int i = 0; i<s.nTriggers; i++)
   {
     scale[i] = 68/((float)nVtx);//using 68mb as inelastic pp xsection
@@ -75,8 +100,8 @@ void makeSpectrum()
         ppUsedByTrigger[i]->SetBinContent(k,ppUsedByTrigger[i]->GetBinContent(k)+spec[i]->GetBinContent(j,k)); 
         ppUsedByTrigger[i]->SetBinError(k,TMath::Power(TMath::Power(ppUsedByTrigger[i]->GetBinError(k),2)+TMath::Power(spec[i]->GetBinError(j,k),2),0.5)); 
       }
-      ppJets->SetBinContent(j,evtCount[i]->GetBinContent(j)*scale[i]);
-      ppJets->SetBinError(j,evtCount[i]->GetBinError(j)*scale[i]);
+      ppJet->SetBinContent(j,evtCount[i]->GetBinContent(j)*scale[i]);
+      ppJet->SetBinError(j,evtCount[i]->GetBinError(j)*scale[i]);
     }
     
     //spectrum for each trigger
@@ -91,12 +116,51 @@ void makeSpectrum()
       ppJetsByTrigger[i]->SetBinError(j,evtCount[i]->GetBinError(j)*scale[i]);
     }
   }
+  
+  //track triggers
+  for(int i = 0; i<s.nTriggers_trk; i++)
+  {
+    scale_trk[i] = 68/((float)nVtx_trk);//using 68mb as inelastic pp xsection
+    for(int j = 0; j<i; j++){
+      scale_trk[i] = scale_trk[i]*evtCount_trk[j]->Integral(evtCount_trk[j]->FindBin(s.triggerOverlapBins_trk[j+1]),evtCount_trk[j]->FindBin(s.maxTrktriggerBin))/(double)evtCount_trk[j+1]->Integral(evtCount_trk[j+1]->FindBin(s.triggerOverlapBins_trk[j+1]),evtCount_trk[j+1]->FindBin(s.maxTrktriggerBin));
+    }
+    std::cout << scale_trk[i] << std::endl;
+    spec_trk[i]->Scale(scale_trk[i]);
+
+    //total spectrum
+    for(int j = evtCount_trk[i]->FindBin(s.triggerBins_trk[i]); j<evtCount_trk[i]->FindBin(s.triggerBins_trk[i+1]); j++)
+    {
+      for(int k = 1; k<pp_trk->GetSize()+1; k++)
+      {
+        pp_trk->SetBinContent(k,pp_trk->GetBinContent(k)+spec_trk[i]->GetBinContent(j,k)); 
+        pp_trk->SetBinError(k,TMath::Power(TMath::Power(pp_trk->GetBinError(k),2)+TMath::Power(spec_trk[i]->GetBinError(j,k),2),0.5)); 
+        ppUsedByTrigger_trk[i]->SetBinContent(k,ppUsedByTrigger_trk[i]->GetBinContent(k)+spec_trk[i]->GetBinContent(j,k)); 
+        ppUsedByTrigger_trk[i]->SetBinError(k,TMath::Power(TMath::Power(ppUsedByTrigger_trk[i]->GetBinError(k),2)+TMath::Power(spec_trk[i]->GetBinError(j,k),2),0.5)); 
+      }
+      ppMaxtrk->SetBinContent(j,evtCount_trk[i]->GetBinContent(j)*scale_trk[i]);
+      ppMaxtrk->SetBinError(j,evtCount_trk[i]->GetBinError(j)*scale_trk[i]);
+    }
+    
+    //spec_trktrum for each trigger
+    for(int j = evtCount_trk[i]->FindBin(0); j<evtCount_trk[i]->FindBin(s.maxTrktriggerBin); j++)
+    {
+      for(int k = 1; k<ppByTrigger_trk[i]->GetSize()+1; k++)
+      {
+        ppByTrigger_trk[i]->SetBinContent(k,ppByTrigger_trk[i]->GetBinContent(k)+spec_trk[i]->GetBinContent(j,k)); 
+        ppByTrigger_trk[i]->SetBinError(k,TMath::Power(TMath::Power(ppByTrigger_trk[i]->GetBinError(k),2)+TMath::Power(spec_trk[i]->GetBinError(j,k),2),0.5)); 
+      }
+      ppMaxtrkByTrigger[i]->SetBinContent(j,evtCount_trk[i]->GetBinContent(j)*scale_trk[i]);
+      ppMaxtrkByTrigger[i]->SetBinError(j,evtCount_trk[i]->GetBinError(j)*scale_trk[i]);
+    }
+  }
 
   //Divide by bin width and jacobian stuff
   for(int i = 1; i<pp->GetSize()+1; i++)
   {
     pp->SetBinContent(i,pp->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
     pp->SetBinError(i,pp->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
+    pp_trk->SetBinContent(i,pp->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
+    pp_trk->SetBinError(i,pp->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
     for(int j = 0; j<s.nTriggers; j++)
     {
       ppByTrigger[j]->SetBinContent(i,ppByTrigger[j]->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
@@ -104,15 +168,29 @@ void makeSpectrum()
       ppUsedByTrigger[j]->SetBinContent(i,ppUsedByTrigger[j]->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
       ppUsedByTrigger[j]->SetBinError(i,ppUsedByTrigger[j]->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
     } 
+    for(int j = 0; j<s.nTriggers_trk; j++)
+    {
+      ppByTrigger_trk[j]->SetBinContent(i,ppByTrigger_trk[j]->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
+      ppByTrigger_trk[j]->SetBinError(i,ppByTrigger_trk[j]->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
+      ppUsedByTrigger_trk[j]->SetBinContent(i,ppUsedByTrigger_trk[j]->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
+      ppUsedByTrigger_trk[j]->SetBinError(i,ppUsedByTrigger_trk[j]->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
+    } 
   } 
   
   TFile * outF = TFile::Open("ppSpectrum.root","recreate");
   pp->Write();
+  pp_trk->Write();
   TH1D * pp_perMBTrigger = (TH1D*)pp->Clone("pp_perMBTrigger");
   pp_perMBTrigger->Scale(1/scale[0]);
   pp_perMBTrigger->Write();
+  TH1D * pp_perMBTrigger_trk = (TH1D*)pp_trk->Clone("pp_perMBTrigger_trk");
+  pp_perMBTrigger_trk->Scale(1/scale_trk[0]);
+  pp_perMBTrigger_trk->Write();
+  
   ppJets->SetMarkerSize(0);
-  ppJets->Write();
+  ppMaxtrk->Write();
+  ppMaxtrk->SetMarkerSize(0);
+  ppMaxtrk->Write();
   for(int j = 0; j<s.nTriggers; j++)
   {
     ppByTrigger[j]->SetLineColor(j+1);
@@ -132,6 +210,26 @@ void makeSpectrum()
     ppJetsByTrigger[j]->SetMarkerSize(0.8);
     ppJetsByTrigger[j]->SetFillColor(j+1);
     ppJetsByTrigger[j]->Write();
+  }
+  for(int j = 0; j<s.nTriggers_trk; j++)
+  {
+    ppByTrigger_trk[j]->SetLineColor(j+1);
+    ppByTrigger_trk[j]->SetLineWidth(1);
+    ppByTrigger_trk[j]->SetMarkerColor(j+1);
+    ppByTrigger_trk[j]->SetFillColor(j+1);
+    ppByTrigger_trk[j]->Write();
+    ppUsedByTrigger_trk[j]->SetLineColor(kBlack);
+    ppUsedByTrigger_trk[j]->SetLineWidth(2);
+    ppUsedByTrigger_trk[j]->SetMarkerColor(j+1);
+    ppUsedByTrigger_trk[j]->SetMarkerSize(0);
+    ppUsedByTrigger_trk[j]->SetFillColor(j+1);
+    ppUsedByTrigger_trk[j]->Write();
+    ppMaxtrkByTrigger[j]->SetLineColor(j+1);
+    ppMaxtrkByTrigger[j]->SetLineWidth(1);
+    ppMaxtrkByTrigger[j]->SetMarkerColor(j+1);
+    ppMaxtrkByTrigger[j]->SetMarkerSize(0.8);
+    ppMaxtrkByTrigger[j]->SetFillColor(j+1);
+    ppMaxtrkByTrigger[j]->Write();
   }
   outF->Close();
 
