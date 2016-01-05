@@ -164,7 +164,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
 
     bool MinBias = 0;
     for(int j = 0; j<20; j++) MinBias = MinBias || (bool)MB[j];
-    if(!MinBias && !j40 && !j60 && !j80) continue;
+    if(!MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
 
     //**************************************************
     //for trigger combination with jet triggers
