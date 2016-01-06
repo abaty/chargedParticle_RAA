@@ -135,7 +135,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   for(unsigned int i = 0; i<inputFiles.size(); i++)  evtCh->Add(inputFiles.at(i).c_str());
   evtCh->SetBranchAddress("pPAprimaryVertexFilter",&pVtx);
   evtCh->SetBranchAddress("pBeamScrapingFilter",&pBeamScrape);
-  evtCh->SetBranchAddress("pHBHENoiseFilterResultProducer",&NoiseFilter);
+  //evtCh->SetBranchAddress("pHBHENoiseFilterResultProducer",&NoiseFilter);
   trkCh->AddFriend(evtCh);
   
   hltCh = new TChain("hltanalysis/HltTree");
@@ -166,7 +166,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, bool isTest = 
   {
     if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
     trkCh->GetEntry(i);
-    if(!NoiseFilter || !pVtx || !pBeamScrape) continue;
+    //if(!NoiseFilter) continue;
+    if(!pVtx || !pBeamScrape) continue;
 
     bool MinBias = 0;
     for(int j = 0; j<20; j++) MinBias = MinBias || (bool)MB[j];
