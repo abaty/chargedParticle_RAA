@@ -159,8 +159,8 @@ void makeSpectrum()
   {
     pp->SetBinContent(i,pp->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
     pp->SetBinError(i,pp->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
-    pp_trk->SetBinContent(i,pp->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
-    pp_trk->SetBinError(i,pp->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
+    pp_trk->SetBinContent(i,pp_trk->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
+    pp_trk->SetBinError(i,pp_trk->GetBinError(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1])));
     for(int j = 0; j<s.nTriggers; j++)
     {
       ppByTrigger[j]->SetBinContent(i,ppByTrigger[j]->GetBinContent(i)/(4*TMath::Pi()*(s.xtrkbins[i]-s.xtrkbins[i-1]))); 
@@ -318,7 +318,7 @@ void makeSpectrum()
    
   c1->SaveAs("plots/ppTrack_FullSpectrum.png");
   c1->SaveAs("plots/ppTrack_FullSpectrum.pdf");
-
+  TH1D * jtVsTrk = (TH1D*)pp->Clone("jtVsTrkRatio");
   //RpPb bin shift correction
   
   //interpolation points
@@ -370,6 +370,8 @@ void makeSpectrum()
 //***********************************************TRACK TRIGGER PLOTS******************************************
 //************************************************************************************************************
   TCanvas * c2 = new TCanvas("c2","c2",800,600);
+  ppMaxtrkByTrigger[4]->SetMarkerColor(kOrange);
+  ppMaxtrkByTrigger[4]->SetLineColor(kOrange);
   c2->SetLogy();
   ppMaxtrk->Scale(100);
   Ymin = 0.00000000001;
@@ -378,7 +380,7 @@ void makeSpectrum()
   ppMaxtrk->Draw("h");
   for(int i = 0; i<s.nTriggers_trk; i++) ppMaxtrkByTrigger[i]->Draw("same");
   TLegend * leg_trk = new TLegend(0.6,0.6,0.9,0.9);
-  leg_trk->AddEntry(ppMaxtrk,"Max Trk Spectrum (x100)","l");
+  leg_trk->AddEntry(ppMaxtrk,"Leading Trk p_{T}Spectrum (x100)","l");
   leg_trk->AddEntry(ppMaxtrkByTrigger[0],"MB (I)","p");
   leg_trk->AddEntry(ppMaxtrkByTrigger[1],"Track 18 (II)","p");
   leg_trk->AddEntry(ppMaxtrkByTrigger[2],"Track 24 (III)","p");
@@ -389,15 +391,15 @@ void makeSpectrum()
   c2->SaveAs("plots/ppMaxtrk_FullSpectrum.png"); 
   c2->SaveAs("plots/ppMaxtrk_FullSpectrum.pdf"); 
 
-  ppMaxtrk->GetXaxis()->SetRangeUser(5,70);
-  Ymin = 0.0000001;
-  Ymax = 100;
-  ppMaxtrk->GetYaxis()->SetRangeUser(0.0000001,100);
+  ppMaxtrk->GetXaxis()->SetRangeUser(10,90);
+  Ymin = 0.0000000001;
+  Ymax = 1;
+  ppMaxtrk->GetYaxis()->SetRangeUser(Ymin,Ymax);
   ppMaxtrk->Draw("h");
   for(int i = 0; i<s.nTriggers_trk; i++) ppMaxtrkByTrigger[i]->Draw("same");
   leg_trk->Draw("same"); 
-  TLine * l_trk[3];
-  for(int i = 0; i<3; i++) 
+  TLine * l_trk[5];
+  for(int i = 0; i<5; i++) 
   {
     l_trk[i] = new TLine(s.triggerBins_trk[i+1],Ymin,s.triggerBins_trk[i+1],Ymax); 
     l_trk[i]->SetLineWidth(2);
@@ -405,19 +407,20 @@ void makeSpectrum()
     l_trk[i]->SetLineColor(1);
     l_trk[i]->Draw("same");
   }
-  lat->DrawLatex(10,Ymin*3,"I");
-  lat->DrawLatex(20,Ymin*3,"II");
-  lat->DrawLatex(30,Ymin*3,"III");
+  lat->DrawLatex(16,Ymin*3,"I");
+  lat->DrawLatex(22,Ymin*3,"II");
+  lat->DrawLatex(28,Ymin*3,"III");
   lat->DrawLatex(40,Ymin*3,"IV");
-  lat->DrawLatex(48,Ymin*3,"V");
-  lat->DrawLatex(60,Ymin*3,"VI");
+  lat->DrawLatex(49,Ymin*3,"V");
+  lat->DrawLatex(57,Ymin*3,"VI");
   c2->SaveAs("plots/ppMaxtrk_FullSpectrum_XZoom.png"); 
   c2->SaveAs("plots/ppMaxtrk_FullSpectrum_XZoom.pdf"); 
 
   c2->SetLogy(0);
+  for(int i = 0; i<s.nTriggers_trk; i++) ppMaxtrkByTrigger[i]->Rebin(2);
   for(int i = 0; i<s.nTriggers_trk-1; i++) ppMaxtrkByTrigger[s.nTriggers_trk-1-i]->Divide(ppMaxtrkByTrigger[s.nTriggers_trk-2-i]);
   ppMaxtrkByTrigger[1]->GetYaxis()->SetRangeUser(0,2);
-  ppMaxtrkByTrigger[1]->GetXaxis()->SetRangeUser(5,70);
+  ppMaxtrkByTrigger[1]->GetXaxis()->SetRangeUser(10,90);
   ppMaxtrkByTrigger[1]->GetXaxis()->SetTitle("Leading Track p_{T}");
   ppMaxtrkByTrigger[1]->Draw();
   ppMaxtrkByTrigger[2]->Draw("same");
@@ -439,9 +442,9 @@ void makeSpectrum()
   pp_trk->SetMarkerSize(0.8);
   pp_trk->Draw();
   ppUsedByTrigger_trk[0]->SetFillColor(kGray);
-  ppUsedByTrigger_trk[3]->SetFillColor(kCyan+2);
+  ppUsedByTrigger_trk[3]->SetFillColor(kBlue);
   ppUsedByTrigger_trk[4]->SetFillColor(kViolet);
-  ppUsedByTrigger_trk[5]->SetFillColor(kBlue+1);
+  ppUsedByTrigger_trk[5]->SetFillColor(kCyan+2);
   ppUsedByTrigger_trk[4]->Add(ppUsedByTrigger_trk[5]);
   ppUsedByTrigger_trk[3]->Add(ppUsedByTrigger_trk[4]);
   ppUsedByTrigger_trk[2]->Add(ppUsedByTrigger_trk[3]);
@@ -463,4 +466,13 @@ void makeSpectrum()
    
   c2->SaveAs("plots/ppTrack_FullSpectrum_trk.png");
   c2->SaveAs("plots/ppTrack_FullSpectrum_trk.pdf");
+
+  c2->SetLogy(0);
+  jtVsTrk->Divide(pp_trk);
+  jtVsTrk->GetYaxis()->SetTitle("pp Jet triggers/pp Track triggers");
+  jtVsTrk->GetYaxis()->SetRangeUser(0.5,1.5);
+  jtVsTrk->Draw();
+  c2->SaveAs("plots/pp_jetVsTrkTriggers.png");
+  c2->SaveAs("plots/pp_JetVsTrkTriggers.pdf");
+  
 }
