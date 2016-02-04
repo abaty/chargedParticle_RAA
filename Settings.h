@@ -16,6 +16,9 @@ class Settings {
   static const int nTriggers = 4;
   double triggerBins[nTriggers+1] = {0,60,80,100,1200};
   double triggerOverlapBins[nTriggers] = {0,60,80,100};
+  static const int HInTriggers = 5;
+  double HItriggerBins[HInTriggers+1] = {0,60,80,100,120,1200};
+  double HItriggerOverlapBins[HInTriggers] = {0,60,80,100,120};
   
   static const int njetBins = 240;
   static const int maxJetBin = 1200;
@@ -23,6 +26,9 @@ class Settings {
   static const int nTriggers_trk = 6;
   double triggerBins_trk[nTriggers_trk+1] = {0,20,26,36,47,55,1000};
   double triggerOverlapBins_trk[nTriggers_trk] = {0,20,26,36,47,55};
+  static const int HInTriggers_trk = 6;
+  double HItriggerBins_trk[HInTriggers_trk+1] = {0,14,20,26,36,47,1000};
+  double HItriggerOverlapBins_trk[HInTriggers_trk] = {0,14,20,26,36,47};
   
   static const int nTrktriggerBins = 600;
   static const int maxTrktriggerBin = 600;
