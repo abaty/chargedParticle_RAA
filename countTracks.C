@@ -87,7 +87,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   int pVtx;
   int pBeamScrape;
-  int NoiseFilter; 
+  //int NoiseFilter; 
   int pClusterCompaitiblityFilter; 
   int pprimaryVertexFilter;  
   int phfCoincFilter3;
@@ -121,7 +121,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int HIt34=0,              HIt34_c30=0;
   int HIt45=0,              HIt45_c30=0;
 
-  //TrkCorr* trkCorr = new TrkCorr();
+  TrkCorr* trkCorr = new TrkCorr();
   TrkCorr_trkTriggered* trkCorr_trkTriggered = new TrkCorr_trkTriggered();
   TChain * trkCh;
   TChain * jetCh;
@@ -264,8 +264,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     float maxJtPt = 0;
     for(int j=0; j<nref; j++)
     {
-      if(isPP && chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>2) continue;
-      if(!isPP &&  ecalSum/(ecalSum+hcalSum)<0.05 || hcalSum/(ecalSum+hcalSum)<0.1|| TMath::Abs(jteta[j])>2) continue;
+      if(isPP && (chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>2)) continue;
+      if(!isPP &&  (ecalSum[j]/(ecalSum[j]+hcalSum[j])<0.05 || hcalSum[j]/(ecalSum[j]+hcalSum[j])<0.1|| TMath::Abs(jteta[j])>2)) continue;
       if(jtpt[j]>maxJtPt) maxJtPt = jtpt[j];
     }
 
@@ -341,7 +341,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         //dividing by pt at bin center instead of track by track pt (just a convention)
         float binCenter;
         if(isPP) binCenter = spec[0]->GetYaxis()->GetBinCenter(spec[0]->GetYaxis()->FindBin(trkPt[j]));
-        else     binCenter = HIspec[0][0]->GetYaxis()->GetBinCenter(HIspec[0]->GetYaxis()->FindBin(trkPt[j]));
+        else     binCenter = HIspec[0][0]->GetYaxis()->GetBinCenter(HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
         if(isPP){
           if(MinBias && PD==0) spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
           if(j40 && PD==1)     spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
@@ -349,10 +349,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(j80 && PD==2)     spec[3]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
         }else{
           if(MinBias && PD==0) HIspec[0][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j40 && PD==1)     HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j60 && PD==1)     HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j80 && PD==1)     HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j100 && PD==1)    HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj40 && PD==1)     HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj60 && PD==1)     HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj80 && PD==1)     HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj100 && PD==1)    HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
           if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
           if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
           if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
@@ -375,7 +375,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
         float binCenter;
         if(isPP) binCenter = spec_trk[0]->GetYaxis()->GetBinCenter(spec[0]->GetYaxis()->FindBin(trkPt[j]));
-        else     binCenter = HIspec_trk[0][0]->GetYaxis()->GetBinCenter(HIspec[0]->GetYaxis()->FindBin(trkPt[j]));
+        else     binCenter = HIspec_trk[0][0]->GetYaxis()->GetBinCenter(HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
         float correction = trkCorr_trkTriggered->getTrkCorr(trkPt[j],trkEta[j]);
         //dividing by pt at bin center instead of track by track pt (just a convention)
         if(isPP){
@@ -386,19 +386,19 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(t45 && PD==3)     spec_trk[4]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
           if(t53 && PD==3)     spec_trk[5]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
         }else{
-          if(MinBias && PD==0) HIspec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt12 && PD==1)     HIspec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt18 && PD==1)     HIspec_trk[2]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt24 && PD==1)     HIspec_trk[3]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt34 && PD==1)     HIspec_trk[4]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt45 && PD==1)     HIspec_trk[5]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) HIspec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) HIspec_trk[2]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) HIspec_trk[3]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) HIspec_trk[4]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) HIspec_trk[5]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) HIspec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) HIspec_trk[2]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(MinBias && PD==0) HIspec_trk[0][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt12 && PD==1)     HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt18 && PD==1)     HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt24 && PD==1)     HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt34 && PD==1)     HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt45 && PD==1)     HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
         } 
       }//end trk loop
     }//end if statement
@@ -407,35 +407,38 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   //for pp
   TFile * outF = TFile::Open(Form("RAA_output_%d.root",jobNum),"recreate");
   outF->cd();
-  for(int i = 0; i<s.nTriggers; i++)
-  {
-    spec[i]->Write();
-    evtCount[i]->Write();
-  }
-  for(int i = 0; i<s.HInTriggers; i++)
-  {
-    for(int j = 0; j<20; j++){
-      HIspec[i][j]->Write();
-      HIevtCount[i][j]->Write();
+  if(isPP){
+    for(int i = 0; i<s.nTriggers; i++)
+    {
+      spec[i]->Write();
+      evtCount[i]->Write();
     }
-  }
-  for(int i = 0; i<s.nTriggers_trk; i++)
-  {
-    spec_trk[i]->Write();
-    evtCount_trk[i]->Write();
-  }
-  for(int i = 0; i<s.HInTriggers_trk; i++)
-  {
-    for(int j = 0; j<20; j++){
-      HIspec_trk[i][j]->Write();
-      HIevtCount_trk[i][j]->Write();
+    for(int i = 0; i<s.nTriggers_trk; i++)
+    {
+      spec_trk[i]->Write();
+      evtCount_trk[i]->Write();
     }
+    nVtxMB->Write();
+    nVtxMB_trk->Write();
+  }else{
+    for(int i = 0; i<s.HInTriggers; i++)
+    {
+      for(int j = 0; j<20; j++){
+        HIspec[i][j]->Write();
+        HIevtCount[i][j]->Write();
+      }
+    }
+    for(int i = 0; i<s.HInTriggers_trk; i++)
+    {
+      for(int j = 0; j<20; j++){
+        HIspec_trk[i][j]->Write();
+        HIevtCount_trk[i][j]->Write();
+      }
+    }
+    HInVtxMB->Write();
+    HInVtxMB_trk->Write();
+    outF->Close(); 
   }
-  nVtxMB->Write();
-  nVtxMB_trk->Write();
-  HInVtxMB->Write();
-  HInVtxMB_trk->Write();
-  outF->Close(); 
 }
 
 
