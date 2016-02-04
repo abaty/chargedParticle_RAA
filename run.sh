@@ -1,6 +1,6 @@
-if [ $# -ne 2 ]
+if [ $# -ne 3 ]
 then
-  echo "Usage: ./run.sh <condor_iteration> <njobs>"
+  echo "Usage: ./run.sh <condor_iteration> <njobs> <isPP>"
   exit 1
 fi
 
