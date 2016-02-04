@@ -254,12 +254,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     //if(!NoiseFilter) continue;
     if(isPP && (!pVtx || !pBeamScrape)) continue;
     if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3)) continue;
-    if(i%10==0) std::cout << "Passed!1" << std::endl; 
     bool MinBias = 0;
     for(int j = 0; j<20; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
     if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
     if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt45 && !HIt12_c10 && !HIt18_c10 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30 && !HIt45_c30) continue;
-    if(i%10==0) std::cout << "Passed!2" << std::endl; 
 
     //**************************************************
     //for trigger combination with jet triggers
@@ -281,7 +279,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     int PD = PDindx[trkCh->GetTreeNumber()];
     if(maxJtPt==0 && (PD==1 || PD==2)) continue;//remove jet events where no jets are in barrel  
     if(maxTrackPt==0 && ((isPP && PD==3) || (!isPP && PD==1))) continue;//remove jet events where no tracks are in barrel  
-    if(i%10==0) std::cout << "Passed!3" << std::endl; 
     if(MinBias && PD==0)
     {
       if(isPP){
