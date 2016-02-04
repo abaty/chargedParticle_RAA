@@ -8,8 +8,8 @@ now="Rpp_$(date +"%Y_%m_%d__%H_%M_%S")"
 njobs=100
 
 mkdir $now
-cp fileLists/fileList.txt $now 
-cp fileLists/testFileList.txt $now 
+cp fileLists/PbPbfileList.txt $now/fileList.txt 
+cp fileLists/testPbPbfileList.txt $now/testFileList.txt
 cp trkCorrections/* $now
 cp trkCorrections_trkTriggered/* $now
 cp run.sh $now

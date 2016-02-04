@@ -88,7 +88,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int pVtx;
   int pBeamScrape;
   //int NoiseFilter; 
-  int pClusterCompaitiblityFilter; 
+  int pclusterCompatibilityFilter; 
   int pprimaryVertexFilter;  
   int phfCoincFilter3;
   int hiBin;
@@ -141,7 +141,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(inputFiles.at(i).find("FullTrack") != std::string::npos) PDindx[i]=3;
     }else{
       if(inputFiles.at(i).find("MinimumBias") != std::string::npos) PDindx[i]=0;
-      if(inputFiles.at(i).find("HIHardProbes") != std::string::npos) PDindx[i]=1;
+      if(inputFiles.at(i).find("HIHardProbes-") != std::string::npos) PDindx[i]=1;
       if(inputFiles.at(i).find("HIHardProbesPeripheral") != std::string::npos) PDindx[i]=2;
     }
   }
@@ -189,7 +189,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     evtCh->SetBranchAddress("pBeamScrapingFilter",&pBeamScrape);
     //evtCh->SetBranchAddress("pHBHENoiseFilterResultProducer",&NoiseFilter);
   }else{
-    evtCh->SetBranchAddress("pClusterCompaitiblityFilter",&pClusterCompaitiblityFilter);  
+    evtCh->SetBranchAddress("pclusterCompatibilityFilter",&pclusterCompatibilityFilter);  
     evtCh->SetBranchAddress("pprimaryVertexFilter",&pprimaryVertexFilter);  
     evtCh->SetBranchAddress("phfCoincFilter3",&phfCoincFilter3); 
   } 
@@ -216,7 +216,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v3",&t53);
   }else{
     for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_HIL1MinimumBiasHF2AND_part%d_v1",i),&(HIMB[i]));
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v1",&HIj40);
+    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v2",&HIj40);
     hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_v1",&HIj60);
     hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_v1",&HIj80);
     hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_v1",&HIj100);
@@ -228,8 +228,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent50_100_v1",&HIj60_c50);
     hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent50_100_v1",&HIj80_c50);
     hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent50_100_v1",&HIj100_c50);
-    hltCh->SetBranchAddress("HLT_HIFullTrack12_L1MinimumBiasHF1_AND_v1",&HIt12);
-    hltCh->SetBranchAddress("HLT_HIFullTrack18_L1MinimumBiasHF1_AND_v1",&HIt18);
+    hltCh->SetBranchAddress("HLT_HIFullTrack12_L1MinimumBiasHF2_AND_v1",&HIt12);
+    hltCh->SetBranchAddress("HLT_HIFullTrack18_L1MinimumBiasHF2_AND_v1",&HIt18);
     hltCh->SetBranchAddress("HLT_HIFullTrack24_v1",&HIt24);
     hltCh->SetBranchAddress("HLT_HIFullTrack34_v1",&HIt34);
     hltCh->SetBranchAddress("HLT_HIFullTrack45_v1",&HIt45);
@@ -248,16 +248,18 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   std::cout << trkCh->GetEntries() << std::endl;
   for(int i = 0; i<trkCh->GetEntries(); i++)
   {
-    if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
+    //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
+    if(i%10==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
     trkCh->GetEntry(i);
     //if(!NoiseFilter) continue;
     if(isPP && (!pVtx || !pBeamScrape)) continue;
-    if(!isPP && (!pClusterCompaitiblityFilter || !pprimaryVertexFilter || !phfCoincFilter3)) continue;
-    
+    if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3)) continue;
+    if(i%10==0) std::cout << "Passed!1" << std::endl; 
     bool MinBias = 0;
     for(int j = 0; j<20; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
     if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
     if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt45 && !HIt12_c10 && !HIt18_c10 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30 && !HIt45_c30) continue;
+    if(i%10==0) std::cout << "Passed!2" << std::endl; 
 
     //**************************************************
     //for trigger combination with jet triggers
@@ -279,6 +281,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     int PD = PDindx[trkCh->GetTreeNumber()];
     if(maxJtPt==0 && (PD==1 || PD==2)) continue;//remove jet events where no jets are in barrel  
     if(maxTrackPt==0 && ((isPP && PD==3) || (!isPP && PD==1))) continue;//remove jet events where no tracks are in barrel  
+    if(i%10==0) std::cout << "Passed!3" << std::endl; 
     if(MinBias && PD==0)
     {
       if(isPP){
