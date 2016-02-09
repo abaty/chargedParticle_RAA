@@ -1,3 +1,4 @@
 /mnt/hadoop/cms/store/user/velicanu/HIHardProbes/HIHardProbes-HIRun2015-PromptReco-v1-FOREST-2-v22/160126_203257/0000/HiForestAOD_440.root
 /mnt/hadoop/cms/store/user/velicanu/HIHardProbes/HIHardProbes-HIRun2015-PromptReco-v1-FOREST-2-v22/160126_203257/0000/HiForestAOD_441.root
 root://xrootd.unl.edu//store/group/phys_heavyions/jisun/ForestRun2015/PbPbMB/MB2_crab3_DCSONLYjson_Track_AK4CaloJet_D0_tkpt0p9eta1p5/HIMinimumBias2/crab_PbPb_HIMinimumBias2_ForestAOD_Track_AK4CaloJet_D0_tkpt0p9eta1p5_01142016/160114_214014/0007/HiForestAOD_7586.root
+root://eoscms.cern.ch//store/group/phys_heavyions/velicanu/forest/HIData/HIHardProbesPeripheral-HIRun2015-PromptReco-v1/000/263/614/HiForestAOD_207.root

@@ -233,8 +233,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     hltCh->SetBranchAddress("HLT_HIFullTrack24_v1",&HIt24);
     hltCh->SetBranchAddress("HLT_HIFullTrack34_v1",&HIt34);
     hltCh->SetBranchAddress("HLT_HIFullTrack45_v1",&HIt45);
-    hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality010_v1",&HIt12_c10);
-    hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality010_v1",&HIt18_c10);
+    //hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality010_v1",&HIt12_c10);
+    //hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality010_v1",&HIt18_c10);
     hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality30100_v1",&HIt12_c30);
     hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality30100_v1",&HIt18_c30);
     hltCh->SetBranchAddress("HLT_HIFullTrack24_L1Centrality30100_v1",&HIt24_c30);
@@ -257,7 +257,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     bool MinBias = 0;
     for(int j = 0; j<20; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
     if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
-    if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt45 && !HIt12_c10 && !HIt18_c10 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30 && !HIt45_c30) continue;
+    //if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt45 && !HIt12_c10 && !HIt18_c10 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30 && !HIt45_c30) continue;
+    if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt45 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30 && !HIt45_c30) continue;
 
     //**************************************************
     //for trigger combination with jet triggers
@@ -275,7 +276,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
       if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
     }
-
     int PD = PDindx[trkCh->GetTreeNumber()];
     if(maxJtPt==0 && (PD==1 || PD==2)) continue;//remove jet events where no jets are in barrel  
     if(maxTrackPt==0 && ((isPP && PD==3) || (!isPP && PD==1))) continue;//remove jet events where no tracks are in barrel  
@@ -323,8 +323,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
     if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
     if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
+    //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
+    //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
     
     if(PD!=3)
     {
@@ -397,8 +397,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
           if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
           if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
         } 
       }//end trk loop
     }//end if statement

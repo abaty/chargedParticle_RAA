@@ -4,7 +4,6 @@ then
   exit 1
 fi
 
-sleep $(($1/2))
 
 echo | awk -v j=$1 -v k=$2 -v isPP=$3 '{print "./run.exe fileList.txt "j" "k" "isPP}' 
 echo | awk -v j=$1 -v k=$2 -v isPP=$3 '{print "./run.exe fileList.txt "j" "k" "isPP}' | bash

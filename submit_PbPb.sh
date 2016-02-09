@@ -5,10 +5,10 @@ then
 fi
 
 now="Rpp_$(date +"%Y_%m_%d__%H_%M_%S")"
-njobs=100
+njobs=500
 
 mkdir $now
-cp fileLists/PbPbfileList.txt $now/fileList.txt 
+cp fileLists/PbPb_fileList.txt $now/fileList.txt 
 cp fileLists/testPbPbfileList.txt $now/testFileList.txt
 cp trkCorrections/* $now
 cp trkCorrections_trkTriggered/* $now
