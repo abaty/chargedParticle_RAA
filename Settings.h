@@ -1,6 +1,8 @@
 #ifndef INPUTSETTINGS
 #define INPUTSETTINGS
 
+#include "TH1D.h"
+#include "TH2D.h"
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -33,13 +35,38 @@ class Settings {
   static const int nTrktriggerBins = 600;
   static const int maxTrktriggerBin = 600;
 
+  TH2D *spec[nTriggers],               *HIspec[HInTriggers][20];
+  TH1D *evtCount[nTriggers],           *HIevtCount[HInTriggers][20];
+  TH1D *nVtxMB,                        *HInVtxMB;
+  TH2D *spec_trk[nTriggers_trk],       *HIspec_trk[HInTriggers_trk][20];
+  TH1D *evtCount_trk[nTriggers_trk],   *HIevtCount_trk[HInTriggers_trk][20];
+  TH1D *nVtxMB_trk,                    *HInVtxMB_trk;
 
+  static const int nCentBins = 28;
+  int lowCentBin[nCentBins] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,6,10,2,6,10,14,16};
+  int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18};
+
+  TH1D * pp,                           *HI[nCentBins];
+  TH1D * ppByTrigger[nTriggers],       *HIByTrigger[nCentBins][HInTriggers];
+  TH1D * ppUsedByTrigger[nTriggers],   *HIUsedByTrigger[nCentBins][HInTriggers];
+  TH1D * ppJets,                       *HIJets[nCentBins];
+  TH1D * ppJetsByTrigger[nTriggers],   *HIJetsByTrigger[nCentBins][HInTriggers];
+  TH1D * pp_perMBTrigger,              *HI_perMBTrigger[nCentBins];               
+
+  TH1D * pp_trk,                              *HI_trk[nCentBins];                                  
+  TH1D * ppByTrigger_trk[nTriggers_trk],      *HIByTrigger_trk[nCentBins][HInTriggers_trk];            
+  TH1D * ppUsedByTrigger_trk[nTriggers_trk],  *HIUsedByTrigger_trk[nCentBins][HInTriggers_trk];        
+  TH1D * ppMaxtrk,                            *HIMaxtrk[nCentBins];                              
+  TH1D * ppMaxtrkByTrigger[nTriggers_trk],    *HIMaxtrkByTrigger[nCentBins][HInTriggers_trk];        
+  TH1D * pp_perMBTrigger_trk,                 *HI_perMBTrigger_trk[nCentBins];                     
+
+  
   Settings();
 };
  
 Settings::Settings()
 {
-  std::cout << "Getting settings..." << std::endl;
+  std::cout << "Getting setting.." << std::endl;
   return;
 }
 

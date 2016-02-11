@@ -20,47 +20,40 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH2D::SetDefaultSumw2();
  
   Settings s; 
-  TH2D *spec[s.nTriggers],             *HIspec[s.HInTriggers][20];
-  TH1D *evtCount[s.nTriggers],         *HIevtCount[s.HInTriggers][20];
-  TH1D *nVtxMB,                        *HInVtxMB;
-  TH2D *spec_trk[s.nTriggers_trk],     *HIspec_trk[s.HInTriggers_trk][20];
-  TH1D *evtCount_trk[s.nTriggers_trk], *HIevtCount_trk[s.HInTriggers_trk][20];
-  TH1D *nVtxMB_trk,                    *HInVtxMB_trk;
-
   if(isPP){
     for(int i = 0; i<s.nTriggers; i++)
     {
-      spec[i] = new TH2D(Form("spectrum_trigger%d",i),"",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
-      evtCount[i] = new TH1D(Form("evtCount%d",i),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
-      evtCount[i]->SetMarkerColor(i);
+      s.spec[i] = new TH2D(Form("spectrum_trigger%d",i),"",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
+      s.evtCount[i] = new TH1D(Form("evtCount%d",i),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
+      s.evtCount[i]->SetMarkerColor(i);
     }
-    nVtxMB = new TH1D("nVtxMB","nVtx;N Events",12,0,12);
+    s.nVtxMB = new TH1D("nVtxMB","nVtx;N Events",12,0,12);
     for(int i = 0; i<s.nTriggers_trk; i++)
     {
-      spec_trk[i] = new TH2D(Form("spectrum_trigger%d_trk",i),"",s.nTrktriggerBins,0,s.maxTrktriggerBin,s.ntrkBins,s.xtrkbins);
-      evtCount_trk[i] = new TH1D(Form("evtCount%d_trk",i),";max jet p_{T};N",s.nTrktriggerBins,0,s.maxTrktriggerBin);
-      evtCount_trk[i]->SetMarkerColor(i);
+      s.spec_trk[i] = new TH2D(Form("spectrum_trigger%d_trk",i),"",s.nTrktriggerBins,0,s.maxTrktriggerBin,s.ntrkBins,s.xtrkbins);
+      s.evtCount_trk[i] = new TH1D(Form("evtCount%d_trk",i),";max jet p_{T};N",s.nTrktriggerBins,0,s.maxTrktriggerBin);
+      s.evtCount_trk[i]->SetMarkerColor(i);
     }
-    nVtxMB_trk = new TH1D("nVtxMB_trk","nVtx;N Events",12,0,12);
+    s.nVtxMB_trk = new TH1D("nVtxMB_trk","nVtx;N Events",12,0,12);
   }else{  //end of pp loop, start of PbPb loop
     for(int i = 0; i<s.HInTriggers; i++)
     {
       for(int j = 0; j<20; j++){
-        HIspec[i][j] = new TH2D(Form("HI_spectrum_trigger%d_cent%d",i,j),"",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
-        HIevtCount[i][j] = new TH1D(Form("HI_evtCount%d_cent%d",i,j),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
-        HIevtCount[i][j]->SetMarkerColor(i);
+        s.HIspec[i][j] = new TH2D(Form("HI_spectrum_trigger%d_cent%d",i,j),"",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
+        s.HIevtCount[i][j] = new TH1D(Form("HI_evtCount%d_cent%d",i,j),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
+        s.HIevtCount[i][j]->SetMarkerColor(i);
       }
     }
-    HInVtxMB = new TH1D("HI_nVtxMB","nVtx;N Events",12,0,12);
+    s.HInVtxMB = new TH1D("HI_nVtxMB","nVtx;N Events",12,0,12);
     for(int i = 0; i<s.HInTriggers_trk; i++)
     {
       for(int j = 0; j<20; j++){
-        HIspec_trk[i][j] = new TH2D(Form("HI_spectrum_trigger%d_cent%d_trk",i,j),"",s.nTrktriggerBins,0,s.maxTrktriggerBin,s.ntrkBins,s.xtrkbins);
-        HIevtCount_trk[i][j] = new TH1D(Form("HI_evtCount%d_cent%d_trk",i,j),";max jet p_{T};N",s.nTrktriggerBins,0,s.maxTrktriggerBin);
-        HIevtCount_trk[i][j]->SetMarkerColor(i);
+        s.HIspec_trk[i][j] = new TH2D(Form("HI_spectrum_trigger%d_cent%d_trk",i,j),"",s.nTrktriggerBins,0,s.maxTrktriggerBin,s.ntrkBins,s.xtrkbins);
+        s.HIevtCount_trk[i][j] = new TH1D(Form("HI_evtCount%d_cent%d_trk",i,j),";max jet p_{T};N",s.nTrktriggerBins,0,s.maxTrktriggerBin);
+        s.HIevtCount_trk[i][j]->SetMarkerColor(i);
       }
     }
-    HInVtxMB_trk = new TH1D("HI_nVtxMB_trk","nVtx;N Events",12,0,12);
+    s.HInVtxMB_trk = new TH1D("HI_nVtxMB_trk","nVtx;N Events",12,0,12);
   }   //end of PbPb loop
 //******************************************************************************************************************************
 //******************************************************************************************************************************
@@ -282,49 +275,49 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     if(MinBias && PD==0)
     {
       if(isPP){
-        evtCount[0]->Fill(maxJtPt); 
-        nVtxMB->Fill(nVtx);
-        evtCount_trk[0]->Fill(maxTrackPt); 
-        nVtxMB_trk->Fill(nVtx);
+        s.evtCount[0]->Fill(maxJtPt); 
+        s.nVtxMB->Fill(nVtx);
+        s.evtCount_trk[0]->Fill(maxTrackPt); 
+        s.nVtxMB_trk->Fill(nVtx);
       }else{
-        HIevtCount[0][hiBin/10]->Fill(maxJtPt);
-        HInVtxMB->Fill(nVtx);
-        HIevtCount_trk[0][hiBin/10]->Fill(maxTrackPt);
-        HInVtxMB_trk->Fill(nVtx);
+        s.HIevtCount[0][hiBin/10]->Fill(maxJtPt);
+        s.HInVtxMB->Fill(nVtx);
+        s.HIevtCount_trk[0][hiBin/10]->Fill(maxTrackPt);
+        s.HInVtxMB_trk->Fill(nVtx);
       }
     }
-    if(j40 && PD==1) evtCount[1]->Fill(maxJtPt);  
-    if(j60 && PD==1) evtCount[2]->Fill(maxJtPt);  
-    if(j80 && PD==2) evtCount[3]->Fill(maxJtPt);  
-    if(t18 && PD==3) evtCount_trk[1]->Fill(maxTrackPt);  
-    if(t24 && PD==3) evtCount_trk[2]->Fill(maxTrackPt);  
-    if(t34 && PD==3) evtCount_trk[3]->Fill(maxTrackPt);  
-    if(t45 && PD==3) evtCount_trk[4]->Fill(maxTrackPt);  
-    if(t53 && PD==3) evtCount_trk[5]->Fill(maxTrackPt);  
-    if(HIj40 && PD==1)  HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
-    if(HIj60 && PD==1)  HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
-    if(HIj80 && PD==1)  HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-    if(HIj100 && PD==1) HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
-    if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
-    if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
-    if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-    if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
-    if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)  HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
-    if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)  HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
-    if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)  HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-    if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
-    if(HIt12 && PD==1) HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt18 && PD==1) HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt24 && PD==1) HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt34 && PD==1) HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt45 && PD==1) HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
-    //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
-    //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
+    if(j40 && PD==1) s.evtCount[1]->Fill(maxJtPt);  
+    if(j60 && PD==1) s.evtCount[2]->Fill(maxJtPt);  
+    if(j80 && PD==2) s.evtCount[3]->Fill(maxJtPt);  
+    if(t18 && PD==3) s.evtCount_trk[1]->Fill(maxTrackPt);  
+    if(t24 && PD==3) s.evtCount_trk[2]->Fill(maxTrackPt);  
+    if(t34 && PD==3) s.evtCount_trk[3]->Fill(maxTrackPt);  
+    if(t45 && PD==3) s.evtCount_trk[4]->Fill(maxTrackPt);  
+    if(t53 && PD==3) s.evtCount_trk[5]->Fill(maxTrackPt);  
+    if(HIj40 && PD==1)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
+    if(HIj60 && PD==1)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
+    if(HIj80 && PD==1)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
+    if(HIj100 && PD==1) s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+    if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
+    if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
+    if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
+    if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+    if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
+    if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
+    if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
+    if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+    if(HIt12 && PD==1) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt18 && PD==1) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt24 && PD==1) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt34 && PD==1) s.HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt45 && PD==1) s.HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
+    if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) s.HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
+    //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
+    //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
     
     if(PD!=3)
     {
@@ -340,27 +333,27 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
         //dividing by pt at bin center instead of track by track pt (just a convention)
         float binCenter;
-        if(isPP) binCenter = spec[0]->GetYaxis()->GetBinCenter(spec[0]->GetYaxis()->FindBin(trkPt[j]));
-        else     binCenter = HIspec[0][0]->GetYaxis()->GetBinCenter(HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
+        if(isPP) binCenter = s.spec[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
+        else     binCenter = s.HIspec[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
         if(isPP){
-          if(MinBias && PD==0) spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j40 && PD==1)     spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j60 && PD==1)     spec[2]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j80 && PD==2)     spec[3]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(MinBias && PD==0) s.spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(j40 && PD==1)     s.spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(j60 && PD==1)     s.spec[2]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(j80 && PD==2)     s.spec[3]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
         }else{
-          if(MinBias && PD==0) HIspec[0][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj40 && PD==1)     HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj60 && PD==1)     HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj80 && PD==1)     HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj100 && PD==1)    HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)   HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)   HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)   HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
+          if(MinBias && PD==0) s.HIspec[0][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj40 && PD==1)     s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj60 && PD==1)     s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj80 && PD==1)     s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj100 && PD==1)    s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+          if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+          if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+          if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+          if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+          if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+          if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+          if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
         }
       } //end trk loop
     }//end if statement  
@@ -374,31 +367,31 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
 
         float binCenter;
-        if(isPP) binCenter = spec_trk[0]->GetYaxis()->GetBinCenter(spec[0]->GetYaxis()->FindBin(trkPt[j]));
-        else     binCenter = HIspec_trk[0][0]->GetYaxis()->GetBinCenter(HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
+        if(isPP) binCenter = s.spec_trk[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
+        else     binCenter = s.HIspec_trk[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
         float correction = trkCorr_trkTriggered->getTrkCorr(trkPt[j],trkEta[j]);
         //dividing by pt at bin center instead of track by track pt (just a convention)
         if(isPP){
-          if(MinBias && PD==0) spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t18 && PD==3)     spec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t24 && PD==3)     spec_trk[2]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t34 && PD==3)     spec_trk[3]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t45 && PD==3)     spec_trk[4]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t53 && PD==3)     spec_trk[5]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(MinBias && PD==0) s.spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(t18 && PD==3)     s.spec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(t24 && PD==3)     s.spec_trk[2]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(t34 && PD==3)     s.spec_trk[3]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(t45 && PD==3)     s.spec_trk[4]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(t53 && PD==3)     s.spec_trk[5]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
         }else{
-          if(MinBias && PD==0) HIspec_trk[0][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt12 && PD==1)     HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt18 && PD==1)     HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt24 && PD==1)     HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt34 && PD==1)     HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt45 && PD==1)     HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(MinBias && PD==0) s.HIspec_trk[0][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt12 && PD==1)     s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt18 && PD==1)     s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt24 && PD==1)     s.HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt34 && PD==1)     s.HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          if(HIt45 && PD==1)     s.HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) s.HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+          //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
         } 
       }//end trk loop
     }//end if statement
@@ -410,33 +403,33 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   if(isPP){
     for(int i = 0; i<s.nTriggers; i++)
     {
-      spec[i]->Write();
-      evtCount[i]->Write();
+      s.spec[i]->Write();
+      s.evtCount[i]->Write();
     }
     for(int i = 0; i<s.nTriggers_trk; i++)
     {
-      spec_trk[i]->Write();
-      evtCount_trk[i]->Write();
+      s.spec_trk[i]->Write();
+      s.evtCount_trk[i]->Write();
     }
-    nVtxMB->Write();
-    nVtxMB_trk->Write();
+    s.nVtxMB->Write();
+    s.nVtxMB_trk->Write();
   }else{
     for(int i = 0; i<s.HInTriggers; i++)
     {
       for(int j = 0; j<20; j++){
-        HIspec[i][j]->Write();
-        HIevtCount[i][j]->Write();
+        s.HIspec[i][j]->Write();
+        s.HIevtCount[i][j]->Write();
       }
     }
     for(int i = 0; i<s.HInTriggers_trk; i++)
     {
       for(int j = 0; j<20; j++){
-        HIspec_trk[i][j]->Write();
-        HIevtCount_trk[i][j]->Write();
+        s.HIspec_trk[i][j]->Write();
+        s.HIevtCount_trk[i][j]->Write();
       }
     }
-    HInVtxMB->Write();
-    HInVtxMB_trk->Write();
+    s.HInVtxMB->Write();
+    s.HInVtxMB_trk->Write();
     outF->Close(); 
   }
 }
