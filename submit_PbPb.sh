@@ -4,7 +4,7 @@ then
   exit 1
 fi
 
-now="Rpp_$(date +"%Y_%m_%d__%H_%M_%S")"
+now="RAA_$(date +"%Y_%m_%d__%H_%M_%S")"
 njobs=500
 
 mkdir $now

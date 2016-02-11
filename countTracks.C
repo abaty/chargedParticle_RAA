@@ -249,7 +249,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   for(int i = 0; i<trkCh->GetEntries(); i++)
   {
     //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
-    if(i%10==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
+    if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
     trkCh->GetEntry(i);
     //if(!NoiseFilter) continue;
     if(isPP && (!pVtx || !pBeamScrape)) continue;
