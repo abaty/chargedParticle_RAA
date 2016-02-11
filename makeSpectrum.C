@@ -36,6 +36,22 @@ void makeSpectrum()
   s.ppMaxtrk = new TH1D("ppMaxtrkSpectrum",";Leading Track P_{T} (GeV);#sigma (mb)",s.nTrktriggerBins,0,s.maxTrktriggerBin);
   for(int i = 0; i<s.nTriggers_trk; i++) s.ppMaxtrkByTrigger[i] = new TH1D(Form("ppMaxtrkSpectrumByTrigger%d",i),"",s.nTrktriggerBins,0,s.maxTrktriggerBin);
 
+//same for PbPb
+  for(int c = 0 ; c<s.nCentBins; c++){
+    s.HI[c] = new TH1D(Form("PbPbTrackSpectrum_%d_%d",5*s.lowCentBin[c],5*s.highCentBin[c]),";p_{T} (GeV);E#frac{d^{3}#sigma}{d^{3}p} (mb/GeV^{2})",s.ntrkBins,s.xtrkbins);
+    for(int i = 0; i<s.HInTriggers; i++) s.HIByTrigger[i][c] = new TH1D(Form("HITrackSpectrumByTrigger%d_%d_%d",i,5*s.lowCentBin[c],5*s.highCentBin[c]),"",s.ntrkBins,s.xtrkbins);
+    for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c] = new TH1D(Form("HIUsedTrackSpectrumByTrigger%d_%d_%d",i,5*s.lowCentBin[c],5*s.highCentBin[c]),"",s.ntrkBins,s.xtrkbins);
+    s.HIJets[c] = new TH1D(Form("PbPbJetSpectrum_%d_%d",5*s.lowCentBin[c],5*s.highCentBin[c]),";Leading Jet P_{T} (GeV);#sigma (mb)",s.njetBins,0,s.maxJetBin);
+    for(int i = 0; i<s.HInTriggers; i++) s.HIJetsByTrigger[i][c] = new TH1D(Form("HIJetSpectrumByTrigger%d_%d_%d",i,5*s.lowCentBin[c],5*s.highCentBin[c]),"",s.njetBins,0,s.maxJetBin);
+
+    s.HI_trk[c] = new TH1D(Form("PbPbTrackSpectrum_trk_%d_%d",5*s.lowCentBin[c],5*s.highCentBin[c]),";p_{T} (GeV);E#frac{d^{3}#sigma}{d^{3}p} (mb/GeV^{2})",s.ntrkBins,s.xtrkbins);
+    for(int i = 0; i<s.HInTriggers_trk; i++) s.HIByTrigger_trk[i][c] = new TH1D(Form("PbPbTrackSpectrumByTrigger%d_%d_%d_trk",i,5*s.lowCentBin[c],5*s.highCentBin[c]),"",s.ntrkBins,s.xtrkbins);
+    for(int i = 0; i<s.HInTriggers_trk; i++) s.HIUsedByTrigger_trk[i][c] = new TH1D(Form("PbPbUsedTrackSpectrumByTrigger%d_%d_%d_trk",i,5*s.lowCentBin[c],5*s.highCentBin[c]),"",s.ntrkBins,s.xtrkbins);
+    s.HIMaxtrk[c] = new TH1D(Form("PbPbMaxtrkSpectrum_%d_%d",5*s.lowCentBin[c],5*s.highCentBin[c]),";Leading Track P_{T} (GeV);#sigma (mb)",s.nTrktriggerBins,0,s.maxTrktriggerBin);
+    for(int i = 0; i<s.HInTriggers_trk; i++) s.HIMaxtrkByTrigger[i][c] = new TH1D(Form("PbPbMaxtrkSpectrumByTrigger%d_%d_%d",i,5*s.lowCentBin[c],5*s.highCentBin[c]),"",s.nTrktriggerBins,0,s.maxTrktriggerBin);
+  }
+
+
   //loading files
   TFile * inFile = TFile::Open("countTracks.root","read");
   for(int i = 0; i<s.nTriggers; i++)
@@ -52,10 +68,34 @@ void makeSpectrum()
     s.spec_trk[i]->SetDirectory(0);
     s.evtCount_trk[i]->SetDirectory(0);
   }
-  s.nVtxMB = (TH1D*) inFile->Get("s.nVtxMB");
+  s.nVtxMB = (TH1D*) inFile->Get("nVtxMB");
   s.nVtxMB->SetDirectory(0);
-  s.nVtxMB_trk = (TH1D*) inFile->Get("s.nVtxMB");
+  s.nVtxMB_trk = (TH1D*) inFile->Get("nVtxMB_trk");
   s.nVtxMB_trk->SetDirectory(0);
+  inFile->Close();
+  
+  inFile = TFile::Open("RAA_Feb10_testfile.root","read");
+  for(int c = 0; c<20; c++)
+  {
+    for(int i = 0; i<s.HInTriggers; i++)
+    {
+      s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",i,c));
+      s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",i,c));
+      s.HIspec[i][c]->SetDirectory(0);
+      s.HIevtCount[i][c]->SetDirectory(0);
+    }
+    for(int i = 0; i<s.HInTriggers_trk; i++)
+    {
+      s.HIspec_trk[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d_trk",i,c));
+      s.HIevtCount_trk[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d_trk",i,c));
+      s.HIspec_trk[i][c]->SetDirectory(0);
+      s.HIevtCount_trk[i][c]->SetDirectory(0);
+    }
+  }
+  s.HInVtxMB = (TH1D*) inFile->Get("HI_nVtxMB");
+  s.HInVtxMB->SetDirectory(0);
+  s.HInVtxMB_trk = (TH1D*) inFile->Get("HI_nVtxMB_trk");
+  s.HInVtxMB_trk->SetDirectory(0);
   inFile->Close();
 
   //calculation of overlaps

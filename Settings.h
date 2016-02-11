@@ -47,17 +47,17 @@ class Settings {
   int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18};
 
   TH1D * pp,                           *HI[nCentBins];
-  TH1D * ppByTrigger[nTriggers],       *HIByTrigger[nCentBins][HInTriggers];
-  TH1D * ppUsedByTrigger[nTriggers],   *HIUsedByTrigger[nCentBins][HInTriggers];
+  TH1D * ppByTrigger[nTriggers],       *HIByTrigger[HInTriggers][nCentBins];
+  TH1D * ppUsedByTrigger[nTriggers],   *HIUsedByTrigger[HInTriggers][nCentBins];
   TH1D * ppJets,                       *HIJets[nCentBins];
-  TH1D * ppJetsByTrigger[nTriggers],   *HIJetsByTrigger[nCentBins][HInTriggers];
+  TH1D * ppJetsByTrigger[nTriggers],   *HIJetsByTrigger[HInTriggers][nCentBins];
   TH1D * pp_perMBTrigger,              *HI_perMBTrigger[nCentBins];               
 
   TH1D * pp_trk,                              *HI_trk[nCentBins];                                  
-  TH1D * ppByTrigger_trk[nTriggers_trk],      *HIByTrigger_trk[nCentBins][HInTriggers_trk];            
-  TH1D * ppUsedByTrigger_trk[nTriggers_trk],  *HIUsedByTrigger_trk[nCentBins][HInTriggers_trk];        
+  TH1D * ppByTrigger_trk[nTriggers_trk],      *HIByTrigger_trk[HInTriggers_trk][nCentBins];            
+  TH1D * ppUsedByTrigger_trk[nTriggers_trk],  *HIUsedByTrigger_trk[HInTriggers_trk][nCentBins];        
   TH1D * ppMaxtrk,                            *HIMaxtrk[nCentBins];                              
-  TH1D * ppMaxtrkByTrigger[nTriggers_trk],    *HIMaxtrkByTrigger[nCentBins][HInTriggers_trk];        
+  TH1D * ppMaxtrkByTrigger[nTriggers_trk],    *HIMaxtrkByTrigger[HInTriggers_trk][nCentBins];        
   TH1D * pp_perMBTrigger_trk,                 *HI_perMBTrigger_trk[nCentBins];                     
 
   
