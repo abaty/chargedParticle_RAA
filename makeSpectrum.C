@@ -188,6 +188,7 @@ void makeSpectrum()
   }
 
   TH1D * tempEvtCount[s.HInTriggers][3];
+  int combinationCentUpperBoundary[3] = {5,9,19};
   int combinationCentLowerBoundary[3] = {0,6,10};
   for(int i = 0; i<s.HInTriggers; i++)
   {
@@ -195,7 +196,7 @@ void makeSpectrum()
       HIscale[i][m] = 68/((float)HInVtx);//using 68mb as inelastic pp xsection
       tempEvtCount[i][m] = (TH1D*)s.HIevtCount[i][0]->Clone(Form("HItempEvtCount%d",m));
       tempEvtCount[i][m]->Reset();
-      for(int c = 19; c>=combinationCentLowerBoundary[m]; c--) tempEvtCount[i][m]->Add(s.HIevtCount[i][c]);
+      for(int c = combinationCentUpperBoundary[m]; c>=combinationCentLowerBoundary[m]; c--) tempEvtCount[i][m]->Add(s.HIevtCount[i][c]);
       for(int j = 0; j<i; j++){
         HIscale[i][m] = HIscale[i][m]*tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j][m]->FindBin(s.maxJetBin))/(double)tempEvtCount[j+1][m]->Integral(tempEvtCount[j+1][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j+1][m]->FindBin(s.maxJetBin));
       }
@@ -256,6 +257,7 @@ void makeSpectrum()
   }
 
   TH1D * tempEvtCount_trk[s.HInTriggers_trk][3];
+  int combinationCentUpperBoundary_trk[3] = {5,9,19};
   int combinationCentLowerBoundary_trk[3] = {0,6,10};
   for(int i = 0; i<s.HInTriggers_trk; i++)
   {
@@ -263,7 +265,7 @@ void makeSpectrum()
       HIscale_trk[i][m] = 68/((float)HInVtx_trk);//using 68mb as inelastic pp xsection
       tempEvtCount_trk[i][m] = (TH1D*)s.HIevtCount_trk[i][0]->Clone(Form("HItempEvtCount%d_trk",m));
       tempEvtCount_trk[i][m]->Reset();
-      for(int c = 19; c>=combinationCentLowerBoundary_trk[m]; c--) tempEvtCount_trk[i][m]->Add(s.HIevtCount_trk[i][c]);
+      for(int c = combinationCentUpperBoundary_trk[m]; c>=combinationCentLowerBoundary_trk[m]; c--) tempEvtCount_trk[i][m]->Add(s.HIevtCount_trk[i][c]);
       for(int j = 0; j<i; j++){
         HIscale_trk[i][m] = HIscale_trk[i][m]*tempEvtCount_trk[j][m]->Integral(tempEvtCount_trk[j][m]->FindBin(s.HItriggerOverlapBins_trk[j+1]),tempEvtCount_trk[j][m]->FindBin(s.maxTrktriggerBin))/(double)tempEvtCount_trk[j+1][m]->Integral(tempEvtCount_trk[j+1][m]->FindBin(s.HItriggerOverlapBins_trk[j+1]),tempEvtCount_trk[j+1][m]->FindBin(s.maxTrktriggerBin));
       }

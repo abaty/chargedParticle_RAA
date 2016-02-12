@@ -36,9 +36,9 @@ class Settings {
   static const int maxTrktriggerBin = 600;
   
 
-  static const int nCentBins = 28;
-  int lowCentBin[nCentBins] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,6,10,2,6,10,14,16};
-  int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18};
+  static const int nCentBins = 31;
+  int lowCentBin[nCentBins] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,6,10,2,6,10,14,16,0,0,6};
+  int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18,6,10,20};
 
   TH2D *spec[nTriggers],               *HIspec[HInTriggers][nCentBins];
   TH1D *evtCount[nTriggers],           *HIevtCount[HInTriggers][nCentBins];
