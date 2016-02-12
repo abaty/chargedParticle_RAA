@@ -389,42 +389,14 @@ void makeSpectrum()
   s.ppMaxtrk->Write();
   for(int j = 0; j<s.nTriggers; j++)
   {
-    s.ppByTrigger[j]->SetLineColor(j+1);
-    s.ppByTrigger[j]->SetLineWidth(1);
-    s.ppByTrigger[j]->SetMarkerColor(j+1);
-    s.ppByTrigger[j]->SetFillColor(j+1);
     s.ppByTrigger[j]->Write();
-    s.ppUsedByTrigger[j]->SetLineColor(kBlack);
-    s.ppUsedByTrigger[j]->SetLineWidth(2);
-    s.ppUsedByTrigger[j]->SetMarkerColor(j+1);
-    s.ppUsedByTrigger[j]->SetMarkerSize(0);
-    s.ppUsedByTrigger[j]->SetFillColor(j+1);
     s.ppUsedByTrigger[j]->Write();
-    s.ppJetsByTrigger[j]->SetLineColor(j+1);
-    s.ppJetsByTrigger[j]->SetLineWidth(1);
-    s.ppJetsByTrigger[j]->SetMarkerColor(j+1);
-    s.ppJetsByTrigger[j]->SetMarkerSize(0.8);
-    s.ppJetsByTrigger[j]->SetFillColor(j+1);
     s.ppJetsByTrigger[j]->Write();
   }
   for(int j = 0; j<s.nTriggers_trk; j++)
   {
-    s.ppByTrigger_trk[j]->SetLineColor(j+1);
-    s.ppByTrigger_trk[j]->SetLineWidth(1);
-    s.ppByTrigger_trk[j]->SetMarkerColor(j+1);
-    s.ppByTrigger_trk[j]->SetFillColor(j+1);
     s.ppByTrigger_trk[j]->Write();
-    s.ppUsedByTrigger_trk[j]->SetLineColor(kBlack);
-    s.ppUsedByTrigger_trk[j]->SetLineWidth(2);
-    s.ppUsedByTrigger_trk[j]->SetMarkerColor(j+1);
-    s.ppUsedByTrigger_trk[j]->SetMarkerSize(0);
-    s.ppUsedByTrigger_trk[j]->SetFillColor(j+1);
     s.ppUsedByTrigger_trk[j]->Write();
-    s.ppMaxtrkByTrigger[j]->SetLineColor(j+1);
-    s.ppMaxtrkByTrigger[j]->SetLineWidth(1);
-    s.ppMaxtrkByTrigger[j]->SetMarkerColor(j+1);
-    s.ppMaxtrkByTrigger[j]->SetMarkerSize(0.8);
-    s.ppMaxtrkByTrigger[j]->SetFillColor(j+1);
     s.ppMaxtrkByTrigger[j]->Write();
   }
   for(int c = 0; c<s.nCentBins; c++){
@@ -453,5 +425,5 @@ void makeSpectrum()
   outF->Close();
  
   makePlotsPbPb(s);
-  makePlotsPP(s)
+  makePlotsPP(s);
 }

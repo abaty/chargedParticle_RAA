@@ -18,34 +18,68 @@
 
 void makePlotsPP(Settings s)
 {
+  for(int j = 0; j<s.nTriggers; j++)
+  {
+    s.ppByTrigger[j]->SetLineColor(j+1);
+    s.ppByTrigger[j]->SetLineWidth(1);
+    s.ppByTrigger[j]->SetMarkerColor(j+1);
+    s.ppByTrigger[j]->SetFillColor(j+1);
+    s.ppUsedByTrigger[j]->SetLineColor(kBlack);
+    s.ppUsedByTrigger[j]->SetLineWidth(2);
+    s.ppUsedByTrigger[j]->SetMarkerColor(j+1);
+    s.ppUsedByTrigger[j]->SetMarkerSize(0);
+    s.ppUsedByTrigger[j]->SetFillColor(j+1);
+    s.ppJetsByTrigger[j]->SetLineColor(j+1);
+    s.ppJetsByTrigger[j]->SetLineWidth(1);
+    s.ppJetsByTrigger[j]->SetMarkerColor(j+1);
+    s.ppJetsByTrigger[j]->SetMarkerSize(0.8);
+    s.ppJetsByTrigger[j]->SetFillColor(j+1);
+  }
+  for(int j = 0; j<s.nTriggers_trk; j++)
+  {
+    s.ppByTrigger_trk[j]->SetLineColor(j+1);
+    s.ppByTrigger_trk[j]->SetLineWidth(1);
+    s.ppByTrigger_trk[j]->SetMarkerColor(j+1);
+    s.ppByTrigger_trk[j]->SetFillColor(j+1);
+    s.ppUsedByTrigger_trk[j]->SetLineColor(kBlack);
+    s.ppUsedByTrigger_trk[j]->SetLineWidth(2);
+    s.ppUsedByTrigger_trk[j]->SetMarkerColor(j+1);
+    s.ppUsedByTrigger_trk[j]->SetMarkerSize(0);
+    s.ppUsedByTrigger_trk[j]->SetFillColor(j+1);
+    s.ppMaxtrkByTrigger[j]->SetLineColor(j+1);
+    s.ppMaxtrkByTrigger[j]->SetLineWidth(1);
+    s.ppMaxtrkByTrigger[j]->SetMarkerColor(j+1);
+    s.ppMaxtrkByTrigger[j]->SetMarkerSize(0.8);
+    s.ppMaxtrkByTrigger[j]->SetFillColor(j+1);
+  }
 //******************************************************************************************************************
 //************************************************JET TRIGGER PLOTS**********************************************************
 //******************************************************************************************************************
   TCanvas * c1 = new TCanvas("c1","c1",800,600);
   c1->SetLogy();
-  ppJets->Scale(100);
+  s.ppJets->Scale(100);
   float Ymin = 0.00000000001;
   float Ymax = 10;
-  ppJets->GetYaxis()->SetRangeUser(Ymin,Ymax);
-  ppJets->Draw("h");
-  for(int i = 0; i<s.nTriggers; i++) ppJetsByTrigger[i]->Draw("same");
+  s.ppJets->GetYaxis()->SetRangeUser(Ymin,Ymax);
+  s.ppJets->Draw("h");
+  for(int i = 0; i<s.nTriggers; i++) s.ppJetsByTrigger[i]->Draw("same");
   TLegend * leg = new TLegend(0.6,0.6,0.9,0.9);
-  leg->AddEntry(ppJets,"Jet Spectrum (x100)","l");
-  leg->AddEntry(ppJetsByTrigger[0],"MB (I)","p");
-  leg->AddEntry(ppJetsByTrigger[1],"jet 40 (II)","p");
-  leg->AddEntry(ppJetsByTrigger[2],"jet 60 (III)","p");
-  leg->AddEntry(ppJetsByTrigger[3],"jet 80 (IV)","p");
+  leg->AddEntry(s.ppJets,"Jet Spectrum (x100)","l");
+  leg->AddEntry(s.ppJetsByTrigger[0],"MB (I)","p");
+  leg->AddEntry(s.ppJetsByTrigger[1],"jet 40 (II)","p");
+  leg->AddEntry(s.ppJetsByTrigger[2],"jet 60 (III)","p");
+  leg->AddEntry(s.ppJetsByTrigger[3],"jet 80 (IV)","p");
   leg->AddEntry((TObject*)0,"ak4Calo Jets, |#eta|<2","");
   leg->Draw("same");
   c1->SaveAs("plots/ppJets_FullSpectrum.png"); 
   c1->SaveAs("plots/ppJets_FullSpectrum.pdf"); 
 
-  ppJets->GetXaxis()->SetRangeUser(20,200);
+  s.ppJets->GetXaxis()->SetRangeUser(20,200);
   Ymin = 0.0000001;
   Ymax = 100;
-  ppJets->GetYaxis()->SetRangeUser(0.0000001,100);
-  ppJets->Draw("h");
-  for(int i = 0; i<s.nTriggers; i++) ppJetsByTrigger[i]->Draw("same");
+  s.ppJets->GetYaxis()->SetRangeUser(0.0000001,100);
+  s.ppJets->Draw("h");
+  for(int i = 0; i<s.nTriggers; i++) s.ppJetsByTrigger[i]->Draw("same");
   leg->Draw("same"); 
   TLine * l[3];
   for(int i = 0; i<3; i++) 
@@ -65,45 +99,45 @@ void makePlotsPP(Settings s)
   c1->SaveAs("plots/ppJets_FullSpectrum_XZoom.pdf"); 
 
   c1->SetLogy(0);
-  for(int i = 0; i<s.nTriggers-1; i++) ppJetsByTrigger[s.nTriggers-1-i]->Divide(ppJetsByTrigger[s.nTriggers-2-i]);
-  ppJetsByTrigger[1]->GetYaxis()->SetRangeUser(0,2);
-  ppJetsByTrigger[1]->GetXaxis()->SetRangeUser(20,140);
-  ppJetsByTrigger[1]->GetXaxis()->SetTitle("Leading jet p_{T}");
-  ppJetsByTrigger[1]->Draw();
-  ppJetsByTrigger[2]->Draw("same");
-  ppJetsByTrigger[3]->Draw("same");
+  for(int i = 0; i<s.nTriggers-1; i++) s.ppJetsByTrigger[s.nTriggers-1-i]->Divide(s.ppJetsByTrigger[s.nTriggers-2-i]);
+  s.ppJetsByTrigger[1]->GetYaxis()->SetRangeUser(0,2);
+  s.ppJetsByTrigger[1]->GetXaxis()->SetRangeUser(20,140);
+  s.ppJetsByTrigger[1]->GetXaxis()->SetTitle("Leading jet p_{T}");
+  s.ppJetsByTrigger[1]->Draw();
+  s.ppJetsByTrigger[2]->Draw("same");
+  s.ppJetsByTrigger[3]->Draw("same");
   TLegend * leg2 = new TLegend(0.2,0.6,0.5,0.9);
-  leg2->AddEntry(ppJetsByTrigger[1],"Jet40/MB","p");
-  leg2->AddEntry(ppJetsByTrigger[2],"Jet60/Jet40","p");
-  leg2->AddEntry(ppJetsByTrigger[3],"Jet80/Jet60","p");
+  leg2->AddEntry(s.ppJetsByTrigger[1],"Jet40/MB","p");
+  leg2->AddEntry(s.ppJetsByTrigger[2],"Jet60/Jet40","p");
+  leg2->AddEntry(s.ppJetsByTrigger[3],"Jet80/Jet60","p");
   leg2->Draw("same");
   c1->SaveAs("plots/JetRelativeTurnOnes.png");
   c1->SaveAs("plots/JetRelativeTurnOnes.pdf");
   
   c1->SetLogy();
   c1->SetLogx();
-  pp->SetMarkerSize(0.8);
-  pp->Draw();
-  ppUsedByTrigger[0]->SetFillColor(kGray);
-  ppUsedByTrigger[3]->SetFillColor(kCyan+2);
-  ppUsedByTrigger[2]->Add(ppUsedByTrigger[3]);
-  ppUsedByTrigger[1]->Add(ppUsedByTrigger[2]);
-  ppUsedByTrigger[0]->Add(ppUsedByTrigger[1]);
-  for(int i = 0; i<s.nTriggers; i++) ppUsedByTrigger[i]->Draw("HIST same");
-  pp->Draw("sameaxis");
-  pp->Draw("same");
+  s.pp->SetMarkerSize(0.8);
+  s.pp->Draw();
+  s.ppUsedByTrigger[0]->SetFillColor(kGray);
+  s.ppUsedByTrigger[3]->SetFillColor(kCyan+2);
+  s.ppUsedByTrigger[2]->Add(s.ppUsedByTrigger[3]);
+  s.ppUsedByTrigger[1]->Add(s.ppUsedByTrigger[2]);
+  s.ppUsedByTrigger[0]->Add(s.ppUsedByTrigger[1]);
+  for(int i = 0; i<s.nTriggers; i++) s.ppUsedByTrigger[i]->Draw("HIST same");
+  s.pp->Draw("sameaxis");
+  s.pp->Draw("same");
   leg->Clear();
-  leg->AddEntry(pp,"pp track Spectrum","p");
-  leg->AddEntry(ppUsedByTrigger[0],"MB trigger","f");
-  leg->AddEntry(ppUsedByTrigger[1],"Jet40 trigger","f");
-  leg->AddEntry(ppUsedByTrigger[2],"Jet60 trigger","f");
-  leg->AddEntry(ppUsedByTrigger[3],"Jet80 trigger","f");
+  leg->AddEntry(s.pp,"pp track Spectrum","p");
+  leg->AddEntry(s.ppUsedByTrigger[0],"MB trigger","f");
+  leg->AddEntry(s.ppUsedByTrigger[1],"Jet40 trigger","f");
+  leg->AddEntry(s.ppUsedByTrigger[2],"Jet60 trigger","f");
+  leg->AddEntry(s.ppUsedByTrigger[3],"Jet80 trigger","f");
   leg->AddEntry((TObject*)0,"|#eta|<1","");
   leg->Draw("same");
    
   c1->SaveAs("plots/ppTrack_FullSpectrum.png");
   c1->SaveAs("plots/ppTrack_FullSpectrum.pdf");
-  TH1D * jtVsTrk = (TH1D*)pp->Clone("jtVsTrkRatio");
+  TH1D * jtVsTrk = (TH1D*)s.pp->Clone("jtVsTrkRatio");
   //RpPb bin shift correction
   
   //interpolation points
@@ -122,66 +156,66 @@ void makePlotsPP(Settings s)
   for(int i=1; i<s.ntrkBins+1; i++) pPbSpectrum->SetBinContent(i,ppintyvals_pPb[i-1]);
   for(int i=1; i<s.ntrkBins+1; i++) pPbSpectrum->SetBinError(i,ppintyvals_pPb[i-1]*ppintyerr_pPb[i-1]);
   
-  float ppScale = RpPb->GetBinContent(17)/pp->GetBinContent(17);
-  pp->Scale(ppScale); 
+  float ppScale = RpPb->GetBinContent(17)/s.pp->GetBinContent(17);
+  s.pp->Scale(ppScale); 
 
   TFile * binShift = TFile::Open("BinningAndResolutionCorrection_TrackTrigger.root","read");
   TH1D *hBinningAndResol_extendedPt = (TH1D*)binShift->Get("hPt_pseudo2_copy1");
   hBinningAndResol_extendedPt->SetDirectory(0);
   binShift->Close();
-  TH1D *pp_BinShift = (TH1D*)pp->Clone("pp_BinShift"); 
+  TH1D *pp_BinShift = (TH1D*)s.pp->Clone("pp_BinShift"); 
   for(int i = 2; i<hBinningAndResol_extendedPt->GetSize()+1; i++)
   {
     pp_BinShift->SetBinContent(i-1,pp_BinShift->GetBinContent(i-1)/hBinningAndResol_extendedPt->GetBinContent(i));
     pp_BinShift->SetBinError(i-1,pp_BinShift->GetBinError(i-1)/hBinningAndResol_extendedPt->GetBinError(i));
   }
-  TFile * outBinF = TFile::Open("ppSpectrum.root","update");
+  TFile * outBinF = TFile::Open("Spectrum.root","update");
   pp_BinShift->Write();
   outBinF->Close();
   
   c1->SetLogy(0);
-  pPbSpectrum->Divide(pp);
+  pPbSpectrum->Divide(s.pp);
   pPbSpectrum->GetYaxis()->SetTitle("RpPb");
   pPbSpectrum->GetYaxis()->SetRangeUser(0.5,1.5);
   pPbSpectrum->Draw();
   c1->SaveAs("plots/pp_RpPb.png");
   
-  pp->Divide(RpPb);
-  pp->GetYaxis()->SetTitle("data/interp");
-  pp->Draw(); 
+  s.pp->Divide(RpPb);
+  s.pp->GetYaxis()->SetTitle("data/interp");
+  s.pp->Draw(); 
   c1->SaveAs("plots/pp_dataVsInterp.png");
   
 //************************************************************************************************************
 //***********************************************TRACK TRIGGER PLOTS******************************************
 //************************************************************************************************************
   TCanvas * c2 = new TCanvas("c2","c2",800,600);
-  ppMaxtrkByTrigger[4]->SetMarkerColor(kOrange);
-  ppMaxtrkByTrigger[4]->SetLineColor(kOrange);
+  s.ppMaxtrkByTrigger[4]->SetMarkerColor(kOrange);
+  s.ppMaxtrkByTrigger[4]->SetLineColor(kOrange);
   c2->SetLogy();
-  ppMaxtrk->Scale(100);
+  s.ppMaxtrk->Scale(100);
   Ymin = 0.00000000001;
   Ymax = 10;
-  ppMaxtrk->GetYaxis()->SetRangeUser(Ymin,Ymax);
-  ppMaxtrk->Draw("h");
-  for(int i = 0; i<s.nTriggers_trk; i++) ppMaxtrkByTrigger[i]->Draw("same");
+  s.ppMaxtrk->GetYaxis()->SetRangeUser(Ymin,Ymax);
+  s.ppMaxtrk->Draw("h");
+  for(int i = 0; i<s.nTriggers_trk; i++) s.ppMaxtrkByTrigger[i]->Draw("same");
   TLegend * leg_trk = new TLegend(0.6,0.6,0.9,0.9);
-  leg_trk->AddEntry(ppMaxtrk,"Leading Trk p_{T}Spectrum (x100)","l");
-  leg_trk->AddEntry(ppMaxtrkByTrigger[0],"MB (I)","p");
-  leg_trk->AddEntry(ppMaxtrkByTrigger[1],"Track 18 (II)","p");
-  leg_trk->AddEntry(ppMaxtrkByTrigger[2],"Track 24 (III)","p");
-  leg_trk->AddEntry(ppMaxtrkByTrigger[3],"Track 34 (IV)","p");
-  leg_trk->AddEntry(ppMaxtrkByTrigger[4],"Track 45 (V)","p");
-  leg_trk->AddEntry(ppMaxtrkByTrigger[5],"Track 53 (VI)","p");
+  leg_trk->AddEntry(s.ppMaxtrk,"Leading Trk p_{T}Spectrum (x100)","l");
+  leg_trk->AddEntry(s.ppMaxtrkByTrigger[0],"MB (I)","p");
+  leg_trk->AddEntry(s.ppMaxtrkByTrigger[1],"Track 18 (II)","p");
+  leg_trk->AddEntry(s.ppMaxtrkByTrigger[2],"Track 24 (III)","p");
+  leg_trk->AddEntry(s.ppMaxtrkByTrigger[3],"Track 34 (IV)","p");
+  leg_trk->AddEntry(s.ppMaxtrkByTrigger[4],"Track 45 (V)","p");
+  leg_trk->AddEntry(s.ppMaxtrkByTrigger[5],"Track 53 (VI)","p");
   leg_trk->Draw("same");
   c2->SaveAs("plots/ppMaxtrk_FullSpectrum.png"); 
   c2->SaveAs("plots/ppMaxtrk_FullSpectrum.pdf"); 
 
-  ppMaxtrk->GetXaxis()->SetRangeUser(10,90);
+  s.ppMaxtrk->GetXaxis()->SetRangeUser(10,90);
   Ymin = 0.0000000001;
   Ymax = 1;
-  ppMaxtrk->GetYaxis()->SetRangeUser(Ymin,Ymax);
-  ppMaxtrk->Draw("h");
-  for(int i = 0; i<s.nTriggers_trk; i++) ppMaxtrkByTrigger[i]->Draw("same");
+  s.ppMaxtrk->GetYaxis()->SetRangeUser(Ymin,Ymax);
+  s.ppMaxtrk->Draw("h");
+  for(int i = 0; i<s.nTriggers_trk; i++) s.ppMaxtrkByTrigger[i]->Draw("same");
   leg_trk->Draw("same"); 
   TLine * l_trk[5];
   for(int i = 0; i<5; i++) 
@@ -202,50 +236,50 @@ void makePlotsPP(Settings s)
   c2->SaveAs("plots/ppMaxtrk_FullSpectrum_XZoom.pdf"); 
 
   c2->SetLogy(0);
-  for(int i = 0; i<s.nTriggers_trk; i++) ppMaxtrkByTrigger[i]->Rebin(2);
-  for(int i = 0; i<s.nTriggers_trk-1; i++) ppMaxtrkByTrigger[s.nTriggers_trk-1-i]->Divide(ppMaxtrkByTrigger[s.nTriggers_trk-2-i]);
-  ppMaxtrkByTrigger[1]->GetYaxis()->SetRangeUser(0,2);
-  ppMaxtrkByTrigger[1]->GetXaxis()->SetRangeUser(10,90);
-  ppMaxtrkByTrigger[1]->GetXaxis()->SetTitle("Leading Track p_{T}");
-  ppMaxtrkByTrigger[1]->Draw();
-  ppMaxtrkByTrigger[2]->Draw("same");
-  ppMaxtrkByTrigger[3]->Draw("same");
-  ppMaxtrkByTrigger[4]->Draw("same");
-  ppMaxtrkByTrigger[5]->Draw("same");
+  for(int i = 0; i<s.nTriggers_trk; i++) s.ppMaxtrkByTrigger[i]->Rebin(2);
+  for(int i = 0; i<s.nTriggers_trk-1; i++) s.ppMaxtrkByTrigger[s.nTriggers_trk-1-i]->Divide(s.ppMaxtrkByTrigger[s.nTriggers_trk-2-i]);
+  s.ppMaxtrkByTrigger[1]->GetYaxis()->SetRangeUser(0,2);
+  s.ppMaxtrkByTrigger[1]->GetXaxis()->SetRangeUser(10,90);
+  s.ppMaxtrkByTrigger[1]->GetXaxis()->SetTitle("Leading Track p_{T}");
+  s.ppMaxtrkByTrigger[1]->Draw();
+  s.ppMaxtrkByTrigger[2]->Draw("same");
+  s.ppMaxtrkByTrigger[3]->Draw("same");
+  s.ppMaxtrkByTrigger[4]->Draw("same");
+  s.ppMaxtrkByTrigger[5]->Draw("same");
   TLegend * leg2_trk = new TLegend(0.2,0.6,0.5,0.9);
-  leg2_trk->AddEntry(ppMaxtrkByTrigger[1],"Trk18/MB","p");
-  leg2_trk->AddEntry(ppMaxtrkByTrigger[2],"Trk24/Trk18","p");
-  leg2_trk->AddEntry(ppMaxtrkByTrigger[3],"Trk34/Trk24","p");
-  leg2_trk->AddEntry(ppMaxtrkByTrigger[4],"Trk45/Trk34","p");
-  leg2_trk->AddEntry(ppMaxtrkByTrigger[5],"Trk53/Trk45","p");
+  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[1],"Trk18/MB","p");
+  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[2],"Trk24/Trk18","p");
+  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[3],"Trk34/Trk24","p");
+  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[4],"Trk45/Trk34","p");
+  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[5],"Trk53/Trk45","p");
   leg2_trk->Draw("same");
   c2->SaveAs("plots/TrackRelativeTurnOnes.png");
   c2->SaveAs("plots/TrackRelativeTurnOnes.pdf");
   
   c2->SetLogy();
   c2->SetLogx();
-  pp_trk->SetMarkerSize(0.8);
-  pp_trk->Draw();
-  ppUsedByTrigger_trk[0]->SetFillColor(kGray);
-  ppUsedByTrigger_trk[3]->SetFillColor(kBlue);
-  ppUsedByTrigger_trk[4]->SetFillColor(kViolet);
-  ppUsedByTrigger_trk[5]->SetFillColor(kCyan+2);
-  ppUsedByTrigger_trk[4]->Add(ppUsedByTrigger_trk[5]);
-  ppUsedByTrigger_trk[3]->Add(ppUsedByTrigger_trk[4]);
-  ppUsedByTrigger_trk[2]->Add(ppUsedByTrigger_trk[3]);
-  ppUsedByTrigger_trk[1]->Add(ppUsedByTrigger_trk[2]);
-  ppUsedByTrigger_trk[0]->Add(ppUsedByTrigger_trk[1]);
-  for(int i = 0; i<s.nTriggers_trk; i++) ppUsedByTrigger_trk[i]->Draw("HIST same");
-  pp_trk->Draw("sameaxis");
-  pp_trk->Draw("same");
+  s.pp_trk->SetMarkerSize(0.8);
+  s.pp_trk->Draw();
+  s.ppUsedByTrigger_trk[0]->SetFillColor(kGray);
+  s.ppUsedByTrigger_trk[3]->SetFillColor(kBlue);
+  s.ppUsedByTrigger_trk[4]->SetFillColor(kViolet);
+  s.ppUsedByTrigger_trk[5]->SetFillColor(kCyan+2);
+  s.ppUsedByTrigger_trk[4]->Add(s.ppUsedByTrigger_trk[5]);
+  s.ppUsedByTrigger_trk[3]->Add(s.ppUsedByTrigger_trk[4]);
+  s.ppUsedByTrigger_trk[2]->Add(s.ppUsedByTrigger_trk[3]);
+  s.ppUsedByTrigger_trk[1]->Add(s.ppUsedByTrigger_trk[2]);
+  s.ppUsedByTrigger_trk[0]->Add(s.ppUsedByTrigger_trk[1]);
+  for(int i = 0; i<s.nTriggers_trk; i++) s.ppUsedByTrigger_trk[i]->Draw("HIST same");
+  s.pp_trk->Draw("sameaxis");
+  s.pp_trk->Draw("same");
   leg_trk->Clear();
-  leg_trk->AddEntry(pp_trk,"pp track Spectrum","p");
-  leg_trk->AddEntry(ppUsedByTrigger_trk[0],"MB trigger","f");
-  leg_trk->AddEntry(ppUsedByTrigger_trk[1],"Track18 trigger","f");
-  leg_trk->AddEntry(ppUsedByTrigger_trk[2],"Track24 trigger","f");
-  leg_trk->AddEntry(ppUsedByTrigger_trk[3],"Track34 trigger","f");
-  leg_trk->AddEntry(ppUsedByTrigger_trk[4],"Track45 trigger","f");
-  leg_trk->AddEntry(ppUsedByTrigger_trk[5],"Track53 trigger","f");
+  leg_trk->AddEntry(s.pp_trk,"pp track Spectrum","p");
+  leg_trk->AddEntry(s.ppUsedByTrigger_trk[0],"MB trigger","f");
+  leg_trk->AddEntry(s.ppUsedByTrigger_trk[1],"Track18 trigger","f");
+  leg_trk->AddEntry(s.ppUsedByTrigger_trk[2],"Track24 trigger","f");
+  leg_trk->AddEntry(s.ppUsedByTrigger_trk[3],"Track34 trigger","f");
+  leg_trk->AddEntry(s.ppUsedByTrigger_trk[4],"Track45 trigger","f");
+  leg_trk->AddEntry(s.ppUsedByTrigger_trk[5],"Track53 trigger","f");
   leg_trk->AddEntry((TObject*)0,"|#eta|<1","");
   leg_trk->Draw("same");
    
@@ -253,7 +287,7 @@ void makePlotsPP(Settings s)
   c2->SaveAs("plots/ppTrack_FullSpectrum_trk.pdf");
 
   c2->SetLogy(0);
-  jtVsTrk->Divide(pp_trk);
+  jtVsTrk->Divide(s.pp_trk);
   jtVsTrk->GetYaxis()->SetTitle("pp Jet triggers/pp Track triggers");
   jtVsTrk->GetYaxis()->SetRangeUser(0.5,1.5);
   jtVsTrk->Draw();
@@ -270,7 +304,5 @@ void makePlotsPP(Settings s)
   delete RpPb;
   delete RpPbSpectrum;
   delete pPbSpectrum;
-  delete l;
-  delete l_trk;
   return;
 }
