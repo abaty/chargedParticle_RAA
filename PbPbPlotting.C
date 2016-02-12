@@ -34,6 +34,10 @@ void makePlotsPbPb(Settings s)
       s.HIJetsByTrigger[j][c]->SetMarkerColor(j+1);
       s.HIJetsByTrigger[j][c]->SetMarkerSize(0.8);
       s.HIJetsByTrigger[j][c]->SetFillColor(j+1);
+      if(j==4){
+        s.HIJetsByTrigger[j][c]->SetMarkerColor(kOrange-3);
+        s.HIJetsByTrigger[j][c]->SetLineColor(kOrange-3);
+      }
     }
     for(int j = 0; j<s.HInTriggers_trk; j++){
       s.HIByTrigger_trk[j][c]->SetLineColor(j+1);
@@ -57,9 +61,12 @@ void makePlotsPbPb(Settings s)
 //************************************************JET TRIGGER PLOTS**********************************************************
 //******************************************************************************************************************
   TCanvas * c1 = new TCanvas("c1","c1",800,600);
-  TLegend * leg = new TLegend(0.5,0.6,0.9,0.9);
+  TLine * l[4];
+  TLatex * lat = new TLatex(1,1,"test");
+  TLegend * leg;
   c1->SetLogy();
   for(int c = 0; c<s.nCentBins; c++){ 
+    leg = new TLegend(0.5,0.6,0.9,0.9);
     s.HIJets[c]->Scale(100);
     s.HIJets[c]->SetMarkerSize(0);
     float Ymin = 0.00000000001;
@@ -80,10 +87,39 @@ void makePlotsPbPb(Settings s)
     leg->Draw("same");
     c1->SaveAs(Form("plots/HIJets_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
     c1->SaveAs(Form("plots/HIJets_FullSpectrum_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    c1->Clear();
+    
+    leg->SetX1NDC(0.5);
+    leg->SetX2NDC(0.8);
+    s.HIJets[c]->GetXaxis()->SetRangeUser(20,200);
+    Ymin = 0.00000001;
+    Ymax = 100;
+    s.HIJets[c]->GetYaxis()->SetRangeUser(Ymin,Ymax);
+    s.HIJets[c]->Draw("h");
+    for(int i = 0; i<s.HInTriggers; i++) s.HIJetsByTrigger[i][c]->Draw("same");
+    leg->Draw("same"); 
+    for(int i = 0; i<4; i++) 
+    {
+      l[i] = new TLine(s.HItriggerBins[i+1],Ymin,s.HItriggerBins[i+1],Ymax); 
+      l[i]->SetLineWidth(2);
+      l[i]->SetLineStyle(2);
+      l[i]->SetLineColor(1);
+      l[i]->Draw("same");
+    }
+    lat->DrawLatex(45,Ymin*3,"I");
+    lat->DrawLatex(65,Ymin*3,"II");
+    lat->DrawLatex(85,Ymin*3,"III");
+    lat->DrawLatex(105,Ymin*3,"IV");
+    lat->DrawLatex(125,Ymin*3,"V");
+    c1->SaveAs(Form("plots/HIJets_FullSpectrum_XZoom_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    c1->SaveAs(Form("plots/HIJets_FullSpectrum_XZoom_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c1->Clear();
+    for(int i = 0; i<4; i++) delete l[i]; 
+    delete leg;
   }
  
+  delete lat;
   delete c1;
-  delete leg;
   return;
 }
 
