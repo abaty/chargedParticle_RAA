@@ -10,8 +10,8 @@ njobs=500
 mkdir $now
 cp fileLists/PbPb_fileList.txt $now/fileList.txt 
 cp fileLists/testPbPbfileList.txt $now/testFileList.txt
-cp trkCorrections/* $now
-cp trkCorrections_trkTriggered/* $now
+cp -r TrkCorr_* $now
+tar -cvzf $now/Corrections.tar.gz TrkCorr_*
 cp run.sh $now
 
 cat run.condor | sed "s@log_flag@$now@g" | sed "s@dir_flag@$PWD/$now@g" | sed "s@user_flag@$USER@g" |  sed "s@arglist@$njobs 0@g" | sed "s@transfer_filelist@run.exe@g" | sed "s@njobs@$njobs@g" > $now/run.condor

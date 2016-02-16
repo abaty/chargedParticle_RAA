@@ -6,8 +6,8 @@
 #include "TMath.h"
 #include "TAttMarker.h"
 #include "TAttLine.h"
-#include "getTrkCorr_simple.h"
-#include "getTrkCorr_simple_trkTriggered.h"
+#include "getTrkCorr.h"
+#include "TrkSettings.h"
 #include "Settings.h"
 #include <iostream>
 #include <fstream>
@@ -84,11 +84,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int pclusterCompatibilityFilter; 
   int pprimaryVertexFilter;  
   int phfCoincFilter3;
-  int hiBin;
+  int hiBin = 1;
 
   int nref;
   float jtpt[200];
   float jteta[200];
+  float jtphi[200];
   float rawpt[200];
   float chargedSum[200];
   float ecalSum[200];
@@ -114,8 +115,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int HIt34=0,              HIt34_c30=0;
   int HIt45=0,              HIt45_c30=0;
 
-  TrkCorr* trkCorr = new TrkCorr();
-  TrkCorr_trkTriggered* trkCorr_trkTriggered = new TrkCorr_trkTriggered();
+  TrkCorr* trkCorr;
+  if(isPP) trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_pp/");
+  else     trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_PbPb/");
   TChain * trkCh;
   TChain * jetCh;
   TChain * evtCh;
@@ -169,6 +171,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   jetCh->SetBranchAddress("nref",&nref);
   jetCh->SetBranchAddress("jtpt",&jtpt);
   jetCh->SetBranchAddress("jteta",&jteta);  
+  jetCh->SetBranchAddress("jtphi",&jtphi);  
   jetCh->SetBranchAddress("rawpt",&rawpt);
   jetCh->SetBranchAddress("chargedSum",&chargedSum);  
   jetCh->SetBranchAddress("ecalSum",&ecalSum);
@@ -226,8 +229,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     hltCh->SetBranchAddress("HLT_HIFullTrack24_v1",&HIt24);
     hltCh->SetBranchAddress("HLT_HIFullTrack34_v1",&HIt34);
     hltCh->SetBranchAddress("HLT_HIFullTrack45_v1",&HIt45);
-    //hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality010_v1",&HIt12_c10);
-    //hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality010_v1",&HIt18_c10);
+    //hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality010_v2",&HIt12_c10);
+    //hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality010_v2",&HIt18_c10);
     hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality30100_v1",&HIt12_c30);
     hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality30100_v1",&HIt18_c30);
     hltCh->SetBranchAddress("HLT_HIFullTrack24_L1Centrality30100_v1",&HIt24_c30);
@@ -323,14 +326,25 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     {
       for(int j = 0; j<nTrk; j++)
       { 
-        if(TMath::Abs(trkEta[j])>1) continue;
         if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
+        if(TMath::Abs(trkEta[j])>1) continue;
         if(highPurity[j]!=1) continue;
-        if((trkMVA[j]<0.5 && trkMVA[j]!=-99) || (int)trkNHit[j]<8 || trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+        if( trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 ||TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;        
+        
+        float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
+        if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
   
-        //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
+        float rmin=999;
+        for(int jt=0; jt<nref; jt++)
+        {
+          if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
+          if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
+          if(jtpt[jt]<50) continue;
+          float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(jtphi[jt]-trkPhi[j],2);
+          if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
+        }
 
-        float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j]);
+        float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
         //dividing by pt at bin center instead of track by track pt (just a convention)
         float binCenter;
         if(isPP) binCenter = s.spec[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
@@ -363,13 +377,27 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       for(int j = 0; j<nTrk; j++)
       {
         if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
-        if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-        //if((trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>15 && (trkPt[j]-2*trkPtError[j])*TMath::CosH(trkEta[j])>pfHcal[j]+pfEcal[j]) continue;} //Calo Matching 
+        if(TMath::Abs(trkEta[j])>1) continue;
+        if(highPurity[j]!=1) continue;
+        if( trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 ||TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;        
+        
+        float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
+        if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+
+        float rmin=999;
+        for(int jt=0; jt<nref; jt++)
+        {
+          if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
+          if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
+          if(jtpt[jt]<50) continue;
+          float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(jtphi[jt]-trkPhi[j],2);
+          if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
+        }
 
         float binCenter;
         if(isPP) binCenter = s.spec_trk[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
         else     binCenter = s.HIspec_trk[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
-        float correction = trkCorr_trkTriggered->getTrkCorr(trkPt[j],trkEta[j]);
+        float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
         //dividing by pt at bin center instead of track by track pt (just a convention)
         if(isPP){
           if(MinBias && PD==0) s.spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 

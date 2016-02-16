@@ -71,8 +71,8 @@ void makePlotsPP(Settings s)
   leg->AddEntry(s.ppJetsByTrigger[3],"jet 80 (IV)","p");
   leg->AddEntry((TObject*)0,"ak4Calo Jets, |#eta|<2","");
   leg->Draw("same");
-  c1->SaveAs("plots/ppJets_FullSpectrum.png"); 
-  c1->SaveAs("plots/ppJets_FullSpectrum.pdf"); 
+  c1->SaveAs("plots/png/ppJets_FullSpectrum.png"); 
+  c1->SaveAs("plots/pdf/ppJets_FullSpectrum.pdf"); 
 
   s.ppJets->GetXaxis()->SetRangeUser(20,200);
   Ymin = 0.0000001;
@@ -95,8 +95,8 @@ void makePlotsPP(Settings s)
   lat->DrawLatex(65,Ymin*3,"II");
   lat->DrawLatex(85,Ymin*3,"III");
   lat->DrawLatex(105,Ymin*3,"IV");
-  c1->SaveAs("plots/ppJets_FullSpectrum_XZoom.png"); 
-  c1->SaveAs("plots/ppJets_FullSpectrum_XZoom.pdf"); 
+  c1->SaveAs("plots/png/ppJets_FullSpectrum_XZoom.png"); 
+  c1->SaveAs("plots/pdf/ppJets_FullSpectrum_XZoom.pdf"); 
 
   c1->SetLogy(0);
   for(int i = 0; i<s.nTriggers-1; i++) s.ppJetsByTrigger[s.nTriggers-1-i]->Divide(s.ppJetsByTrigger[s.nTriggers-2-i]);
@@ -111,8 +111,8 @@ void makePlotsPP(Settings s)
   leg2->AddEntry(s.ppJetsByTrigger[2],"Jet60/Jet40","p");
   leg2->AddEntry(s.ppJetsByTrigger[3],"Jet80/Jet60","p");
   leg2->Draw("same");
-  c1->SaveAs("plots/JetRelativeTurnOnes.png");
-  c1->SaveAs("plots/JetRelativeTurnOnes.pdf");
+  c1->SaveAs("plots/png/JetRelativeTurnOnes.png");
+  c1->SaveAs("plots/pdf/JetRelativeTurnOnes.pdf");
   
   c1->SetLogy();
   c1->SetLogx();
@@ -135,8 +135,8 @@ void makePlotsPP(Settings s)
   leg->AddEntry((TObject*)0,"|#eta|<1","");
   leg->Draw("same");
    
-  c1->SaveAs("plots/ppTrack_FullSpectrum.png");
-  c1->SaveAs("plots/ppTrack_FullSpectrum.pdf");
+  c1->SaveAs("plots/png/ppTrack_FullSpectrum.png");
+  c1->SaveAs("plots/pdf/ppTrack_FullSpectrum.pdf");
   TH1D * jtVsTrk = (TH1D*)s.pp->Clone("jtVsTrkRatio");
   //RpPb bin shift correction
   
@@ -178,12 +178,12 @@ void makePlotsPP(Settings s)
   pPbSpectrum->GetYaxis()->SetTitle("RpPb");
   pPbSpectrum->GetYaxis()->SetRangeUser(0.5,1.5);
   pPbSpectrum->Draw();
-  c1->SaveAs("plots/pp_RpPb.png");
+  c1->SaveAs("plots/png/pp_RpPb.png");
   
   s.pp->Divide(RpPb);
   s.pp->GetYaxis()->SetTitle("data/interp");
   s.pp->Draw(); 
-  c1->SaveAs("plots/pp_dataVsInterp.png");
+  c1->SaveAs("plots/png/pp_dataVsInterp.png");
   
 //************************************************************************************************************
 //***********************************************TRACK TRIGGER PLOTS******************************************
@@ -207,8 +207,8 @@ void makePlotsPP(Settings s)
   leg_trk->AddEntry(s.ppMaxtrkByTrigger[4],"Track 45 (V)","p");
   leg_trk->AddEntry(s.ppMaxtrkByTrigger[5],"Track 53 (VI)","p");
   leg_trk->Draw("same");
-  c2->SaveAs("plots/ppMaxtrk_FullSpectrum.png"); 
-  c2->SaveAs("plots/ppMaxtrk_FullSpectrum.pdf"); 
+  c2->SaveAs("plots/png/ppMaxtrk_FullSpectrum.png"); 
+  c2->SaveAs("plots/pdf/ppMaxtrk_FullSpectrum.pdf"); 
 
   s.ppMaxtrk->GetXaxis()->SetRangeUser(10,90);
   Ymin = 0.0000000001;
@@ -232,8 +232,8 @@ void makePlotsPP(Settings s)
   lat->DrawLatex(40,Ymin*3,"IV");
   lat->DrawLatex(49,Ymin*3,"V");
   lat->DrawLatex(57,Ymin*3,"VI");
-  c2->SaveAs("plots/ppMaxtrk_FullSpectrum_XZoom.png"); 
-  c2->SaveAs("plots/ppMaxtrk_FullSpectrum_XZoom.pdf"); 
+  c2->SaveAs("plots/png/ppMaxtrk_FullSpectrum_XZoom.png"); 
+  c2->SaveAs("plots/pdf/ppMaxtrk_FullSpectrum_XZoom.pdf"); 
 
   c2->SetLogy(0);
   for(int i = 0; i<s.nTriggers_trk; i++) s.ppMaxtrkByTrigger[i]->Rebin(2);
@@ -253,8 +253,8 @@ void makePlotsPP(Settings s)
   leg2_trk->AddEntry(s.ppMaxtrkByTrigger[4],"Trk45/Trk34","p");
   leg2_trk->AddEntry(s.ppMaxtrkByTrigger[5],"Trk53/Trk45","p");
   leg2_trk->Draw("same");
-  c2->SaveAs("plots/TrackRelativeTurnOnes.png");
-  c2->SaveAs("plots/TrackRelativeTurnOnes.pdf");
+  c2->SaveAs("plots/png/TrackRelativeTurnOnes.png");
+  c2->SaveAs("plots/pdf/TrackRelativeTurnOnes.pdf");
   
   c2->SetLogy();
   c2->SetLogx();
@@ -283,16 +283,16 @@ void makePlotsPP(Settings s)
   leg_trk->AddEntry((TObject*)0,"|#eta|<1","");
   leg_trk->Draw("same");
    
-  c2->SaveAs("plots/ppTrack_FullSpectrum_trk.png");
-  c2->SaveAs("plots/ppTrack_FullSpectrum_trk.pdf");
+  c2->SaveAs("plots/png/ppTrack_FullSpectrum_trk.png");
+  c2->SaveAs("plots/pdf/ppTrack_FullSpectrum_trk.pdf");
 
   c2->SetLogy(0);
   jtVsTrk->Divide(s.pp_trk);
   jtVsTrk->GetYaxis()->SetTitle("pp Jet triggers/pp Track triggers");
   jtVsTrk->GetYaxis()->SetRangeUser(0.5,1.5);
   jtVsTrk->Draw();
-  c2->SaveAs("plots/pp_jetVsTrkTriggers.png");
-  c2->SaveAs("plots/pp_JetVsTrkTriggers.pdf");
+  c2->SaveAs("plots/png/pp_jetVsTrkTriggers.png");
+  c2->SaveAs("plots/pdf/pp_JetVsTrkTriggers.pdf");
 
   delete c1;
   delete c2;

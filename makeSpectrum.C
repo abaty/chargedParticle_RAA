@@ -256,12 +256,12 @@ void makeSpectrum()
     }//cent loop closed
   }
 
-  TH1D * tempEvtCount_trk[s.HInTriggers_trk][3];
-  int combinationCentUpperBoundary_trk[3] = {5,9,19};
-  int combinationCentLowerBoundary_trk[3] = {0,6,10};
+  TH1D * tempEvtCount_trk[s.HInTriggers_trk][2];
+  int combinationCentUpperBoundary_trk[2] = {5,19};
+  int combinationCentLowerBoundary_trk[2] = {0,6};
   for(int i = 0; i<s.HInTriggers_trk; i++)
   {
-    for(int m = 0; m<3; m++){
+    for(int m = 0; m<2; m++){
       HIscale_trk[i][m] = 68/((float)HInVtx_trk);//using 68mb as inelastic pp xsection
       tempEvtCount_trk[i][m] = (TH1D*)s.HIevtCount_trk[i][0]->Clone(Form("HItempEvtCount%d_trk",m));
       tempEvtCount_trk[i][m]->Reset();
@@ -276,13 +276,9 @@ void makeSpectrum()
       if(c<6){
         s.HIspec_trk[i][c]->Scale(HIscale_trk[i][0]);
         s.HIevtCount_trk[i][c]->Scale(HIscale_trk[i][0]);
-      }
-      else if(c<10){
+      }else{
         s.HIspec_trk[i][c]->Scale(HIscale_trk[i][1]);
         s.HIevtCount_trk[i][c]->Scale(HIscale_trk[i][1]);
-      }else{
-        s.HIspec_trk[i][c]->Scale(HIscale_trk[i][2]);
-        s.HIevtCount_trk[i][c]->Scale(HIscale_trk[i][2]);
       } 
     }
     for(int c = 20; c<s.nCentBins; c++){

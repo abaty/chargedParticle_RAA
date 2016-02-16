@@ -1,5 +1,5 @@
-#ifndef INPUTSETTINGS
-#define INPUTSETTINGS
+#ifndef RAAINPUTSETTINGS
+#define RAAINPUTSETTINGS
 
 #include "TH1D.h"
 #include "TH2D.h"
