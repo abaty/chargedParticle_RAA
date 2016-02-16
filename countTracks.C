@@ -427,7 +427,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //for pp
   TFile * outF;
-  if(isPP) outF = TFile::Open(Form("PbPb_output_%d.root",jobNum),"recreate");
+  if(!isPP) outF = TFile::Open(Form("PbPb_output_%d.root",jobNum),"recreate");
   else     outF = TFile::Open(Form("pp_output_%d.root",jobNum),"recreate");
   outF->cd();
   if(isPP){
