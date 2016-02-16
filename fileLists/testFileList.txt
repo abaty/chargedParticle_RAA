@@ -1,5 +1,4 @@
-/mnt/hadoop/cms/store/user/dgulhan/MinimumBias1/HiForest_MinimumBias1_Run2015E_PromptReco_pp_5020GeV/151201_113508/0000/HiForest_314.root
-/mnt/hadoop/cms/store/user/dgulhan/MinimumBias1/HiForest_MinimumBias1_Run2015E_PromptReco_pp_5020GeV/151201_113508/0000/HiForest_315.root
-/mnt/hadoop/cms/store/user/abaty/PromptReco_2015pp_HighPtLowerJets_Forest/HiForestAOD_50.root
-/mnt/hadoop/cms/store/user/abaty/PromptReco_2015pp_HighPtJet80_Forest/HiForestAOD_12.root
-/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_FullTrack_Forest/HiForestAOD_760.root
+/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_FullTrack_Forest/HiForestAOD_97.root
+/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_HighPtJet80_Forest_v2/HiForestAOD_1.root
+/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_HighPtLowerJets_Forest_v2/HiForestAOD_10.root
+/mnt/hadoop/cms/store/user/dgulhan/MinimumBias6/HiForest_MinimumBias6_Run2015E_PromptReco_pp_5020GeV/151204_102344/0001/HiForest_1000.root
