@@ -426,7 +426,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   }//end event loop
 
   //for pp
-  TFile * outF = TFile::Open(Form("RAA_output_%d.root",jobNum),"recreate");
+  TFile * outF;
+  if(isPP) outF = TFile::Open(Form("PbPb_output_%d.root",jobNum),"recreate");
+  else     outF = TFile::Open(Form("pp_output_%d.root",jobNum),"recreate");
   outF->cd();
   if(isPP){
     for(int i = 0; i<s.nTriggers; i++)

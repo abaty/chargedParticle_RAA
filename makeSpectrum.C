@@ -55,7 +55,7 @@ void makeSpectrum()
 
 
   //loading files
-  TFile * inFile = TFile::Open("countTracks.root","read");
+  TFile * inFile = TFile::Open("PbPb_Feb16_2016.root","read");
   for(int i = 0; i<s.nTriggers; i++)
   {
     s.spec[i] = (TH2D*) inFile->Get(Form("spectrum_trigger%d",i));
@@ -76,7 +76,7 @@ void makeSpectrum()
   s.nVtxMB_trk->SetDirectory(0);
   inFile->Close();
   
-  inFile = TFile::Open("RAA_Feb10_testfile.root","read");
+  inFile = TFile::Open("PbPb_Feb16_2016.root","read");
   for(int c = 0; c<20; c++)
   {
     for(int i = 0; i<s.HInTriggers; i++)
