@@ -144,7 +144,7 @@ void makePlotsPbPb(Settings s)
   c1->SetLogx();
   for(int c = 0; c<s.nCentBins;c++){
     s.HI[c]->SetMarkerSize(0.8);
-    s.HI[c]->GetYaxis()->SetRangeUser(s.HI[20]->GetMinimum()/200.0,s.HI[20]->GetMaximum()*2);
+    s.HI[c]->GetYaxis()->SetRangeUser(TMath::Max(s.HI[20]->GetMinimum()/200.0,1e-15),s.HI[20]->GetMaximum()*2);
     s.HI[c]->Draw();
     s.HIUsedByTrigger[0][c]->SetFillColor(kGray);
     s.HIUsedByTrigger[4][c]->SetFillColor(kCyan+2);

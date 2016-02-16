@@ -126,7 +126,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
   //0 is MB, 1 is jet40/60, 2 is jet80
-  int PDindx[1000];
+  int PDindx[100];
   for(unsigned int i = 0; i<inputFiles.size(); i++)
   {
     if(isPP){
@@ -205,11 +205,16 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     hltCh->SetBranchAddress("HLT_AK4CaloJet40_Eta5p1_v1",&j40);
     hltCh->SetBranchAddress("HLT_AK4CaloJet60_Eta5p1_v1",&j60);
     hltCh->SetBranchAddress("HLT_AK4CaloJet80_Eta5p1_v1",&j80);
-    hltCh->SetBranchAddress("HLT_FullTrack18ForPPRef_v3",&t18);
-    hltCh->SetBranchAddress("HLT_FullTrack24ForPPRef_v3",&t24);
-    hltCh->SetBranchAddress("HLT_FullTrack34ForPPRef_v4",&t34);
-    hltCh->SetBranchAddress("HLT_FullTrack45ForPPRef_v3",&t45);
-    hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v3",&t53);
+
+//!!!!!
+//!!!!!
+//!!!!!
+//CHANGE TO V3 AND V4 WHEN POSSIBLE
+    hltCh->SetBranchAddress("HLT_FullTrack18ForPPRef_v2",&t18);
+    hltCh->SetBranchAddress("HLT_FullTrack24ForPPRef_v2",&t24);
+    hltCh->SetBranchAddress("HLT_FullTrack34ForPPRef_v3",&t34);
+    hltCh->SetBranchAddress("HLT_FullTrack45ForPPRef_v2",&t45);
+    hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v2",&t53);
   }else{
     for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_HIL1MinimumBiasHF2AND_part%d_v1",i),&(HIMB[i]));
     hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v2",&HIj40);
@@ -269,7 +274,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     float maxTrackPt = 0;
     for(int j=0; j<nTrk; j++)
     {
-      if(TMath::Abs(trkEta[j])>1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || (int)trkNHit[j]<11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.1 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+      if(TMath::Abs(trkEta[j])>1 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+      float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
+      if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
       if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
     }
     int PD = PDindx[trkCh->GetTreeNumber()];

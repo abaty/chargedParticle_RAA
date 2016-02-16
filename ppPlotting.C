@@ -63,7 +63,7 @@ void makePlotsPP(Settings s)
   s.ppJets->GetYaxis()->SetRangeUser(Ymin,Ymax);
   s.ppJets->Draw("h");
   for(int i = 0; i<s.nTriggers; i++) s.ppJetsByTrigger[i]->Draw("same");
-  TLegend * leg = new TLegend(0.6,0.6,0.9,0.9);
+  TLegend * leg = new TLegend(0.47,0.62,0.87,0.92);
   leg->AddEntry(s.ppJets,"Jet Spectrum (x100)","l");
   leg->AddEntry(s.ppJetsByTrigger[0],"MB (I)","p");
   leg->AddEntry(s.ppJetsByTrigger[1],"jet 40 (II)","p");
@@ -169,7 +169,7 @@ void makePlotsPP(Settings s)
     pp_BinShift->SetBinContent(i-1,pp_BinShift->GetBinContent(i-1)/hBinningAndResol_extendedPt->GetBinContent(i));
     pp_BinShift->SetBinError(i-1,pp_BinShift->GetBinError(i-1)/hBinningAndResol_extendedPt->GetBinError(i));
   }
-  TFile * outBinF = TFile::Open("Spectrum.root","update");
+  TFile * outBinF = TFile::Open("Spectra.root","update");
   pp_BinShift->Write();
   outBinF->Close();
   
