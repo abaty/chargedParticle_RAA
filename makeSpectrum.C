@@ -93,11 +93,11 @@ void makeSpectrum()
       s.HIspec_trk[i][c]->SetDirectory(0);
       s.HIevtCount_trk[i][c]->SetDirectory(0);
     }
+    s.HInVtxMB[c] = (TH1D*) inFile->Get(Form("HI_nVtxMB_%d",c));
+    s.HInVtxMB[c]->SetDirectory(0);
+    s.HInVtxMB_trk[c] = (TH1D*) inFile->Get(Form("HI_nVtxMB_%d_trk",c));
+    s.HInVtxMB_trk[c]->SetDirectory(0);
   }
-  s.HInVtxMB = (TH1D*) inFile->Get("HI_nVtxMB");
-  s.HInVtxMB->SetDirectory(0);
-  s.HInVtxMB_trk = (TH1D*) inFile->Get("HI_nVtxMB_trk");
-  s.HInVtxMB_trk->SetDirectory(0);
   inFile->Close();
 
   //calculation of overlaps
@@ -105,18 +105,12 @@ void makeSpectrum()
   float scale_trk[s.nTriggers_trk];
   float HIscale[s.HInTriggers][3];
   float HIscale_trk[s.HInTriggers_trk][3];
-  //calculate total number of verticies from MB events
-  int nVtx = 0, nVtx_trk = 0, HInVtx = 0, HInVtx_trk = 0;
-  for(int i = 1; i<s.nVtxMB->GetSize()+1;i++) nVtx = nVtx+i*s.nVtxMB->GetBinContent(s.nVtxMB->FindBin(i));
-  for(int i = 1; i<s.nVtxMB_trk->GetSize()+1;i++) nVtx_trk = nVtx_trk+i*s.nVtxMB_trk->GetBinContent(s.nVtxMB_trk->FindBin(i));
-  for(int i = 1; i<s.HInVtxMB->GetSize()+1;i++) HInVtx = nVtx+i*s.HInVtxMB->GetBinContent(s.HInVtxMB->FindBin(i));
-  for(int i = 1; i<s.HInVtxMB_trk->GetSize()+1;i++) HInVtx_trk = nVtx_trk+i*s.HInVtxMB_trk->GetBinContent(s.HInVtxMB_trk->FindBin(i));
   
   //*****************************************************************************************************************************************************
   //pp jet triggers
   for(int i = 0; i<s.nTriggers; i++)
   {
-    scale[i] = 68/((float)nVtx);//using 68mb as inelastic pp xsection
+    scale[i] = 1;//using 68mb as inelastic pp xsection
     for(int j = 0; j<i; j++){
       scale[i] = scale[i]*s.evtCount[j]->Integral(s.evtCount[j]->FindBin(s.triggerOverlapBins[j+1]),s.evtCount[j]->FindBin(s.maxJetBin))/(double)s.evtCount[j+1]->Integral(s.evtCount[j+1]->FindBin(s.triggerOverlapBins[j+1]),s.evtCount[j+1]->FindBin(s.maxJetBin));
     }
@@ -153,7 +147,7 @@ void makeSpectrum()
   //pp track triggers
   for(int i = 0; i<s.nTriggers_trk; i++)
   {
-    scale_trk[i] = 68/((float)nVtx_trk);//using 68mb as inelastic pp xsection
+    scale_trk[i] = 1;//using 68mb as inelastic pp xsection
     for(int j = 0; j<i; j++){
       scale_trk[i] = scale_trk[i]*s.evtCount_trk[j]->Integral(s.evtCount_trk[j]->FindBin(s.triggerOverlapBins_trk[j+1]),s.evtCount_trk[j]->FindBin(s.maxTrktriggerBin))/(double)s.evtCount_trk[j+1]->Integral(s.evtCount_trk[j+1]->FindBin(s.triggerOverlapBins_trk[j+1]),s.evtCount_trk[j+1]->FindBin(s.maxTrktriggerBin));
     }
@@ -193,7 +187,7 @@ void makeSpectrum()
   for(int i = 0; i<s.HInTriggers; i++)
   {
     for(int m = 0; m<3; m++){
-      HIscale[i][m] = 68/((float)HInVtx);//using 68mb as inelastic pp xsection
+      HIscale[i][m] = 1;//using 68mb as inelastic pp xsection
       tempEvtCount[i][m] = (TH1D*)s.HIevtCount[i][0]->Clone(Form("HItempEvtCount%d",m));
       tempEvtCount[i][m]->Reset();
       for(int c = combinationCentUpperBoundary[m]; c>=combinationCentLowerBoundary[m]; c--) tempEvtCount[i][m]->Add(s.HIevtCount[i][c]);
@@ -262,7 +256,7 @@ void makeSpectrum()
   for(int i = 0; i<s.HInTriggers_trk; i++)
   {
     for(int m = 0; m<2; m++){
-      HIscale_trk[i][m] = 68/((float)HInVtx_trk);//using 68mb as inelastic pp xsection
+      HIscale_trk[i][m] = 1;//using 68mb as inelastic pp xsection
       tempEvtCount_trk[i][m] = (TH1D*)s.HIevtCount_trk[i][0]->Clone(Form("HItempEvtCount%d_trk",m));
       tempEvtCount_trk[i][m]->Reset();
       for(int c = combinationCentUpperBoundary_trk[m]; c>=combinationCentLowerBoundary_trk[m]; c--) tempEvtCount_trk[i][m]->Add(s.HIevtCount_trk[i][c]);
@@ -370,58 +364,86 @@ void makeSpectrum()
     }
   }
  
+  //calculate total number of verticies from MB events
+  int nVtx = 0, nVtx_trk = 0;
+  for(int i = 1; i<s.nVtxMB->GetSize()+1;i++) nVtx = nVtx+i*s.nVtxMB->GetBinContent(s.nVtxMB->FindBin(i));
+  for(int i = 1; i<s.nVtxMB_trk->GetSize()+1;i++) nVtx_trk = nVtx_trk+i*s.nVtxMB_trk->GetBinContent(s.nVtxMB_trk->FindBin(i));
   //*************************OUTPUT**********************************************************
+  
   TFile * outF = TFile::Open("Spectra.root","recreate");
+  s.pp_perMBTrigger = (TH1D*)s.pp->Clone("pp_NotperMBTrigger");
+  s.pp_perMBTrigger_trk = (TH1D*)s.pp_trk->Clone("pp_NotperMBTrigger_trk");
+  s.pp_perMBTrigger->Write();
+  s.pp_perMBTrigger_trk->Write();
+  s.pp->Scale(1/(float)nVtx);
+  s.pp_trk->Scale(1/(float)nVtx);
   s.pp->Write();
   s.pp_trk->Write();
-  s.pp_perMBTrigger = (TH1D*)s.pp->Clone("pp_perMBTrigger");
-  s.pp_perMBTrigger->Scale(1/scale[0]);
-  s.pp_perMBTrigger->Write();
-  s.pp_perMBTrigger_trk = (TH1D*)s.pp_trk->Clone("pp_perMBTrigger_trk");
-  s.pp_perMBTrigger_trk->Scale(1/scale_trk[0]);
-  s.pp_perMBTrigger_trk->Write();
   
   s.ppJets->SetMarkerSize(0);
-  s.ppJets->Write();
   s.ppMaxtrk->SetMarkerSize(0);
+  s.ppJets->Scale(1/(float)nVtx);
+  s.ppMaxtrk->Scale(1/(float)nVtx);
+  s.ppJets->Write();
   s.ppMaxtrk->Write();
+  
   for(int j = 0; j<s.nTriggers; j++)
   {
+    s.ppByTrigger[j]->Scale(1/(float)nVtx);
+    s.ppUsedByTrigger[j]->Scale(1/(float)nVtx);
+    s.ppJetsByTrigger[j]->Scale(1/(float)nVtx);
     s.ppByTrigger[j]->Write();
     s.ppUsedByTrigger[j]->Write();
     s.ppJetsByTrigger[j]->Write();
   }
   for(int j = 0; j<s.nTriggers_trk; j++)
   {
+    s.ppByTrigger_trk[j]->Scale(1/(float)nVtx_trk);
+    s.ppUsedByTrigger_trk[j]->Scale(1/(float)nVtx_trk);
+    s.ppMaxtrkByTrigger[j]->Scale(1/(float)nVtx_trk);
     s.ppByTrigger_trk[j]->Write();
     s.ppUsedByTrigger_trk[j]->Write();
     s.ppMaxtrkByTrigger[j]->Write();
   }
   for(int c = 0; c<s.nCentBins; c++){
-    s.HI[c]->Write();
-    s.HI_trk[c]->Write();
-    s.HI_perMBTrigger[c] = (TH1D*)s.HI[c]->Clone(Form("PbPb_perMBTrigger_%d_%d",5*s.lowCentBin[c],5*s.highCentBin[c]));
-    s.HI_perMBTrigger[c]->Scale(1/HIscale[0][0]);
+    s.HI_perMBTrigger[c] = (TH1D*)s.HI[c]->Clone(Form("PbPb_NotperMBTrigger_%d_%d",5*s.lowCentBin[c],5*s.highCentBin[c]));
     s.HI_perMBTrigger[c]->Write();
-    s.HI_perMBTrigger_trk[c] = (TH1D*)s.HI_trk[c]->Clone(Form("PbPb_perMBTrigger_%d_%d_trk",5*s.lowCentBin[c],5*s.highCentBin[c]));
-    s.HI_perMBTrigger_trk[c]->Scale(1/HIscale_trk[0][0]);
-    s.HI_perMBTrigger_trk[c]->Write();
-    
+   
+    double nMBInCentRange = 0;
+    for(int cc = s.lowCentBin[c]; cc<s.highCentBin[c]; cc++) nMBInCentRange += s.HInVtxMB[cc]->GetBinContent(s.HInVtxMB[cc]->GetXaxis()->FindBin(1));
+    s.HI[c]->Scale(1/(nMBInCentRange));
+    s.HIJets[c]->Scale(1/(nMBInCentRange));
+    s.HI[c]->Write();
     s.HIJets[c]->Write();
-    s.HIMaxtrk[c]->Write();
     for(int j = 0; j<s.HInTriggers; j++){
+      s.HIByTrigger[j][c]->Scale(1/(nMBInCentRange));
+      s.HIUsedByTrigger[j][c]->Scale(1/(nMBInCentRange));
+      s.HIJetsByTrigger[j][c]->Scale(1/(nMBInCentRange));
       s.HIByTrigger[j][c]->Write();
       s.HIUsedByTrigger[j][c]->Write();
       s.HIJetsByTrigger[j][c]->Write();
     }
+    
+    s.HI_perMBTrigger_trk[c] = (TH1D*)s.HI_trk[c]->Clone(Form("PbPb_NotperMBTrigger_%d_%d_trk",5*s.lowCentBin[c],5*s.highCentBin[c])); 
+    s.HI_perMBTrigger_trk[c]->Write();
+    
+    double nMBInCentRange_trk = 0;
+    for(int cc = s.lowCentBin[c]; cc<s.highCentBin[c]; cc++) nMBInCentRange_trk += s.HInVtxMB_trk[cc]->GetBinContent(s.HInVtxMB[cc]->GetXaxis()->FindBin(1));
+    s.HI_trk[c]->Scale(1/(nMBInCentRange_trk));
+    s.HIMaxtrk[c]->Scale(1/(nMBInCentRange_trk));
+    s.HI_trk[c]->Write();
+    s.HIMaxtrk[c]->Write();
     for(int j = 0; j<s.HInTriggers_trk; j++){
+      s.HIByTrigger_trk[j][c]->Scale(1/(nMBInCentRange_trk));
+      s.HIUsedByTrigger_trk[j][c]->Scale(1/(nMBInCentRange_trk));
+      s.HIMaxtrkByTrigger[j][c]->Scale(1/(nMBInCentRange_trk));
       s.HIByTrigger_trk[j][c]->Write();
       s.HIUsedByTrigger_trk[j][c]->Write();
       s.HIMaxtrkByTrigger[j][c]->Write();
     }
-  }
-  outF->Close();
- 
+  } 
+  
   makePlotsPbPb(s);
+  outF->Close();
   makePlotsPP(s);
 }

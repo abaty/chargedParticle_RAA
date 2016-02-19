@@ -44,7 +44,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         s.HIevtCount[i][j]->SetMarkerColor(i);
       }
     }
-    s.HInVtxMB = new TH1D("HI_nVtxMB","nVtx;N Events",12,0,12);
+    for(int j = 0; j<20; j++) s.HInVtxMB[j] = new TH1D(Form("HI_nVtxMB_%d",j),"nVtx;N Events",12,0,12);
     for(int i = 0; i<s.HInTriggers_trk; i++)
     {
       for(int j = 0; j<20; j++){
@@ -53,30 +53,34 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         s.HIevtCount_trk[i][j]->SetMarkerColor(i);
       }
     }
-    s.HInVtxMB_trk = new TH1D("HI_nVtxMB_trk","nVtx;N Events",12,0,12);
+    for(int j = 0; j<20; j++) s.HInVtxMB_trk[j] = new TH1D(Form("HI_nVtxMB_%d_trk",j),"nVtx;N Events",12,0,12);
   }   //end of PbPb loop
 //******************************************************************************************************************************
 //******************************************************************************************************************************
 //******************************************************************************************************************************
   int nTrk;
   int nVtx;
-  bool highPurity[60000];
-  float trkPt[60000];
-  float trkPtError[60000];
-  float trkEta[60000];
-  float trkPhi[60000];
-  float trkMVA[60000];
-  float trkDxy1[60000];
-  float trkDxyError1[60000];
-  float trkDz1[60000];
-  float trkDzError1[60000];
-  float pfEcal[60000];
-  float pfHcal[60000];
-  float trkChi2[60000];
-  unsigned char trkNHit[60000];
-  unsigned char trkNlayer[60000];
-  unsigned char trkNdof[60000];
-  unsigned char trkAlgo[60000];
+  int nTrkTimesnVtx;
+  bool highPurity[50000];
+  float trkPt[50000];
+  float trkPtError[50000];
+  float trkEta[50000];
+  float trkPhi[50000];
+  float trkMVA[50000];
+  float trkDxy1[50000];
+  float trkDxyError1[50000];
+  float trkDz1[50000];
+  float trkDzError1[50000];
+  float trkDzOverDzError[500000];
+  float trkDxyOverDxyError[500000]
+  float pfEcal[50000];
+  float pfHcal[50000];
+  float trkChi2[50000];
+  unsigned char trkNHit[50000];
+  unsigned char trkNlayer[50000];
+  unsigned char trkNdof[50000];
+  unsigned char trkAlgo[50000];
+  unsigned char trkOriginalAlgo[50000];
 
   int pVtx;
   int pBeamScrape;
@@ -146,6 +150,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   
   for(unsigned int i = 0; i<inputFiles.size(); i++)  trkCh->Add(inputFiles.at(i).c_str());
   trkCh->SetBranchAddress("nTrk",&nTrk);
+  trkCh->SetBranchAddress("nVtx",&nVtx);
   trkCh->SetBranchAddress("trkPt",&trkPt);
   trkCh->SetBranchAddress("trkEta",&trkEta);
   trkCh->SetBranchAddress("trkPhi",&trkPhi);
@@ -159,11 +164,15 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   trkCh->SetBranchAddress("trkDxyError1",&trkDxyError1);
   trkCh->SetBranchAddress("trkDz1",&trkDz1);
   trkCh->SetBranchAddress("trkDzError1",&trkDzError1);
-  trkCh->SetBranchAddress("nVtx",&nVtx);
   trkCh->SetBranchAddress("trkChi2",&trkChi2);
   trkCh->SetBranchAddress("trkNlayer",&trkNlayer);
   trkCh->SetBranchAddress("trkNdof",&trkNdof);
   trkCh->SetBranchAddress("trkAlgo",&trkAlgo);
+  trkCh->SetBranchAddress("trkOriginalAlgo",&trkOriginalAlgo);
+  if(isPP)  trkCh->SetBranchAddress("nTrkTimesnVtx",&nTrkTimesnVtx);
+            trkCh->SetBranchAddress("trkDzOverDzError",&trkDzOverDzError);
+            trkCh->SetBranchAddress("trkDxyOverDxyError",&trkDxyOverDxyError); 
+  }
 
   if(isPP) jetCh = new TChain("ak4CaloJetAnalyzer/t");
   else     jetCh = new TChain("akPu4CaloJetAnalyzer/t");
@@ -275,6 +284,18 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     for(int j=0; j<nTrk; j++)
     {
       if(TMath::Abs(trkEta[j])>1 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+
+      if(isPP){
+        bool isCompatibleWithVertex = false;
+        for(int v = 0; v<nVtx; v++){
+          if(TMath::Abs(trkDxyOverDxyError[ntrk*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[ntrk*nVtx+v])<3){
+            isCompatibleWithVertex = true;
+            break;
+          }
+        } 
+        if(!isCompatibleWithVertex) continue;
+      }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+
       float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
       if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
       if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
@@ -291,9 +312,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         s.nVtxMB_trk->Fill(nVtx);
       }else{
         s.HIevtCount[0][hiBin/10]->Fill(maxJtPt);
-        s.HInVtxMB->Fill(nVtx);
+        s.HInVtxMB[hiBin/10]->Fill(nVtx);
         s.HIevtCount_trk[0][hiBin/10]->Fill(maxTrackPt);
-        s.HInVtxMB_trk->Fill(nVtx);
+        s.HInVtxMB_trk[hiBin/10]->Fill(nVtx);
       }
     }
     if(j40 && PD==1) s.evtCount[1]->Fill(maxJtPt);  
@@ -347,7 +368,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
           if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
           if(jtpt[jt]<50) continue;
-          float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(jtphi[jt]-trkPhi[j],2);
+          float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(TMath::ACos(TMath::Cos(jtphi[jt]-trkPhi[j])),2);
           if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
         }
 
@@ -397,7 +418,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
           if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
           if(jtpt[jt]<50) continue;
-          float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(jtphi[jt]-trkPhi[j],2);
+          float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(TMath::ACos(TMath::Cos(jtphi[jt]-trkPhi[j])),2);
           if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
         }
 
@@ -465,8 +486,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         s.HIevtCount_trk[i][j]->Write();
       }
     }
-    s.HInVtxMB->Write();
-    s.HInVtxMB_trk->Write();
+    for(int j = 0; j<20; j++){
+      s.HInVtxMB[j]->Write();
+      s.HInVtxMB_trk[j]->Write();
+    }
     outF->Close(); 
   }
 }

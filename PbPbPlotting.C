@@ -144,7 +144,7 @@ void makePlotsPbPb(Settings s)
   c1->SetLogx();
   for(int c = 0; c<s.nCentBins;c++){
     s.HI[c]->SetMarkerSize(0.8);
-    s.HI[c]->GetYaxis()->SetRangeUser(TMath::Max(s.HI[20]->GetMinimum()/200.0,1e-15),s.HI[20]->GetMaximum()*2);
+    s.HI[c]->GetYaxis()->SetRangeUser(TMath::Max(s.HI[20]->GetMinimum()/200.0,1e-15),s.HI[20]->GetMaximum()*10);
     s.HI[c]->Draw();
     s.HIUsedByTrigger[0][c]->SetFillColor(kGray);
     s.HIUsedByTrigger[4][c]->SetFillColor(kCyan+2);
@@ -167,7 +167,62 @@ void makePlotsPbPb(Settings s)
      
     c1->SaveAs(Form("plots/png/HITrack_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c1->SaveAs(Form("plots/pdf/HITrack_FullSpectrum_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    delete leg;
   }
+
+  c1->SetLogy(0);
+  for(int c = 0; c<s.nCentBins;c++){
+    c1->Clear();
+    s.RAA[c] = (TH1D*)s.HI[c]->Clone(Form("RAA_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    s.RAA[c]->Scale(1/s.nColl[c]);
+    s.RAA[c]->Divide(s.pp); 
+    s.RAA[c]->Write();
+
+    s.RAA[c]->GetYaxis()->SetRangeUser(0,1.2); 
+    s.RAA[c]->GetYaxis()->SetTitle("R_{AA}"); 
+    s.RAA[c]->Draw();
+    leg = new TLegend(0.2,0.7,0.4,0.9);
+    leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
+    leg->AddEntry((TObject*)0,"#sqrt{s_{NN}} = 5.02 TeV","");
+    leg->Draw("same");
+    TLine *line = new TLine(0.5,1,400,1);
+    line->SetLineStyle(2);
+    line->SetLineWidth(2);
+    line->SetLineColor(kBlack);
+    line->Draw("same");
+    c1->SaveAs(Form("plots/png/RAA_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c1->SaveAs(Form("plots/pdf/RAA_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    delete leg;
+    delete line;
+  }
+ 
+  TFile * KKRAA = TFile::Open("Krajczar_RAA_160216.root","read");
+  TH1D * KKRAA_h[21];
+  for(int c = 0; c<21; c++){
+    if(c<20) KKRAA_h[c] = (TH1D*)KKRAA->Get(Form("hForPlotting_%d_%d",c*5,5+c*5));
+    else     KKRAA_h[c] = (TH1D*)KKRAA->Get("hTrackPt_trkCorr_PbPb_copy1");
+    c1->Clear();
+    s.RAA[c]->Draw();
+    KKRAA_h[c]->SetMarkerStyle(25); 
+    KKRAA_h[c]->Draw("same"); 
+    leg = new TLegend(0.2,0.6,0.5,0.9);
+    leg->AddEntry(s.RAA[c],"AB's RAA","p");
+    leg->AddEntry(KKRAA_h[c],"KK's RAA","p");
+    leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
+    leg->AddEntry((TObject*)0,"#sqrt{s_{NN}} = 5.02 TeV","");
+    leg->Draw("same");
+    TLine *line = new TLine(0.5,1,400,1);
+    line->SetLineStyle(2);
+    line->SetLineWidth(2);
+    line->SetLineColor(kBlack);
+    line->Draw("same");
+    c1->SaveAs(Form("plots/png/RAA_Comparison_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c1->SaveAs(Form("plots/pdf/RAA_Comparison_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    delete leg;
+    delete line;
+  }
+  KKRAA->Close();
+
  
   delete lat;
   delete c1;
