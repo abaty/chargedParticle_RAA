@@ -72,7 +72,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   float trkDz1[50000];
   float trkDzError1[50000];
   float trkDzOverDzError[500000];
-  float trkDxyOverDxyError[500000]
+  float trkDxyOverDxyError[500000];
   float pfEcal[50000];
   float pfHcal[50000];
   float trkChi2[50000];
@@ -169,9 +169,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   trkCh->SetBranchAddress("trkNdof",&trkNdof);
   trkCh->SetBranchAddress("trkAlgo",&trkAlgo);
   trkCh->SetBranchAddress("trkOriginalAlgo",&trkOriginalAlgo);
-  if(isPP)  trkCh->SetBranchAddress("nTrkTimesnVtx",&nTrkTimesnVtx);
-            trkCh->SetBranchAddress("trkDzOverDzError",&trkDzOverDzError);
-            trkCh->SetBranchAddress("trkDxyOverDxyError",&trkDxyOverDxyError); 
+  if(isPP){
+    trkCh->SetBranchAddress("nTrkTimesnVtx",&nTrkTimesnVtx);
+    trkCh->SetBranchAddress("trkDzOverDzError",&trkDzOverDzError);
+    trkCh->SetBranchAddress("trkDxyOverDxyError",&trkDxyOverDxyError); 
   }
 
   if(isPP) jetCh = new TChain("ak4CaloJetAnalyzer/t");
@@ -283,12 +284,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     float maxTrackPt = 0;
     for(int j=0; j<nTrk; j++)
     {
-      if(TMath::Abs(trkEta[j])>1 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-
+      if(TMath::Abs(trkEta[j])>1 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.3) continue;
       if(isPP){
         bool isCompatibleWithVertex = false;
         for(int v = 0; v<nVtx; v++){
-          if(TMath::Abs(trkDxyOverDxyError[ntrk*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[ntrk*nVtx+v])<3){
+          if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
             isCompatibleWithVertex = true;
             break;
           }
@@ -357,7 +357,17 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
         if(TMath::Abs(trkEta[j])>1) continue;
         if(highPurity[j]!=1) continue;
-        if( trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 ||TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;        
+        if( trkPtError[j]/trkPt[j]>0.3) continue;        
+        if(isPP){
+          bool isCompatibleWithVertex = false;
+          for(int v = 0; v<nVtx; v++){
+            if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
+              isCompatibleWithVertex = true;
+              break;
+            }
+          }          
+          if(!isCompatibleWithVertex) continue;
+        }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
         
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
         if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
@@ -407,7 +417,17 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
         if(TMath::Abs(trkEta[j])>1) continue;
         if(highPurity[j]!=1) continue;
-        if( trkPtError[j]/trkPt[j]>0.3 || TMath::Abs(trkDz1[j]/trkDzError1[j])>3 ||TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;        
+        if( trkPtError[j]/trkPt[j]>0.3) continue;        
+        if(isPP){
+          bool isCompatibleWithVertex = false;
+          for(int v = 0; v<nVtx; v++){
+            if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
+              isCompatibleWithVertex = true;
+              break;
+            }
+          }          
+          if(!isCompatibleWithVertex) continue;
+        }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
         
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
         if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
