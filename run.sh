@@ -4,6 +4,7 @@ then
   exit 1
 fi
 
+echo $HOSTNAME
 tar -xvf Corrections.tar.gz
 
 echo | awk -v j=$1 -v k=$2 -v isPP=$3 '{print "./run.exe fileList.txt "j" "k" "isPP}' 
