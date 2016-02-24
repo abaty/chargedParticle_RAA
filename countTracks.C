@@ -366,7 +366,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
           if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
-          if(trkPt[j]>maxJtPt) continue;
+          if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
     
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
