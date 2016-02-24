@@ -1,6 +1,7 @@
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TChain.h"
+#include "TTree.h"
 #include "TFile.h"
 #include "TBranch.h"
 #include "TMath.h"
@@ -122,11 +123,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TrkCorr* trkCorr;
   if(isPP) trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_pp/");
   else     trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_PbPb/");
-  TChain * trkCh;
-  TChain * jetCh;
-  TChain * evtCh;
-  TChain * hltCh;
-  TChain * hiCh;
+  TFile * inputFile;
+  TTree * trkCh;
+  TTree * jetCh;
+  TTree * evtCh;
+  TTree * hltCh;
+  TTree * hiCh;
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
   //0 is MB, 1 is jet40/60, 2 is jet80
@@ -145,279 +147,139 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     }
   }
 
-  if(isPP) trkCh = new TChain("ppTrack/trackTree");
-  else     trkCh = new TChain("anaTrack/trackTree");
-  
-  for(unsigned int i = 0; i<inputFiles.size(); i++)  trkCh->Add(inputFiles.at(i).c_str());
-  trkCh->SetBranchAddress("nTrk",&nTrk);
-  trkCh->SetBranchAddress("nVtx",&nVtx);
-  trkCh->SetBranchAddress("trkPt",&trkPt);
-  trkCh->SetBranchAddress("trkEta",&trkEta);
-  trkCh->SetBranchAddress("trkPhi",&trkPhi);
-  trkCh->SetBranchAddress("highPurity",&highPurity);
-  trkCh->SetBranchAddress("trkMVA",&trkMVA);
-  trkCh->SetBranchAddress("trkNHit",&trkNHit);
-  trkCh->SetBranchAddress("trkPtError",&trkPtError);
-  trkCh->SetBranchAddress("pfHcal",&pfHcal);
-  trkCh->SetBranchAddress("pfEcal",&pfEcal);
-  trkCh->SetBranchAddress("trkDxy1",&trkDxy1);
-  trkCh->SetBranchAddress("trkDxyError1",&trkDxyError1);
-  trkCh->SetBranchAddress("trkDz1",&trkDz1);
-  trkCh->SetBranchAddress("trkDzError1",&trkDzError1);
-  trkCh->SetBranchAddress("trkChi2",&trkChi2);
-  trkCh->SetBranchAddress("trkNlayer",&trkNlayer);
-  trkCh->SetBranchAddress("trkNdof",&trkNdof);
-  trkCh->SetBranchAddress("trkAlgo",&trkAlgo);
-  trkCh->SetBranchAddress("trkOriginalAlgo",&trkOriginalAlgo);
-  if(isPP){
-    trkCh->SetBranchAddress("nTrkTimesnVtx",&nTrkTimesnVtx);
-    trkCh->SetBranchAddress("trkDzOverDzError",&trkDzOverDzError);
-    trkCh->SetBranchAddress("trkDxyOverDxyError",&trkDxyOverDxyError); 
-  }
-
-  if(isPP) jetCh = new TChain("ak4CaloJetAnalyzer/t");
-  else     jetCh = new TChain("akPu4CaloJetAnalyzer/t");
-  for(unsigned int i = 0; i<inputFiles.size(); i++)  jetCh->Add(inputFiles.at(i).c_str());
-  jetCh->SetBranchAddress("nref",&nref);
-  jetCh->SetBranchAddress("jtpt",&jtpt);
-  jetCh->SetBranchAddress("jteta",&jteta);  
-  jetCh->SetBranchAddress("jtphi",&jtphi);  
-  jetCh->SetBranchAddress("rawpt",&rawpt);
-  jetCh->SetBranchAddress("chargedSum",&chargedSum);  
-  jetCh->SetBranchAddress("ecalSum",&ecalSum);
-  jetCh->SetBranchAddress("hcalSum",&hcalSum);  
-  trkCh->AddFriend(jetCh);
-
-  evtCh = new TChain("skimanalysis/HltTree");
-  for(unsigned int i = 0; i<inputFiles.size(); i++)  evtCh->Add(inputFiles.at(i).c_str());
-  if(isPP){
-    evtCh->SetBranchAddress("pPAprimaryVertexFilter",&pVtx);
-    evtCh->SetBranchAddress("pBeamScrapingFilter",&pBeamScrape);
-    //evtCh->SetBranchAddress("pHBHENoiseFilterResultProducer",&NoiseFilter);
-  }else{
-    evtCh->SetBranchAddress("pclusterCompatibilityFilter",&pclusterCompatibilityFilter);  
-    evtCh->SetBranchAddress("pprimaryVertexFilter",&pprimaryVertexFilter);  
-    evtCh->SetBranchAddress("phfCoincFilter3",&phfCoincFilter3); 
-  } 
-  trkCh->AddFriend(evtCh);
- 
-  if(!isPP){
-    hiCh = new TChain("hiEvtAnalyzer/HiTree");
-    for(unsigned int i = 0; i<inputFiles.size(); i++)  hiCh->Add(inputFiles.at(i).c_str());
-    hiCh->SetBranchAddress("hiBin",&hiBin);
-    trkCh->AddFriend(hiCh);
-  }
- 
-  hltCh = new TChain("hltanalysis/HltTree");
-  for(unsigned int i = 0; i<inputFiles.size(); i++)  hltCh->Add(inputFiles.at(i).c_str());
-  if(isPP){
-    for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_L1MinimumBiasHF1OR_part%d_v1",i),&(MB[i]));
-    hltCh->SetBranchAddress("HLT_AK4CaloJet40_Eta5p1_v1",&j40);
-    hltCh->SetBranchAddress("HLT_AK4CaloJet60_Eta5p1_v1",&j60);
-    hltCh->SetBranchAddress("HLT_AK4CaloJet80_Eta5p1_v1",&j80);
-
-//!!!!!
-//!!!!!
-//!!!!!
-//CHANGE TO V3 AND V4 WHEN POSSIBLE
-    hltCh->SetBranchAddress("HLT_FullTrack18ForPPRef_v2",&t18);
-    hltCh->SetBranchAddress("HLT_FullTrack24ForPPRef_v2",&t24);
-    hltCh->SetBranchAddress("HLT_FullTrack34ForPPRef_v3",&t34);
-    hltCh->SetBranchAddress("HLT_FullTrack45ForPPRef_v2",&t45);
-    hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v2",&t53);
-  }else{
-    for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_HIL1MinimumBiasHF2AND_part%d_v1",i),&(HIMB[i]));
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v2",&HIj40);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_v1",&HIj60);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_v1",&HIj80);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_v1",&HIj100);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_Cent30_100_v1",&HIj40_c30);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent30_100_v1",&HIj60_c30);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent30_100_v1",&HIj80_c30);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent30_100_v1",&HIj100_c30);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_Cent50_100_v1",&HIj40_c50);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent50_100_v1",&HIj60_c50);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent50_100_v1",&HIj80_c50);
-    hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent50_100_v1",&HIj100_c50);
-    hltCh->SetBranchAddress("HLT_HIFullTrack12_L1MinimumBiasHF2_AND_v1",&HIt12);
-    hltCh->SetBranchAddress("HLT_HIFullTrack18_L1MinimumBiasHF2_AND_v1",&HIt18);
-    hltCh->SetBranchAddress("HLT_HIFullTrack24_v1",&HIt24);
-    hltCh->SetBranchAddress("HLT_HIFullTrack34_v1",&HIt34);
-    hltCh->SetBranchAddress("HLT_HIFullTrack45_v1",&HIt45);
-    //hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality010_v2",&HIt12_c10);
-    //hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality010_v2",&HIt18_c10);
-    hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality30100_v1",&HIt12_c30);
-    hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality30100_v1",&HIt18_c30);
-    hltCh->SetBranchAddress("HLT_HIFullTrack24_L1Centrality30100_v1",&HIt24_c30);
-    hltCh->SetBranchAddress("HLT_HIFullTrack34_L1Centrality30100_v1",&HIt34_c30);
-    hltCh->SetBranchAddress("HLT_HIFullTrack45_L1Centrality30100_v1",&HIt45_c30);
-  }
-  trkCh->AddFriend(hltCh);
-//***********************************************************************************
-//***********************************************************************
-  std::cout << "starting event loop" << std::endl;
-  std::cout << trkCh->GetEntries() << std::endl;
-  for(int i = 0; i<trkCh->GetEntries(); i++)
-  {
-    //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
-    if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
-    trkCh->GetEntry(i);
-    //if(!NoiseFilter) continue;
-    if(isPP && (!pVtx || !pBeamScrape)) continue;
-    if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3)) continue;
-    bool MinBias = 0;
-    for(int j = 0; j<20; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
-    if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
-    //if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt45 && !HIt12_c10 && !HIt18_c10 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30 && !HIt45_c30) continue;
-    if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt45 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30 && !HIt45_c30) continue;
-
-    //**************************************************
-    //for trigger combination with jet triggers
-    float maxJtPt = 0;
-    for(int j=0; j<nref; j++)
-    {
-      if(isPP && (chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>2)) continue;
-      if(!isPP &&  (ecalSum[j]/(ecalSum[j]+hcalSum[j])<0.05 || hcalSum[j]/(ecalSum[j]+hcalSum[j])<0.1|| TMath::Abs(jteta[j])>2)) continue;
-      if(jtpt[j]>maxJtPt) maxJtPt = jtpt[j];
-    }
-
-    float maxTrackPt = 0;
-    for(int j=0; j<nTrk; j++)
-    {
-      if(TMath::Abs(trkEta[j])>1 || !highPurity[j] || trkPtError[j]/trkPt[j]>0.3) continue;
-      if(isPP){
-        bool isCompatibleWithVertex = false;
-        for(int v = 0; v<nVtx; v++){
-          if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
-            isCompatibleWithVertex = true;
-            break;
-          }
-        } 
-        if(!isCompatibleWithVertex) continue;
-      }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-
-      float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-      if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
-      if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
-    }
-    int PD = PDindx[trkCh->GetTreeNumber()];
-    if(maxJtPt==0 && (PD==1 || PD==2)) continue;//remove jet events where no jets are in barrel  
-    if(maxTrackPt==0 && ((isPP && PD==3) || (!isPP && PD==1))) continue;//remove jet events where no tracks are in barrel  
-    if(MinBias && PD==0)
-    {
-      if(isPP){
-        s.evtCount[0]->Fill(maxJtPt); 
-        s.nVtxMB->Fill(nVtx);
-        s.evtCount_trk[0]->Fill(maxTrackPt); 
-        s.nVtxMB_trk->Fill(nVtx);
-      }else{
-        s.HIevtCount[0][hiBin/10]->Fill(maxJtPt);
-        s.HInVtxMB[hiBin/10]->Fill(nVtx);
-        s.HIevtCount_trk[0][hiBin/10]->Fill(maxTrackPt);
-        s.HInVtxMB_trk[hiBin/10]->Fill(nVtx);
-      }
-    }
-    if(j40 && PD==1) s.evtCount[1]->Fill(maxJtPt);  
-    if(j60 && PD==1) s.evtCount[2]->Fill(maxJtPt);  
-    if(j80 && PD==2) s.evtCount[3]->Fill(maxJtPt);  
-    if(t18 && PD==3) s.evtCount_trk[1]->Fill(maxTrackPt);  
-    if(t24 && PD==3) s.evtCount_trk[2]->Fill(maxTrackPt);  
-    if(t34 && PD==3) s.evtCount_trk[3]->Fill(maxTrackPt);  
-    if(t45 && PD==3) s.evtCount_trk[4]->Fill(maxTrackPt);  
-    if(t53 && PD==3) s.evtCount_trk[5]->Fill(maxTrackPt);  
-    if(HIj40 && PD==1)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
-    if(HIj60 && PD==1)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
-    if(HIj80 && PD==1)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-    if(HIj100 && PD==1) s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
-    if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
-    if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
-    if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-    if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
-    if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
-    if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
-    if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-    if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
-    if(HIt12 && PD==1) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt18 && PD==1) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt24 && PD==1) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt34 && PD==1) s.HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt45 && PD==1) s.HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
-    if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) s.HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
-    //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
-    //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
+  for(int nFile = 0; nFile<inputFiles.size(); nFile++){
+    inputFile = TFile::Open(inputFiles.at(nFile).c_str(),"read");
+    if(isPP) trkCh = (TTree*)inputFile->Get("ppTrack/trackTree");
+    else     trkCh = (TTree*)inputFile->Get("anaTrack/trackTree");
     
-    if(PD!=3)
-    {
-      for(int j = 0; j<nTrk; j++)
-      { 
-        if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
-        if(TMath::Abs(trkEta[j])>1) continue;
-        if(highPurity[j]!=1) continue;
-        if( trkPtError[j]/trkPt[j]>0.3) continue;        
-        if(isPP){
-          bool isCompatibleWithVertex = false;
-          for(int v = 0; v<nVtx; v++){
-            if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
-              isCompatibleWithVertex = true;
-              break;
-            }
-          }          
-          if(!isCompatibleWithVertex) continue;
-        }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-        
-        float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-        if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+    trkCh->SetBranchAddress("nTrk",&nTrk);
+    trkCh->SetBranchAddress("nVtx",&nVtx);
+    trkCh->SetBranchAddress("trkPt",&trkPt);
+    trkCh->SetBranchAddress("trkEta",&trkEta);
+    trkCh->SetBranchAddress("trkPhi",&trkPhi);
+    trkCh->SetBranchAddress("highPurity",&highPurity);
+    trkCh->SetBranchAddress("trkMVA",&trkMVA);
+    trkCh->SetBranchAddress("trkNHit",&trkNHit);
+    trkCh->SetBranchAddress("trkPtError",&trkPtError);
+    trkCh->SetBranchAddress("pfHcal",&pfHcal);
+    trkCh->SetBranchAddress("pfEcal",&pfEcal);
+    trkCh->SetBranchAddress("trkDxy1",&trkDxy1);
+    trkCh->SetBranchAddress("trkDxyError1",&trkDxyError1);
+    trkCh->SetBranchAddress("trkDz1",&trkDz1);
+    trkCh->SetBranchAddress("trkDzError1",&trkDzError1);
+    trkCh->SetBranchAddress("trkChi2",&trkChi2);
+    trkCh->SetBranchAddress("trkNlayer",&trkNlayer);
+    trkCh->SetBranchAddress("trkNdof",&trkNdof);
+    trkCh->SetBranchAddress("trkAlgo",&trkAlgo);
+    trkCh->SetBranchAddress("trkOriginalAlgo",&trkOriginalAlgo);
+    if(isPP){
+      trkCh->SetBranchAddress("nTrkTimesnVtx",&nTrkTimesnVtx);
+      trkCh->SetBranchAddress("trkDzOverDzError",&trkDzOverDzError);
+      trkCh->SetBranchAddress("trkDxyOverDxyError",&trkDxyOverDxyError); 
+    }
   
-        float rmin=999;
-        for(int jt=0; jt<nref; jt++)
-        {
-          if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
-          if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
-          if(jtpt[jt]<50) continue;
-          float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(TMath::ACos(TMath::Cos(jtphi[jt]-trkPhi[j])),2);
-          if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
-        }
-
-        float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
-        //dividing by pt at bin center instead of track by track pt (just a convention)
-        float binCenter;
-        if(isPP) binCenter = s.spec[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
-        else     binCenter = s.HIspec[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
-        if(isPP){
-          if(MinBias && PD==0) s.spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j40 && PD==1)     s.spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j60 && PD==1)     s.spec[2]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(j80 && PD==2)     s.spec[3]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-        }else{
-          if(MinBias && PD==0) s.HIspec[0][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj40 && PD==1)     s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj60 && PD==1)     s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj80 && PD==1)     s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj100 && PD==1)    s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-          if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-          if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
-        }
-      } //end trk loop
-    }//end if statement  
- 
-    if((!isPP && PD!=2) || (isPP && PD!=1 && PD!=2))
-    { 
-      for(int j = 0; j<nTrk; j++)
+    if(isPP) jetCh = (TTree*)inputFile->Get("ak4CaloJetAnalyzer/t");
+    else     jetCh = (TTree*)inputFile->Get("akPu4CaloJetAnalyzer/t");
+    jetCh->SetBranchAddress("nref",&nref);
+    jetCh->SetBranchAddress("jtpt",&jtpt);
+    jetCh->SetBranchAddress("jteta",&jteta);  
+    jetCh->SetBranchAddress("jtphi",&jtphi);  
+    jetCh->SetBranchAddress("rawpt",&rawpt);
+    jetCh->SetBranchAddress("chargedSum",&chargedSum);  
+    jetCh->SetBranchAddress("ecalSum",&ecalSum);
+    jetCh->SetBranchAddress("hcalSum",&hcalSum);  
+    trkCh->AddFriend(jetCh);
+  
+    evtCh = (TTree*)inputFile->Get("skimanalysis/HltTree");
+    if(isPP){
+      evtCh->SetBranchAddress("pPAprimaryVertexFilter",&pVtx);
+      evtCh->SetBranchAddress("pBeamScrapingFilter",&pBeamScrape);
+      //evtCh->SetBranchAddress("pHBHENoiseFilterResultProducer",&NoiseFilter);
+    }else{
+      evtCh->SetBranchAddress("pclusterCompatibilityFilter",&pclusterCompatibilityFilter);  
+      evtCh->SetBranchAddress("pprimaryVertexFilter",&pprimaryVertexFilter);  
+      evtCh->SetBranchAddress("phfCoincFilter3",&phfCoincFilter3); 
+    } 
+    trkCh->AddFriend(evtCh);
+   
+    if(!isPP){
+      hiCh = (TTree*)inputFile->Get("hiEvtAnalyzer/HiTree");
+      hiCh->SetBranchAddress("hiBin",&hiBin);
+      trkCh->AddFriend(hiCh);
+    }
+   
+    hltCh = (TTree*)inputFile->Get("hltanalysis/HltTree");
+    if(isPP){
+      for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_L1MinimumBiasHF1OR_part%d_v1",i),&(MB[i]));
+      hltCh->SetBranchAddress("HLT_AK4CaloJet40_Eta5p1_v1",&j40);
+      hltCh->SetBranchAddress("HLT_AK4CaloJet60_Eta5p1_v1",&j60);
+      hltCh->SetBranchAddress("HLT_AK4CaloJet80_Eta5p1_v1",&j80);
+      hltCh->SetBranchAddress("HLT_FullTrack18ForPPRef_v3",&t18);
+      hltCh->SetBranchAddress("HLT_FullTrack24ForPPRef_v3",&t24);
+      hltCh->SetBranchAddress("HLT_FullTrack34ForPPRef_v4",&t34);
+      hltCh->SetBranchAddress("HLT_FullTrack45ForPPRef_v3",&t45);
+      hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v3",&t53);
+    }else{
+      for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_HIL1MinimumBiasHF2AND_part%d_v1",i),&(HIMB[i]));
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v2",&HIj40);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_v1",&HIj60);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_v1",&HIj80);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_v1",&HIj100);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_Cent30_100_v1",&HIj40_c30);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent30_100_v1",&HIj60_c30);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent30_100_v1",&HIj80_c30);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent30_100_v1",&HIj100_c30);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_Cent50_100_v1",&HIj40_c50);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent50_100_v1",&HIj60_c50);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent50_100_v1",&HIj80_c50);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent50_100_v1",&HIj100_c50);
+      hltCh->SetBranchAddress("HLT_HIFullTrack12_L1MinimumBiasHF2_AND_v1",&HIt12);
+      hltCh->SetBranchAddress("HLT_HIFullTrack18_L1MinimumBiasHF2_AND_v1",&HIt18);
+      hltCh->SetBranchAddress("HLT_HIFullTrack24_v1",&HIt24);
+      hltCh->SetBranchAddress("HLT_HIFullTrack34_v1",&HIt34);
+      hltCh->SetBranchAddress("HLT_HIFullTrack45_v1",&HIt45);
+      //hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality010_v2",&HIt12_c10);
+      //hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality010_v2",&HIt18_c10);
+      hltCh->SetBranchAddress("HLT_HIFullTrack12_L1Centrality30100_v1",&HIt12_c30);
+      hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality30100_v1",&HIt18_c30);
+      hltCh->SetBranchAddress("HLT_HIFullTrack24_L1Centrality30100_v1",&HIt24_c30);
+      hltCh->SetBranchAddress("HLT_HIFullTrack34_L1Centrality30100_v1",&HIt34_c30);
+      hltCh->SetBranchAddress("HLT_HIFullTrack45_L1Centrality30100_v1",&HIt45_c30);
+    }
+    trkCh->AddFriend(hltCh);
+  //***********************************************************************************
+  //***********************************************************************
+    std::cout << "starting event loop" << std::endl;
+    std::cout << trkCh->GetEntries() << std::endl;
+    for(int i = 0; i<trkCh->GetEntries(); i++)
+    {
+      //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
+      if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
+      trkCh->GetEntry(i);
+      //if(!NoiseFilter) continue;
+      if(isPP && (!pVtx || !pBeamScrape)) continue;
+      if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3)) continue;
+      bool MinBias = 0;
+      for(int j = 0; j<20; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
+      if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
+      if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt45 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30 && !HIt45_c30) continue;
+  
+      //**************************************************
+      //for trigger combination with jet triggers
+      float maxJtPt = 0;
+      for(int j=0; j<nref; j++)
       {
-        if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
-        if(TMath::Abs(trkEta[j])>1) continue;
-        if(highPurity[j]!=1) continue;
-        if( trkPtError[j]/trkPt[j]>0.3) continue;        
+        if(isPP && (chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>2)) continue;
+        if(!isPP &&  (ecalSum[j]/(ecalSum[j]+hcalSum[j])<0.05 || hcalSum[j]/(ecalSum[j]+hcalSum[j])<0.1|| TMath::Abs(jteta[j])>2)) continue;
+        if(jtpt[j]>maxJtPt) maxJtPt = jtpt[j];
+      }
+  
+      float maxTrackPt = 0;
+      for(int j=0; j<nTrk; j++)
+      {
+        if(TMath::Abs(trkEta[j])>1 || !highPurity[j]) continue;
+        if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || trkOriginalAlgo[j]==11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; //track trigger cuts
+       
         if(isPP){
           bool isCompatibleWithVertex = false;
           for(int v = 0; v<nVtx; v++){
@@ -425,53 +287,189 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
               isCompatibleWithVertex = true;
               break;
             }
-          }          
+          } 
           if(!isCompatibleWithVertex) continue;
         }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-        
+  
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
         if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
-
-        float rmin=999;
-        for(int jt=0; jt<nref; jt++)
-        {
-          if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
-          if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
-          if(jtpt[jt]<50) continue;
-          float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(TMath::ACos(TMath::Cos(jtphi[jt]-trkPhi[j])),2);
-          if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
-        }
-
-        float binCenter;
-        if(isPP) binCenter = s.spec_trk[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
-        else     binCenter = s.HIspec_trk[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
-        float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
-        //dividing by pt at bin center instead of track by track pt (just a convention)
+        if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
+      }
+      int PD = PDindx[nFile];
+      if(maxJtPt==0 && (PD==1 || PD==2)) continue;//remove jet events where no jets are in barrel  
+      if(maxTrackPt==0 && ((isPP && PD==3) || (!isPP && PD==1))) continue;//remove jet events where no tracks are in barrel  
+      if(MinBias && PD==0)
+      {
         if(isPP){
-          if(MinBias && PD==0) s.spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t18 && PD==3)     s.spec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t24 && PD==3)     s.spec_trk[2]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t34 && PD==3)     s.spec_trk[3]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t45 && PD==3)     s.spec_trk[4]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(t53 && PD==3)     s.spec_trk[5]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          s.evtCount[0]->Fill(maxJtPt); 
+          s.nVtxMB->Fill(nVtx);
+          s.evtCount_trk[0]->Fill(maxTrackPt); 
+          s.nVtxMB_trk->Fill(nVtx);
         }else{
-          if(MinBias && PD==0) s.HIspec_trk[0][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt12 && PD==1)     s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt18 && PD==1)     s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt24 && PD==1)     s.HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt34 && PD==1)     s.HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          if(HIt45 && PD==1)     s.HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) s.HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-          //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
-          //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-        } 
-      }//end trk loop
-    }//end if statement
-  }//end event loop
+          s.HIevtCount[0][hiBin/10]->Fill(maxJtPt);
+          s.HInVtxMB[hiBin/10]->Fill(nVtx);
+          s.HIevtCount_trk[0][hiBin/10]->Fill(maxTrackPt);
+          s.HInVtxMB_trk[hiBin/10]->Fill(nVtx);
+        }
+      }
+      if(j40 && PD==1) s.evtCount[1]->Fill(maxJtPt);  
+      if(j60 && PD==1) s.evtCount[2]->Fill(maxJtPt);  
+      if(j80 && PD==2) s.evtCount[3]->Fill(maxJtPt);  
+      if(t18 && PD==3) s.evtCount_trk[1]->Fill(maxTrackPt);  
+      if(t24 && PD==3) s.evtCount_trk[2]->Fill(maxTrackPt);  
+      if(t34 && PD==3) s.evtCount_trk[3]->Fill(maxTrackPt);  
+      if(t45 && PD==3) s.evtCount_trk[4]->Fill(maxTrackPt);  
+      if(t53 && PD==3) s.evtCount_trk[5]->Fill(maxTrackPt);  
+      if(HIj40 && PD==1)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
+      if(HIj60 && PD==1)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
+      if(HIj80 && PD==1)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
+      if(HIj100 && PD==1) s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+      if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
+      if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
+      if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
+      if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+      if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
+      if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
+      if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
+      if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+      if(HIt12 && PD==1) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt18 && PD==1) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt24 && PD==1) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt34 && PD==1) s.HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt45 && PD==1) s.HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) s.HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
+      //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
+      //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
+      
+      if(PD!=3)
+      {
+        for(int j = 0; j<nTrk; j++)
+        { 
+          if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
+          if(TMath::Abs(trkEta[j])>1) continue;
+          if(highPurity[j]!=1) continue;
+          if( trkPtError[j]/trkPt[j]>0.3) continue;        
+          if(isPP){
+            bool isCompatibleWithVertex = false;
+            for(int v = 0; v<nVtx; v++){
+              if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
+                isCompatibleWithVertex = true;
+                break;
+              }
+            }          
+            if(!isCompatibleWithVertex) continue;
+          }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+          
+          float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
+          if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+          if(trkPt[j]>maxJtPt) continue;
+    
+          float rmin=999;
+          for(int jt=0; jt<nref; jt++)
+          {
+            if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
+            if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
+            if(jtpt[jt]<50) continue;
+            float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(TMath::ACos(TMath::Cos(jtphi[jt]-trkPhi[j])),2);
+            if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
+          }
+  
+          float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          //dividing by pt at bin center instead of track by track pt (just a convention)
+          float binCenter;
+          if(isPP) binCenter = s.spec[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
+          else     binCenter = s.HIspec[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
+          if(isPP){
+            if(MinBias && PD==0) s.spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+            if(j40 && PD==1)     s.spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+            if(j60 && PD==1)     s.spec[2]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+            if(j80 && PD==2)     s.spec[3]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+          }else{
+            if(MinBias && PD==0) s.HIspec[0][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+            if(HIj40 && PD==1)     s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+            if(HIj60 && PD==1)     s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+            if(HIj80 && PD==1)     s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+            if(HIj100 && PD==1)    s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
+            if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
+          }
+        } //end trk loop
+      }//end if statement  
+   
+      if((!isPP && PD!=2) || (isPP && PD!=1 && PD!=2))
+      { 
+        for(int j = 0; j<nTrk; j++)
+        {
+          if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
+          if(TMath::Abs(trkEta[j])>1) continue;
+          if(highPurity[j]!=1) continue;
+          if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || trkOriginalAlgo[j]==11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; //track trigger cuts
+          if(isPP){
+            bool isCompatibleWithVertex = false;
+            for(int v = 0; v<nVtx; v++){
+              if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
+                isCompatibleWithVertex = true;
+                break;
+              }
+            }          
+            if(!isCompatibleWithVertex) continue;
+          }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+          
+          float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
+          if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+  
+          float rmin=999;
+          for(int jt=0; jt<nref; jt++)
+          {
+            if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
+            if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
+            if(jtpt[jt]<50) continue;
+            float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(TMath::ACos(TMath::Cos(jtphi[jt]-trkPhi[j])),2);
+            if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
+          }
+  
+          float binCenter;
+          if(isPP) binCenter = s.spec_trk[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
+          else     binCenter = s.HIspec_trk[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
+          float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          //dividing by pt at bin center instead of track by track pt (just a convention)
+          if(isPP){
+            if(MinBias && PD==0) s.spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(t18 && PD==3)     s.spec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(t24 && PD==3)     s.spec_trk[2]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(t34 && PD==3)     s.spec_trk[3]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(t45 && PD==3)     s.spec_trk[4]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(t53 && PD==3)     s.spec_trk[5]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          }else{
+            if(MinBias && PD==0) s.HIspec_trk[0][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(HIt12 && PD==1)     s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(HIt18 && PD==1)     s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(HIt24 && PD==1)     s.HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(HIt34 && PD==1)     s.HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            if(HIt45 && PD==1)     s.HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+            if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+            if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+            if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+            if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+            if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) s.HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+            //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
+            //if(HIt18_c10 && !HIt18 && PD==1 && hiBin<20) s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+          } 
+        }//end trk loop
+      }//end if statement
+    }//end event loop
+    inputFile->Close();
+  }//end file loop
 
   //for pp
   TFile * outF;
