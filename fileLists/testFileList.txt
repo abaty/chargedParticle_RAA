@@ -1,4 +1,4 @@
-/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_FullTrack_Forest/HiForestAOD_97.root
-/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_HighPtJet80_Forest_v2/HiForestAOD_1.root
-/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_HighPtLowerJets_Forest_v2/HiForestAOD_10.root
-/mnt/hadoop/cms/store/user/dgulhan/MinimumBias6/HiForest_MinimumBias6_Run2015E_PromptReco_pp_5020GeV/151204_102344/0001/HiForest_1000.root
+/mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/2015pp_FullTrack/HiForestAOD_1.root
+/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_HighPtJet80_Forest_v2/HiForestAOD_113.root
+/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015pp_PromptReco_HighPtLowerJets_Forest_v2/HiForestAOD_197.root
+/mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/2015pp_MinBias_2/MinimumBias2_HiForestAOD_99.root
