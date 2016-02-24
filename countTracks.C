@@ -121,8 +121,14 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int HIt45=0,              HIt45_c30=0;
 
   TrkCorr* trkCorr;
-  if(isPP) trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_pp/");
-  else     trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_PbPb/");
+  TrkCorr* trkCorr_trk;
+  if(isPP){  
+    trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_pp/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Feb_23_Iterative_pp_TrkTrig/");
+  }else{  
+    trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_PbPb/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Feb_23_Iterative_PbPb_TrkTrig/");
+  }
   TFile * inputFile;
   TTree * trkCh;
   TTree * jetCh;
@@ -406,7 +412,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         } //end trk loop
       }//end if statement  
    
-      if((!isPP && PD!=2) || (isPP && PD!=1 && PD!=2))
+      if((!isPP && PD!=2) || (isPP && PD!=1 && PD!=2))//trkTriggers
       { 
         for(int j = 0; j<nTrk; j++)
         {
@@ -441,7 +447,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           float binCenter;
           if(isPP) binCenter = s.spec_trk[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
           else     binCenter = s.HIspec_trk[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
-          float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          float correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           //dividing by pt at bin center instead of track by track pt (just a convention)
           if(isPP){
             if(MinBias && PD==0) s.spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
