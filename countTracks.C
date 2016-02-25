@@ -124,10 +124,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TrkCorr* trkCorr_trk;
   if(isPP){  
     trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_pp/");
-    trkCorr_trk = new TrkCorr("TrkCorr_Feb_23_Iterative_pp_TrkTrig/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Feb23_Iterative_pp_TrkTrig/");
   }else{  
     trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_PbPb/");
-    trkCorr_trk = new TrkCorr("TrkCorr_Feb_23_Iterative_PbPb_TrkTrig/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Feb23_Iterative_PbPb_TrkTrig/");
   }
   TFile * inputFile;
   TTree * trkCh;
@@ -262,7 +262,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
       if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
       trkCh->GetEntry(i);
-      //if(!NoiseFilter) continue;
+      //if(!NoiseFilter) continue;i
       if(isPP && (!pVtx || !pBeamScrape)) continue;
       if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3)) continue;
       bool MinBias = 0;
@@ -299,6 +299,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
         if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+        if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
         if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
       }
       int PD = PDindx[nFile];
@@ -345,7 +346,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(HIt45 && PD==1) s.HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
       if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
       if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
-      if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
+      if(HIt24_c30 && !HIt24 && PD==1 && hiBin>=60) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
       if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIevtCount_trk[4][hiBin/10]->Fill(maxTrackPt);  
       if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) s.HIevtCount_trk[5][hiBin/10]->Fill(maxTrackPt);  
       //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
@@ -433,6 +434,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
           if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+          if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
   
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
@@ -465,7 +467,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(HIt45 && PD==1)     s.HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
             if(HIt12_c30 && !HIt12 && PD==1 && hiBin>=60) s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
             if(HIt18_c30 && !HIt18 && PD==1 && hiBin>=60) s.HIspec_trk[2][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
-            if(HIt24_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
+            if(HIt24_c30 && !HIt24 && PD==1 && hiBin>=60) s.HIspec_trk[3][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
             if(HIt34_c30 && !HIt34 && PD==1 && hiBin>=60) s.HIspec_trk[4][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
             if(HIt45_c30 && !HIt45 && PD==1 && hiBin>=60) s.HIspec_trk[5][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter);
             //if(HIt12_c10 && !HIt12 && PD==1 && hiBin<20) s.HIspec_trk[1][hiBin/10]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 

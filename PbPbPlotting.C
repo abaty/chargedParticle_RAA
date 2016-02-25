@@ -61,7 +61,7 @@ void makePlotsPbPb(Settings s)
 //************************************************JET TRIGGER PLOTS**********************************************************
 //******************************************************************************************************************
   TCanvas * c1 = new TCanvas("c1","c1",800,600);
-  TLine * l[4];
+  TLine * l[8];
   TLatex * lat = new TLatex(1,1,"test");
   TLegend * leg;
   c1->SetLogy();
@@ -226,126 +226,165 @@ void makePlotsPbPb(Settings s)
  
   delete lat;
   delete c1;
-  return;
-}
-
-/*
   
 //************************************************************************************************************
 //***********************************************TRACK TRIGGER PLOTS******************************************
 //************************************************************************************************************
   TCanvas * c2 = new TCanvas("c2","c2",800,600);
-  s.ppMaxtrkByTrigger[4]->SetMarkerColor(kOrange);
-  s.ppMaxtrkByTrigger[4]->SetLineColor(kOrange);
-  c2->SetLogy();
-  s.ppMaxtrk->Scale(100);
-  Ymin = 0.00000000001;
-  Ymax = 10;
-  s.ppMaxtrk->GetYaxis()->SetRangeUser(Ymin,Ymax);
-  s.ppMaxtrk->Draw("h");
-  for(int i = 0; i<s.nTriggers_trk; i++) s.ppMaxtrkByTrigger[i]->Draw("same");
-  TLegend * leg_trk = new TLegend(0.6,0.6,0.9,0.9);
-  leg_trk->AddEntry(s.ppMaxtrk,"Leading Trk p_{T}Spectrum (x100)","l");
-  leg_trk->AddEntry(s.ppMaxtrkByTrigger[0],"MB (I)","p");
-  leg_trk->AddEntry(s.ppMaxtrkByTrigger[1],"Track 18 (II)","p");
-  leg_trk->AddEntry(s.ppMaxtrkByTrigger[2],"Track 24 (III)","p");
-  leg_trk->AddEntry(s.ppMaxtrkByTrigger[3],"Track 34 (IV)","p");
-  leg_trk->AddEntry(s.ppMaxtrkByTrigger[4],"Track 45 (V)","p");
-  leg_trk->AddEntry(s.ppMaxtrkByTrigger[5],"Track 53 (VI)","p");
-  leg_trk->Draw("same");
-  c2->SaveAs("plots/ppMaxtrk_FullSpectrum.png"); 
-  c2->SaveAs("plots/ppMaxtrk_FullSpectrum.pdf"); 
-
-  s.ppMaxtrk->GetXaxis()->SetRangeUser(10,90);
-  Ymin = 0.0000000001;
-  Ymax = 1;
-  s.ppMaxtrk->GetYaxis()->SetRangeUser(Ymin,Ymax);
-  s.ppMaxtrk->Draw("h");
-  for(int i = 0; i<s.nTriggers_trk; i++) s.ppMaxtrkByTrigger[i]->Draw("same");
-  leg_trk->Draw("same"); 
-  TLine * l_trk[5];
-  for(int i = 0; i<5; i++) 
-  {
-    l_trk[i] = new TLine(s.triggerBins_trk[i+1],Ymin,s.triggerBins_trk[i+1],Ymax); 
-    l_trk[i]->SetLineWidth(2);
-    l_trk[i]->SetLineStyle(2);
-    l_trk[i]->SetLineColor(1);
-    l_trk[i]->Draw("same");
-  }
-  lat->DrawLatex(16,Ymin*3,"I");
-  lat->DrawLatex(22,Ymin*3,"II");
-  lat->DrawLatex(28,Ymin*3,"III");
-  lat->DrawLatex(40,Ymin*3,"IV");
-  lat->DrawLatex(49,Ymin*3,"V");
-  lat->DrawLatex(57,Ymin*3,"VI");
-  c2->SaveAs("plots/ppMaxtrk_FullSpectrum_XZoom.png"); 
-  c2->SaveAs("plots/ppMaxtrk_FullSpectrum_XZoom.pdf"); 
-
-  c2->SetLogy(0);
-  for(int i = 0; i<s.nTriggers_trk; i++) s.ppMaxtrkByTrigger[i]->Rebin(2);
-  for(int i = 0; i<s.nTriggers_trk-1; i++) s.ppMaxtrkByTrigger[s.nTriggers_trk-1-i]->Divide(s.ppMaxtrkByTrigger[s.nTriggers_trk-2-i]);
-  s.ppMaxtrkByTrigger[1]->GetYaxis()->SetRangeUser(0,2);
-  s.ppMaxtrkByTrigger[1]->GetXaxis()->SetRangeUser(10,90);
-  s.ppMaxtrkByTrigger[1]->GetXaxis()->SetTitle("Leading Track p_{T}");
-  s.ppMaxtrkByTrigger[1]->Draw();
-  s.ppMaxtrkByTrigger[2]->Draw("same");
-  s.ppMaxtrkByTrigger[3]->Draw("same");
-  s.ppMaxtrkByTrigger[4]->Draw("same");
-  s.ppMaxtrkByTrigger[5]->Draw("same");
-  TLegend * leg2_trk = new TLegend(0.2,0.6,0.5,0.9);
-  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[1],"Trk18/MB","p");
-  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[2],"Trk24/Trk18","p");
-  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[3],"Trk34/Trk24","p");
-  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[4],"Trk45/Trk34","p");
-  leg2_trk->AddEntry(s.ppMaxtrkByTrigger[5],"Trk53/Trk45","p");
-  leg2_trk->Draw("same");
-  c2->SaveAs("plots/TrackRelativeTurnOnes.png");
-  c2->SaveAs("plots/TrackRelativeTurnOnes.pdf");
+  for(int c = 0; c<s.nCentBins; c++){
+    c2->SetLogy();
+    c2->Clear();
+    s.HIMaxtrk[c]->SetMarkerSize(0);
+    s.HIMaxtrkByTrigger[4][c]->SetMarkerColor(kOrange);
+    s.HIMaxtrkByTrigger[4][c]->SetLineColor(kOrange);
+    s.HIMaxtrk[c]->Scale(100);
+    float Ymin = 0.000000001;
+    float Ymax = 1000;
+    s.HIMaxtrk[c]->GetYaxis()->SetRangeUser(Ymin,Ymax);
+    s.HIMaxtrk[c]->Draw("h");
+    for(int i = 0; i<s.HInTriggers_trk; i++) s.HIMaxtrkByTrigger[i][c]->Draw("same");
+    leg = new TLegend(0.5,0.6,0.8,0.9);
+    leg->AddEntry(s.HIMaxtrk[c],"Leading Trk p_{T}Spectrum (x100)","l");
+    leg->AddEntry(s.HIMaxtrkByTrigger[0][c],"MB (I)","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[1][c],"Track 12 (II)","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[2][c],"Track 18 (III)","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[3][c],"Track 24 (IV)","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[4][c],"Track 34 (V)","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[5][c],"Track 45 (VI)","p");
+    leg->AddEntry((TObject*)0,Form("%d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
+    leg->Draw("same");
+    c2->SaveAs(Form("plots/png/HIMaxtrk_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    c2->SaveAs(Form("plots/pdf/HIMaxtrk_FullSpectrum_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    c2->Clear();
+ 
+    s.HIMaxtrk[c]->GetXaxis()->SetRangeUser(0,70);
+    Ymin = 0.00000001;
+    Ymax = 1000;
+    s.HIMaxtrk[c]->GetYaxis()->SetRangeUser(Ymin,Ymax);
+    s.HIMaxtrk[c]->Draw("h");
+    for(int i = 0; i<s.HInTriggers_trk; i++) s.HIMaxtrkByTrigger[i][c]->Draw("same");
+    leg->Draw("same"); 
+    for(int i = 0; i<5; i++) 
+    {
+      l[i] = new TLine(s.HItriggerBins_trk[i+1],Ymin,s.HItriggerBins_trk[i+1],Ymax); 
+      l[i]->SetLineWidth(2);
+      l[i]->SetLineStyle(2);
+      l[i]->SetLineColor(1);
+      l[i]->Draw("same");
+    }
+    lat->DrawLatex(8,Ymin*3,"I");
+    lat->DrawLatex(16,Ymin*3,"II");
+    lat->DrawLatex(22,Ymin*3,"III");
+    lat->DrawLatex(28,Ymin*3,"IV");
+    lat->DrawLatex(38,Ymin*3,"V");
+    lat->DrawLatex(50,Ymin*3,"VI");
+    c2->SaveAs(Form("plots/png/HIMaxtrk_FullSpectrum_XZoom_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    c2->SaveAs(Form("plots/pdf/HIMaxtrk_FullSpectrum_XZoom_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    for(int i = 0; i<5; i++) delete l[i]; 
+    delete leg;
   
+    c2->SetLogy(0);
+    for(int i = 0; i<s.HInTriggers_trk; i++) s.HIMaxtrkByTrigger[i][c]->Rebin(2);
+    for(int i = 0; i<s.HInTriggers_trk-1; i++) s.HIMaxtrkByTrigger[s.nTriggers_trk-1-i][c]->Divide(s.HIMaxtrkByTrigger[s.nTriggers_trk-2-i][c]);
+    s.HIMaxtrkByTrigger[1][c]->GetYaxis()->SetRangeUser(0,2);
+    s.HIMaxtrkByTrigger[1][c]->GetXaxis()->SetRangeUser(10,90);
+    s.HIMaxtrkByTrigger[1][c]->GetXaxis()->SetTitle("Leading Track p_{T}");
+    s.HIMaxtrkByTrigger[1][c]->Draw();
+    s.HIMaxtrkByTrigger[2][c]->Draw("same");
+    s.HIMaxtrkByTrigger[3][c]->Draw("same");
+    s.HIMaxtrkByTrigger[4][c]->Draw("same");
+    s.HIMaxtrkByTrigger[5][c]->Draw("same");
+    leg = new TLegend(0.2,0.6,0.5,0.9);
+    leg->AddEntry(s.HIMaxtrkByTrigger[1][c],"Trk12/MB","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[2][c],"Trk18/Trk12","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[3][c],"Trk24/Trk18","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[4][c],"Trk34/Trk24","p");
+    leg->AddEntry(s.HIMaxtrkByTrigger[5][c],"Trk45/Trk34","p");
+    leg->AddEntry((TObject*)0,Form("%d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
+    leg->Draw("same");
+    c2->SaveAs(Form("plots/png/HITrackRelativeTurnOnes_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c2->SaveAs(Form("plots/pdf/HITrackRelativeTurnOnes_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    delete leg;
+  }
+
   c2->SetLogy();
   c2->SetLogx();
-  s.pp_trk->SetMarkerSize(0.8);
-  s.pp_trk->Draw();
-  s.ppUsedByTrigger_trk[0]->SetFillColor(kGray);
-  s.ppUsedByTrigger_trk[3]->SetFillColor(kBlue);
-  s.ppUsedByTrigger_trk[4]->SetFillColor(kViolet);
-  s.ppUsedByTrigger_trk[5]->SetFillColor(kCyan+2);
-  s.ppUsedByTrigger_trk[4]->Add(s.ppUsedByTrigger_trk[5]);
-  s.ppUsedByTrigger_trk[3]->Add(s.ppUsedByTrigger_trk[4]);
-  s.ppUsedByTrigger_trk[2]->Add(s.ppUsedByTrigger_trk[3]);
-  s.ppUsedByTrigger_trk[1]->Add(s.ppUsedByTrigger_trk[2]);
-  s.ppUsedByTrigger_trk[0]->Add(s.ppUsedByTrigger_trk[1]);
-  for(int i = 0; i<s.nTriggers_trk; i++) s.ppUsedByTrigger_trk[i]->Draw("HIST same");
-  s.pp_trk->Draw("sameaxis");
-  s.pp_trk->Draw("same");
-  leg_trk->Clear();
-  leg_trk->AddEntry(s.pp_trk,"pp track Spectrum","p");
-  leg_trk->AddEntry(s.ppUsedByTrigger_trk[0],"MB trigger","f");
-  leg_trk->AddEntry(s.ppUsedByTrigger_trk[1],"Track18 trigger","f");
-  leg_trk->AddEntry(s.ppUsedByTrigger_trk[2],"Track24 trigger","f");
-  leg_trk->AddEntry(s.ppUsedByTrigger_trk[3],"Track34 trigger","f");
-  leg_trk->AddEntry(s.ppUsedByTrigger_trk[4],"Track45 trigger","f");
-  leg_trk->AddEntry(s.ppUsedByTrigger_trk[5],"Track53 trigger","f");
-  leg_trk->AddEntry((TObject*)0,"|#eta|<1","");
-  leg_trk->Draw("same");
-   
-  c2->SaveAs("plots/ppTrack_FullSpectrum_trk.png");
-  c2->SaveAs("plots/ppTrack_FullSpectrum_trk.pdf");
+  for(int c = 0; c<s.nCentBins; c++){
+    c2->Clear();
+    s.HI_trk[c]->SetMarkerSize(0.8);
+    s.HI_trk[c]->GetYaxis()->SetRangeUser(TMath::Max(s.HI_trk[20]->GetMinimum()/200.0,1e-15),s.HI_trk[20]->GetMaximum()*10);
+    s.HI_trk[c]->Draw();
+    s.HIUsedByTrigger_trk[0][c]->SetFillColor(kGray);
+    s.HIUsedByTrigger_trk[3][c]->SetFillColor(kBlue);
+    s.HIUsedByTrigger_trk[4][c]->SetFillColor(kViolet);
+    s.HIUsedByTrigger_trk[5][c]->SetFillColor(kCyan+2);
+    s.HIUsedByTrigger_trk[4][c]->Add(s.HIUsedByTrigger_trk[5][c]);
+    s.HIUsedByTrigger_trk[3][c]->Add(s.HIUsedByTrigger_trk[4][c]);
+    s.HIUsedByTrigger_trk[2][c]->Add(s.HIUsedByTrigger_trk[3][c]);
+    s.HIUsedByTrigger_trk[1][c]->Add(s.HIUsedByTrigger_trk[2][c]);
+    s.HIUsedByTrigger_trk[0][c]->Add(s.HIUsedByTrigger_trk[1][c]);
+    for(int i = 0; i<s.HInTriggers_trk; i++) s.HIUsedByTrigger_trk[i][c]->Draw("HIST same");
+    leg = new TLegend(0.5,0.6,0.8,0.9);
+    s.HI_trk[c]->Draw("sameaxis");
+    s.HI_trk[c]->Draw("same");
+    leg->Clear();
+    leg->AddEntry(s.HI_trk[c],"PbPb track Spectrum","p");
+    leg->AddEntry(s.HIUsedByTrigger_trk[0][c],"MB trigger","f");
+    leg->AddEntry(s.HIUsedByTrigger_trk[1][c],"Track12 trigger","f");
+    leg->AddEntry(s.HIUsedByTrigger_trk[2][c],"Track18 trigger","f");
+    leg->AddEntry(s.HIUsedByTrigger_trk[3][c],"Track24 trigger","f");
+    leg->AddEntry(s.HIUsedByTrigger_trk[4][c],"Track34 trigger","f");
+    leg->AddEntry(s.HIUsedByTrigger_trk[5][c],"Track45 trigger","f");
+    leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
+    leg->Draw("same");
+     
+    c2->SaveAs(Form("plots/png/HITrack_FullSpectrum_trk_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c2->SaveAs(Form("plots/pdf/HITrack_FullSpectrum_trk_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    delete leg;
+  }
+  
+  c2->SetLogy(0);
+  for(int c = 0; c<s.nCentBins;c++){
+    c2->Clear();
+    s.RAA_trk[c] = (TH1D*)s.HI_trk[c]->Clone(Form("RAA_trk_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    s.RAA_trk[c]->Scale(1/s.nColl[c]);
+    s.RAA_trk[c]->Divide(s.pp_trk); 
+    //s.RAA_trk[c]->Write();
+
+    s.RAA_trk[c]->GetYaxis()->SetRangeUser(0,1.2); 
+    s.RAA_trk[c]->GetYaxis()->SetTitle("R_{AA}"); 
+    s.RAA_trk[c]->SetMarkerStyle(25); 
+    s.RAA_trk[c]->Draw();
+    s.RAA[c]->Draw("same");
+    leg = new TLegend(0.2,0.7,0.4,0.9);
+    leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
+    leg->AddEntry((TObject*)0,"#sqrt{s_{NN}} = 5.02 TeV","");
+    leg->AddEntry(s.RAA[c],"Jet Triggers","p");
+    leg->AddEntry(s.RAA_trk[c],"Track Triggers","p");
+    leg->Draw("same");
+    TLine *line = new TLine(0.5,1,400,1);
+    line->SetLineStyle(2);
+    line->SetLineWidth(2);
+    line->SetLineColor(kBlack);
+    line->Draw("same");
+    c1->SaveAs(Form("plots/png/RAA_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c1->SaveAs(Form("plots/pdf/RAA_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    delete leg;
+    delete line;
+  }
 
   c2->SetLogy(0);
-  jtVsTrk->Divide(s.pp_trk);
-  jtVsTrk->GetYaxis()->SetTitle("pp Jet triggers/pp Track triggers");
-  jtVsTrk->GetYaxis()->SetRangeUser(0.5,1.5);
-  jtVsTrk->Draw();
-  c2->SaveAs("plots/pp_jetVsTrkTriggers.png");
-  c2->SaveAs("plots/pp_JetVsTrkTriggers.pdf");
+  TH1D * HIjtVsTrk[s.nCentBins];
+  for(int c = 0; c<s.nCentBins;c++){
+    HIjtVsTrk[c] = (TH1D*)s.HI[c]->Clone(Form("HIJetVsTrk%d",c));
+    HIjtVsTrk[c]->Divide(s.HI_trk[c]);
+    HIjtVsTrk[c]->GetYaxis()->SetTitle("PbPb Jet triggers/PbPb Track triggers");
+    HIjtVsTrk[c]->GetYaxis()->SetRangeUser(0.5,1.5);
+    HIjtVsTrk[c]->Draw();
+    c2->SaveAs(Form("plots/png/HI_jetVsTrkTriggers_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c2->SaveAs(Form("plots/pdf/HI_JetVsTrkTriggers_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+  }
+  delete c2;
 
-  delete c1;
- // delete c2;
- // delete lat;
- // delete leg;
- // delete leg2;
- // delete leg_trk; 
- // delete leg2_trk; 
   return;
-}*/
+}
