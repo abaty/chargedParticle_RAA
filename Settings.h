@@ -28,9 +28,9 @@ class Settings {
   static const int nTriggers_trk = 6;
   double triggerBins_trk[nTriggers_trk+1] = {0,20,26,36,47,55,1000};
   double triggerOverlapBins_trk[nTriggers_trk] = {0,20,26,36,47,55};
-  static const int HInTriggers_trk = 6;
-  double HItriggerBins_trk[HInTriggers_trk+1] = {0,14,20,26,36,47,1000};
-  double HItriggerOverlapBins_trk[HInTriggers_trk] = {0,14,20,26,36,47};
+  static const int HInTriggers_trk = 5;
+  double HItriggerBins_trk[HInTriggers_trk+1] = {0,14,20,35,50,1000};
+  double HItriggerOverlapBins_trk[HInTriggers_trk] = {0,14,20,35,50};
   
   static const int nTrktriggerBins = 500;
   static const int maxTrktriggerBin = 500;

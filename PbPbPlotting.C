@@ -250,7 +250,6 @@ void makePlotsPbPb(Settings s)
     leg->AddEntry(s.HIMaxtrkByTrigger[2][c],"Track 18 (III)","p");
     leg->AddEntry(s.HIMaxtrkByTrigger[3][c],"Track 24 (IV)","p");
     leg->AddEntry(s.HIMaxtrkByTrigger[4][c],"Track 34 (V)","p");
-    leg->AddEntry(s.HIMaxtrkByTrigger[5][c],"Track 45 (VI)","p");
     leg->AddEntry((TObject*)0,Form("%d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
     c2->SaveAs(Form("plots/png/HIMaxtrk_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
@@ -277,7 +276,6 @@ void makePlotsPbPb(Settings s)
     lat->DrawLatex(22,Ymin*3,"III");
     lat->DrawLatex(28,Ymin*3,"IV");
     lat->DrawLatex(38,Ymin*3,"V");
-    lat->DrawLatex(50,Ymin*3,"VI");
     c2->SaveAs(Form("plots/png/HIMaxtrk_FullSpectrum_XZoom_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
     c2->SaveAs(Form("plots/pdf/HIMaxtrk_FullSpectrum_XZoom_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
     for(int i = 0; i<5; i++) delete l[i]; 
@@ -293,13 +291,11 @@ void makePlotsPbPb(Settings s)
     s.HIMaxtrkByTrigger[2][c]->Draw("same");
     s.HIMaxtrkByTrigger[3][c]->Draw("same");
     s.HIMaxtrkByTrigger[4][c]->Draw("same");
-    s.HIMaxtrkByTrigger[5][c]->Draw("same");
     leg = new TLegend(0.2,0.6,0.5,0.9);
     leg->AddEntry(s.HIMaxtrkByTrigger[1][c],"Trk12/MB","p");
     leg->AddEntry(s.HIMaxtrkByTrigger[2][c],"Trk18/Trk12","p");
     leg->AddEntry(s.HIMaxtrkByTrigger[3][c],"Trk24/Trk18","p");
     leg->AddEntry(s.HIMaxtrkByTrigger[4][c],"Trk34/Trk24","p");
-    leg->AddEntry(s.HIMaxtrkByTrigger[5][c],"Trk45/Trk34","p");
     leg->AddEntry((TObject*)0,Form("%d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
     c2->SaveAs(Form("plots/png/HITrackRelativeTurnOnes_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
@@ -316,9 +312,7 @@ void makePlotsPbPb(Settings s)
     s.HI_trk[c]->Draw();
     s.HIUsedByTrigger_trk[0][c]->SetFillColor(kGray);
     s.HIUsedByTrigger_trk[3][c]->SetFillColor(kBlue);
-    s.HIUsedByTrigger_trk[4][c]->SetFillColor(kViolet);
-    s.HIUsedByTrigger_trk[5][c]->SetFillColor(kCyan+2);
-    s.HIUsedByTrigger_trk[4][c]->Add(s.HIUsedByTrigger_trk[5][c]);
+    s.HIUsedByTrigger_trk[4][c]->SetFillColor(kCyan+2);
     s.HIUsedByTrigger_trk[3][c]->Add(s.HIUsedByTrigger_trk[4][c]);
     s.HIUsedByTrigger_trk[2][c]->Add(s.HIUsedByTrigger_trk[3][c]);
     s.HIUsedByTrigger_trk[1][c]->Add(s.HIUsedByTrigger_trk[2][c]);
@@ -334,7 +328,6 @@ void makePlotsPbPb(Settings s)
     leg->AddEntry(s.HIUsedByTrigger_trk[2][c],"Track18 trigger","f");
     leg->AddEntry(s.HIUsedByTrigger_trk[3][c],"Track24 trigger","f");
     leg->AddEntry(s.HIUsedByTrigger_trk[4][c],"Track34 trigger","f");
-    leg->AddEntry(s.HIUsedByTrigger_trk[5][c],"Track45 trigger","f");
     leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
      
