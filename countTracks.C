@@ -93,6 +93,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int pprimaryVertexFilter;  
   int phfCoincFilter3;
   int hiBin = 1;
+  float hiHF = 0;
 
   int nref;
   float jtpt[200];
@@ -140,7 +141,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //Ntuple for looking at specific tracks
   std::string trkSkimVars;
-  trkSkimVars=   "trkPt:trkEta:trkPhi:hiBin:rmin:correction:maxjtpt:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34";
+  trkSkimVars=   "trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34";
   TNtuple * trkSkim  = new TNtuple("trkSkim","",trkSkimVars.data()); 
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
@@ -218,6 +219,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     if(!isPP){
       hiCh = (TTree*)inputFile->Get("hiEvtAnalyzer/HiTree");
       hiCh->SetBranchAddress("hiBin",&hiBin);
+      hiCh->SetBranchAddress("hiHF",&hiHF);
       trkCh->AddFriend(hiCh);
     }
    
@@ -302,7 +304,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
   
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-        if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+        if(!(trkPt[j]<20 || (Et>0.8*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
         if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
         if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
       }
@@ -372,7 +374,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+          if(!(trkPt[j]<20 || (Et>0.8*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
     
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
@@ -389,7 +391,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)){
             if(!isPP){
-              float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
+              float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
               trkSkim->Fill(skimEntry);   
              }
             continue;//upper boundary on track pt
@@ -443,7 +445,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+          if(!(trkPt[j]<20 || (Et>0.8*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
           if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
   
           float rmin=999;
