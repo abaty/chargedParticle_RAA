@@ -20,8 +20,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 {
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
-
-  bool useTrkCorrEverywhere = true
+  bool doOnly1Vertex = false;
+  bool useTrkCorrEverywhere = true;
  
   Settings s; 
   if(isPP){
@@ -265,7 +265,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
       if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
       trkCh->GetEntry(i);
-      //if(!NoiseFilter) continue;i
+      //if(!NoiseFilter) continue;
+      if(doOnly1Vertex && nVtx!=1) continue;
       if(isPP && (!pVtx || !pBeamScrape)) continue;
       if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3)) continue;
       bool MinBias = 0;
@@ -521,7 +522,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       s.HInVtxMB[j]->Write();
       s.HInVtxMB_trk[j]->Write();
     }
-    trkSkim->Write();
+    if(!isPP) trkSkim->Write();
     outF->Close(); 
   }
 }
