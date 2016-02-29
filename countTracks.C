@@ -20,6 +20,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 {
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
+
+  bool useTrkCorrEverywhere = true
  
   Settings s; 
   if(isPP){
@@ -381,7 +383,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
           }
   
-          float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          float correction;
+          if(!useTrkCorrEverywhere) correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)){
             if(!isPP){
               float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
@@ -389,6 +393,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
              }
             continue;//upper boundary on track pt
           }
+          if(useTrkCorrEverywhere && (trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || trkOriginalAlgo[j]==11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15)) continue;  
+
           //dividing by pt at bin center instead of track by track pt (just a convention)
           float binCenter;
           if(isPP) binCenter = s.spec[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
