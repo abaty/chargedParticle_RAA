@@ -3,6 +3,7 @@
 #include "TChain.h"
 #include "TTree.h"
 #include "TFile.h"
+#include "TNtuple.h"
 #include "TBranch.h"
 #include "TMath.h"
 #include "TAttMarker.h"
@@ -134,6 +135,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TTree * evtCh;
   TTree * hltCh;
   TTree * hiCh;
+
+  //Ntuple for looking at specific tracks
+  std::string trkSkimVars;
+  trkSkimVars=   "trkPt:trkEta:trkPhi:hiBin:rmin:correction:maxjtpt:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34";
+  TNtuple * trkSkim  = new TNtuple("trkSkim","",trkSkimVars.data()); 
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
   //0 is MB, 1 is jet40/60, 2 is jet80
@@ -364,7 +370,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
           if(!(trkPt[j]<20 || (Et>0.2*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
-          if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
     
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
@@ -377,6 +382,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           }
   
           float correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)){
+            if(!isPP){
+              float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
+              trkSkim->Fill(skimEntry);   
+             }
+            continue;//upper boundary on track pt
+          }
           //dividing by pt at bin center instead of track by track pt (just a convention)
           float binCenter;
           if(isPP) binCenter = s.spec[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
@@ -503,6 +515,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       s.HInVtxMB[j]->Write();
       s.HInVtxMB_trk[j]->Write();
     }
+    trkSkim->Write();
     outF->Close(); 
   }
 }
