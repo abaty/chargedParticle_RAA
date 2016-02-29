@@ -309,8 +309,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
       }
       int PD = PDindx[nFile];
-      if(maxJtPt==0 && (PD==1 || PD==2)) continue;//remove jet events where no jets are in barrel  
-      if(maxTrackPt==0 && ((isPP && PD==3) || (!isPP && PD==1))) continue;//remove jet events where no tracks are in barrel  
       if(MinBias && PD==0)
       {
         if(isPP){
