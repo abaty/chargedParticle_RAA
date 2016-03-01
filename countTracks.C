@@ -21,7 +21,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
-  bool useTrkCorrEverywhere = true;
+  bool useTrkCorrEverywhere = false;
+  float caloMatchValue = 0.8;
  
   Settings s; 
   if(isPP){
@@ -304,7 +305,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
   
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-        if(!(trkPt[j]<20 || (Et>0.8*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+        if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
         if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
         if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
       }
@@ -372,7 +373,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<20 || (Et>0.8*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+          if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
     
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
@@ -443,7 +444,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<20 || (Et>0.8*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
+          if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j] && Et>trkPt[j]-80))) continue; //Calo Matching
           if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
   
           float rmin=999;
