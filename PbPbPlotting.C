@@ -283,7 +283,7 @@ void makePlotsPbPb(Settings s)
   
     c2->SetLogy(0);
     for(int i = 0; i<s.HInTriggers_trk; i++) s.HIMaxtrkByTrigger[i][c]->Rebin(2);
-    for(int i = 0; i<s.HInTriggers_trk-1; i++) s.HIMaxtrkByTrigger[s.nTriggers_trk-1-i][c]->Divide(s.HIMaxtrkByTrigger[s.nTriggers_trk-2-i][c]);
+    for(int i = 0; i<s.HInTriggers_trk-1; i++) s.HIMaxtrkByTrigger[s.HInTriggers_trk-1-i][c]->Divide(s.HIMaxtrkByTrigger[s.HInTriggers_trk-2-i][c]);
     s.HIMaxtrkByTrigger[1][c]->GetYaxis()->SetRangeUser(0,2);
     s.HIMaxtrkByTrigger[1][c]->GetXaxis()->SetRangeUser(10,90);
     s.HIMaxtrkByTrigger[1][c]->GetXaxis()->SetTitle("Leading Track p_{T}");
