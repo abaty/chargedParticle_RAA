@@ -1,3 +1,4 @@
 /mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/2015pp_HighPtJet80/HiForestAOD_1.root
 /mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/2015pp_HighPtLowerJets/HiForestAOD_121.root
 /mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/2015pp_MinBias_2/MinimumBias2_HiForestAOD_99.root
+/mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/2015pp_FullTrack/HiForestAOD_1.root
