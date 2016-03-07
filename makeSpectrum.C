@@ -105,7 +105,12 @@ void makeSpectrum()
   float scale_trk[s.nTriggers_trk];
   float HIscale[s.HInTriggers][3];
   float HIscale_trk[s.HInTriggers_trk][3];
-  
+  s.h_scale = new TH2D("h_scale","h_scale",10,0,10,10,0,10);
+  s.h_scale_trk = new TH2D("h_scale_trk","h_scale_trk",10,0,10,10,0,10);
+  for(int i = 0; i<3; i++){
+    s.h_HIscale = new TH2D("h_HIscale","h_HIscale",10,0,10,10,0,10);
+    s.h_HIscale_trk = new TH2D("h_HIscale_trk","h_HIscale_trk",10,0,10,10,0,10);
+  } 
   //*****************************************************************************************************************************************************
   //pp jet triggers
   for(int i = 0; i<s.nTriggers; i++)
@@ -442,6 +447,17 @@ void makeSpectrum()
       s.HIMaxtrkByTrigger[j][c]->Write();
     }
   } 
+  
+  for(int i = 0; i<s.nTriggers; i++)      s.h_scale->SetBinContent(i+1,1,scale[i]);
+  for(int i = 0; i<s.nTriggers_trk; i++)  s.h_scale_trk->SetBinContent(i+1,1,scale_trk[i]);
+  for(int i = 0; i<3; i++){
+    for(int j = 0; j<s.HInTriggers; j++)     s.h_HIscale->SetBinContent(j+1,i+1,HIscale[j][i]);
+    for(int j = 0; j<s.HInTriggers_trk; j++) s.h_HIscale_trk->SetBinContent(j+1,i+1,HIscale_trk[j][i]);
+  }
+  s.h_scale->Write();
+  s.h_scale_trk->Write();
+  s.h_HIscale->Write();
+  s.h_HIscale_trk->Write();
   
   makePlotsPbPb(s);
   outF->Close();

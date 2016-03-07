@@ -23,6 +23,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   bool doOnly1Vertex = false;
   bool useTrkCorrEverywhere = false;
   float caloMatchValue = 0.4;
+  float jetEtaSelection = 2;
  
   Settings s; 
   if(isPP){
@@ -31,6 +32,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       s.spec[i] = new TH2D(Form("spectrum_trigger%d",i),"",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
       s.evtCount[i] = new TH1D(Form("evtCount%d",i),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
       s.evtCount[i]->SetMarkerColor(i);
+      s.evtCount_JetVars[i] = new TH2D(Form("evtCount_JetVars%d",i),"max jet #eta;max jet p_{T};N",10,-2,2,16,40,120);
     }
     s.nVtxMB = new TH1D("nVtxMB","nVtx;N Events",12,0,12);
     for(int i = 0; i<s.nTriggers_trk; i++)
@@ -47,6 +49,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         s.HIspec[i][j] = new TH2D(Form("HI_spectrum_trigger%d_cent%d",i,j),"",s.njetBins,0,s.maxJetBin,s.ntrkBins,s.xtrkbins);
         s.HIevtCount[i][j] = new TH1D(Form("HI_evtCount%d_cent%d",i,j),";max jet p_{T};N",s.njetBins,0,s.maxJetBin);
         s.HIevtCount[i][j]->SetMarkerColor(i);
+        s.HIevtCount_JetVars[i][j] = new TH2D(Form("HI_evtCount_JetVars%d_cent%d",i,j),"max jet #eta;max jet p_{T};N",10,-2,2,16,40,120);
       }
     }
     for(int j = 0; j<20; j++) s.HInVtxMB[j] = new TH1D(Form("HI_nVtxMB_%d",j),"nVtx;N Events",12,0,12);
@@ -127,11 +130,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TrkCorr* trkCorr;
   TrkCorr* trkCorr_trk;
   if(isPP){  
-    trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_pp/");
-    trkCorr_trk = new TrkCorr("TrkCorr_Feb23_Iterative_pp_TrkTrig/");
+    trkCorr = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_pp_TrkTrig/");
   }else{  
-    trkCorr = new TrkCorr("TrkCorr_Feb_12_Iterative_PbPb/");
-    trkCorr_trk = new TrkCorr("TrkCorr_Feb23_Iterative_PbPb_TrkTrig/");
+    trkCorr = new TrkCorr("TrkCorr_Feb16_Iterative_PbPb/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
   }
   TFile * inputFile;
   TTree * trkCh;
@@ -266,7 +269,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     for(int i = 0; i<trkCh->GetEntries(); i++)
     {
       //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
-      if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
       trkCh->GetEntry(i);
       //if(!NoiseFilter) continue;
       if(doOnly1Vertex && nVtx!=1) continue;
@@ -280,18 +282,22 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       //**************************************************
       //for trigger combination with jet triggers
       float maxJtPt = 0;
+      float maxJtEta = -99;
       for(int j=0; j<nref; j++)
       {
-        if(isPP && (chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>2)) continue;
-        if(!isPP &&  (ecalSum[j]/(ecalSum[j]+hcalSum[j])<0.05 || hcalSum[j]/(ecalSum[j]+hcalSum[j])<0.1|| TMath::Abs(jteta[j])>2)) continue;
-        if(jtpt[j]>maxJtPt) maxJtPt = jtpt[j];
+        if(isPP && (chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>jetEtaSelection)) continue;
+        if(!isPP &&  (ecalSum[j]/(ecalSum[j]+hcalSum[j])<0.05 || hcalSum[j]/(ecalSum[j]+hcalSum[j])<0.1|| TMath::Abs(jteta[j])>jetEtaSelection)) continue;
+        if(jtpt[j]>maxJtPt){
+          maxJtPt = jtpt[j];
+          maxJtEta = jteta[j];
+        }
       }
   
       float maxTrackPt = 0;
       for(int j=0; j<nTrk; j++)
       {
         if(TMath::Abs(trkEta[j])>1 || !highPurity[j]) continue;
-        if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || trkOriginalAlgo[j]==11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; //track trigger cuts
+        if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7  || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; //track trigger cuts
        
         if(isPP){
           bool isCompatibleWithVertex = false;
@@ -314,28 +320,30 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       {
         if(isPP){
           s.evtCount[0]->Fill(maxJtPt); 
+          s.evtCount_JetVars[0]->Fill(maxJtEta,maxJtPt);
           s.nVtxMB->Fill(nVtx);
           s.evtCount_trk[0]->Fill(maxTrackPt); 
           s.nVtxMB_trk->Fill(nVtx);
         }else{
           s.HIevtCount[0][hiBin/10]->Fill(maxJtPt);
+          s.HIevtCount_JetVars[0][hiBin/10]->Fill(maxJtEta,maxJtPt);
           s.HInVtxMB[hiBin/10]->Fill(nVtx);
           s.HIevtCount_trk[0][hiBin/10]->Fill(maxTrackPt);
           s.HInVtxMB_trk[hiBin/10]->Fill(nVtx);
         }
       }
-      if(j40 && PD==1) s.evtCount[1]->Fill(maxJtPt);  
-      if(j60 && PD==1) s.evtCount[2]->Fill(maxJtPt);  
-      if(j80 && PD==2) s.evtCount[3]->Fill(maxJtPt);  
+      if(j40 && PD==1){s.evtCount_JetVars[1]->Fill(maxJtEta,maxJtPt); s.evtCount[1]->Fill(maxJtPt);}  
+      if(j60 && PD==1){s.evtCount_JetVars[2]->Fill(maxJtEta,maxJtPt); s.evtCount[2]->Fill(maxJtPt);}  
+      if(j80 && PD==2){s.evtCount_JetVars[2]->Fill(maxJtEta,maxJtPt); s.evtCount[3]->Fill(maxJtPt);} 
       if(t18 && PD==3) s.evtCount_trk[1]->Fill(maxTrackPt);  
       if(t24 && PD==3) s.evtCount_trk[2]->Fill(maxTrackPt);  
       if(t34 && PD==3) s.evtCount_trk[3]->Fill(maxTrackPt);  
       if(t45 && PD==3) s.evtCount_trk[4]->Fill(maxTrackPt);  
       if(t53 && PD==3) s.evtCount_trk[5]->Fill(maxTrackPt);  
-      if(HIj40 && PD==1)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
-      if(HIj60 && PD==1)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
-      if(HIj80 && PD==1)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-      if(HIj100 && PD==1) s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+      if(HIj40 && PD==1){ s.HIevtCount_JetVars[0][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);} 
+      if(HIj60 && PD==1){ s.HIevtCount_JetVars[1][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);} 
+      if(HIj80 && PD==1){ s.HIevtCount_JetVars[2][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);} 
+      if(HIj100 && PD==1){ s.HIevtCount_JetVars[3][hiBin/10]->Fill(maxJtEta,maxJtPt); s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);} 
       if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
       if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
       if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
@@ -395,7 +403,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
              }
             continue;//upper boundary on track pt
           }
-          if(useTrkCorrEverywhere && (trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || trkOriginalAlgo[j]==11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15)) continue;  
+          if(useTrkCorrEverywhere && (trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15)) continue;  
 
           //dividing by pt at bin center instead of track by track pt (just a convention)
           float binCenter;
@@ -431,7 +439,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
           if(TMath::Abs(trkEta[j])>1) continue;
           if(highPurity[j]!=1) continue;
-          if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkAlgo[j]<4 || (int)trkAlgo[j]>8 || trkOriginalAlgo[j]==11 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; //track trigger cuts
+          if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; //track trigger cuts
           if(isPP){
             bool isCompatibleWithVertex = false;
             for(int v = 0; v<nVtx; v++){
@@ -496,6 +504,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     {
       s.spec[i]->Write();
       s.evtCount[i]->Write();
+      s.evtCount_JetVars[i]->Write();
     }
     for(int i = 0; i<s.nTriggers_trk; i++)
     {
@@ -510,6 +519,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       for(int j = 0; j<20; j++){
         s.HIspec[i][j]->Write();
         s.HIevtCount[i][j]->Write();
+        s.HIevtCount_JetVars[i][j]->Write();
       }
     }
     for(int i = 0; i<s.HInTriggers_trk; i++)
