@@ -23,7 +23,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
   bool useTrkCorrEverywhere = true;
-  float caloMatchValue = 0.4;
+  float caloMatchValue = 0.5;
   float jetEtaSelection = 2;
  
   Settings s; 
@@ -165,7 +165,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       else if(inputFiles.at(i).find("FullTrack") != std::string::npos) PDindx[i]=3;
       else PDindx[i]=-1;
     }else{
-      if((inputFiles.at(i).find("MinimumBias") != std::string::npos) || (inputFiles.at(i).find("MinBias") != std::string::npos) PDindx[i]=0;
+      if((inputFiles.at(i).find("MinimumBias") != std::string::npos) || (inputFiles.at(i).find("MinBias") != std::string::npos)) PDindx[i]=0;
       else if(inputFiles.at(i).find("HIHardProbes-") != std::string::npos) PDindx[i]=1;
       else if(inputFiles.at(i).find("HIHardProbesPeripheral") != std::string::npos) PDindx[i]=2;
       else PDindx[i]=-1;
@@ -282,7 +282,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       evtCh->GetEntry(i);
       //if(!NoiseFilter) continue;
       if(isPP && (!pVtx || !pBeamScrape)) continue;
-      if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3))continue;// || !isInGoldenJSON(run,lumi))) continue;
+      if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3 || !isInGoldenJSON(run,lumi))) continue;
       trkCh->GetEntry(i);
       if(doOnly1Vertex && nVtx!=1) continue;
       bool MinBias = 0;
