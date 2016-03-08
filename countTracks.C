@@ -343,16 +343,16 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       }
       if(j40 && PD==1){s.evtCount_JetVars[1]->Fill(maxJtEta,maxJtPt); s.evtCount[1]->Fill(maxJtPt);}  
       if(j60 && PD==1){s.evtCount_JetVars[2]->Fill(maxJtEta,maxJtPt); s.evtCount[2]->Fill(maxJtPt);}  
-      if(j80 && PD==2){s.evtCount_JetVars[2]->Fill(maxJtEta,maxJtPt); s.evtCount[3]->Fill(maxJtPt);} 
+      if(j80 && PD==2){s.evtCount_JetVars[3]->Fill(maxJtEta,maxJtPt); s.evtCount[3]->Fill(maxJtPt);} 
       if(t18 && PD==3) s.evtCount_trk[1]->Fill(maxTrackPt);  
       if(t24 && PD==3) s.evtCount_trk[2]->Fill(maxTrackPt);  
       if(t34 && PD==3) s.evtCount_trk[3]->Fill(maxTrackPt);  
       if(t45 && PD==3) s.evtCount_trk[4]->Fill(maxTrackPt);  
       if(t53 && PD==3) s.evtCount_trk[5]->Fill(maxTrackPt);  
-      if(HIj40 && PD==1){ s.HIevtCount_JetVars[0][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);} 
-      if(HIj60 && PD==1){ s.HIevtCount_JetVars[1][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);} 
-      if(HIj80 && PD==1){ s.HIevtCount_JetVars[2][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);} 
-      if(HIj100 && PD==1){ s.HIevtCount_JetVars[3][hiBin/10]->Fill(maxJtEta,maxJtPt); s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);} 
+      if(HIj40 && PD==1){ s.HIevtCount_JetVars[1][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);} 
+      if(HIj60 && PD==1){ s.HIevtCount_JetVars[2][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);} 
+      if(HIj80 && PD==1){ s.HIevtCount_JetVars[3][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);} 
+      if(HIj100 && PD==1){ s.HIevtCount_JetVars[4][hiBin/10]->Fill(maxJtEta,maxJtPt); s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);} 
       if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
       if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
       if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
