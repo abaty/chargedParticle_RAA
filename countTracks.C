@@ -91,6 +91,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   unsigned char trkAlgo[50000];
   unsigned char trkOriginalAlgo[50000];
 
+  unsigned int run=0;
+  unsigned int lumi=0;
+
   int pVtx;
   int pBeamScrape;
   //int NoiseFilter; 
@@ -119,6 +122,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int t45=0;
   int t53=0;
   int HIMB[20]={0};
+  int HIj40_v1=0, HIj40_v2=0;
   int HIj40=0, HIj40_c30=0, HIj40_c50=0;
   int HIj60=0, HIj60_c30=0, HIj60_c50=0;
   int HIj80=0, HIj80_c30=0, HIj80_c50=0;
@@ -225,6 +229,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       hiCh = (TTree*)inputFile->Get("hiEvtAnalyzer/HiTree");
       hiCh->SetBranchAddress("hiBin",&hiBin);
       hiCh->SetBranchAddress("hiHF",&hiHF);
+      hiCh->SetBranchAddress("run",&run);
+      hiCh->SetBranchAddress("lumi",&lumi);
       trkCh->AddFriend(hiCh);
     }
    
@@ -241,7 +247,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v3",&t53);
     }else{
       for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_HIL1MinimumBiasHF2AND_part%d_v1",i),&(HIMB[i]));
-      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v2",&HIj40);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v1",&HIj40_v1);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v2",&HIj40_v2);
+      HIj40 = HIj40_v1 || HIj40_v2;
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_v1",&HIj60);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_v1",&HIj80);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_v1",&HIj100);
@@ -274,7 +282,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       //if(!NoiseFilter) continue;
       if(doOnly1Vertex && nVtx!=1) continue;
       if(isPP && (!pVtx || !pBeamScrape)) continue;
-      if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3)) continue;
+      if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3 || !isInGoldenJSON(run,lumi))) continue;
       bool MinBias = 0;
       for(int j = 0; j<20; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
       if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
