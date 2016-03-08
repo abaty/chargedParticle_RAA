@@ -10,6 +10,7 @@
 #include "TAttLine.h"
 #include "getTrkCorr.h"
 #include "TrkSettings.h"
+#include "goldenJSON.h"
 #include "Settings.h"
 #include <iostream>
 #include <fstream>
@@ -21,7 +22,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
-  bool useTrkCorrEverywhere = false;
+  bool useTrkCorrEverywhere = true;
   float caloMatchValue = 0.4;
   float jetEtaSelection = 2;
  
