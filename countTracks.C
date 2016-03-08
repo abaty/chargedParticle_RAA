@@ -155,18 +155,20 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
   //0 is MB, 1 is jet40/60, 2 is jet80
-  int PDindx[100];
+  int PDindx[500];
   for(unsigned int i = 0; i<inputFiles.size(); i++)
   {
     if(isPP){
       if(inputFiles.at(i).find("MinimumBias") != std::string::npos) PDindx[i]=0;
-      if(inputFiles.at(i).find("HighPtLowerJets") != std::string::npos) PDindx[i]=1;
-      if(inputFiles.at(i).find("HighPtJet80") != std::string::npos) PDindx[i]=2;
-      if(inputFiles.at(i).find("FullTrack") != std::string::npos) PDindx[i]=3;
+      else if(inputFiles.at(i).find("HighPtLowerJets") != std::string::npos) PDindx[i]=1;
+      else if(inputFiles.at(i).find("HighPtJet80") != std::string::npos) PDindx[i]=2;
+      else if(inputFiles.at(i).find("FullTrack") != std::string::npos) PDindx[i]=3;
+      else PDindx[i]=-1;
     }else{
-      if(inputFiles.at(i).find("MinimumBias") != std::string::npos) PDindx[i]=0;
-      if(inputFiles.at(i).find("HIHardProbes-") != std::string::npos) PDindx[i]=1;
-      if(inputFiles.at(i).find("HIHardProbesPeripheral") != std::string::npos) PDindx[i]=2;
+      if((inputFiles.at(i).find("MinimumBias") != std::string::npos) || (inputFiles.at(i).find("MinBias") != std::string::npos) PDindx[i]=0;
+      else if(inputFiles.at(i).find("HIHardProbes-") != std::string::npos) PDindx[i]=1;
+      else if(inputFiles.at(i).find("HIHardProbesPeripheral") != std::string::npos) PDindx[i]=2;
+      else PDindx[i]=-1;
     }
   }
 
