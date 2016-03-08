@@ -223,7 +223,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       evtCh->SetBranchAddress("pprimaryVertexFilter",&pprimaryVertexFilter);  
       evtCh->SetBranchAddress("phfCoincFilter3",&phfCoincFilter3); 
     } 
-    trkCh->AddFriend(evtCh);
    
     if(!isPP){
       hiCh = (TTree*)inputFile->Get("hiEvtAnalyzer/HiTree");
@@ -231,7 +230,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       hiCh->SetBranchAddress("hiHF",&hiHF);
       hiCh->SetBranchAddress("run",&run);
       hiCh->SetBranchAddress("lumi",&lumi);
-      trkCh->AddFriend(hiCh);
+      evtCh->AddFriend(hiCh);
     }
    
     hltCh = (TTree*)inputFile->Get("hltanalysis/HltTree");
@@ -278,11 +277,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     for(int i = 0; i<trkCh->GetEntries(); i++)
     {
       //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
-      trkCh->GetEntry(i);
+      evtCh->GetEntry(i);
       //if(!NoiseFilter) continue;
-      if(doOnly1Vertex && nVtx!=1) continue;
       if(isPP && (!pVtx || !pBeamScrape)) continue;
-      if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3 || !isInGoldenJSON(run,lumi))) continue;
+      if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3))continue;// || !isInGoldenJSON(run,lumi))) continue;
+      trkCh->GetEntry(i);
+      if(doOnly1Vertex && nVtx!=1) continue;
       bool MinBias = 0;
       for(int j = 0; j<20; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
       if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
