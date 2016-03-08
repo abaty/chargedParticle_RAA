@@ -121,7 +121,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int t34=0;
   int t45=0;
   int t53=0;
-  int HIMB[20]={0};
+  int HIMB[21]={0};
   int HIj40_v1=0, HIj40_v2=0;
   int HIj40=0, HIj40_c30=0, HIj40_c50=0;
   int HIj60=0, HIj60_c30=0, HIj60_c50=0;
@@ -155,7 +155,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
   //0 is MB, 1 is jet40/60, 2 is jet80
-  int PDindx[500];
+  int PDindx[5000];
   for(unsigned int i = 0; i<inputFiles.size(); i++)
   {
     if(isPP){
@@ -248,9 +248,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v3",&t53);
     }else{
       for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_HIL1MinimumBiasHF2AND_part%d_v1",i),&(HIMB[i]));
+      hltCh->SetBranchAddress("HLT_HIL1MinimumBiasHF2AND_v1"),&(HIMB[20]));
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v1",&HIj40_v1);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v2",&HIj40_v2);
-      HIj40 = HIj40_v1 || HIj40_v2;
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_v1",&HIj60);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_v1",&HIj80);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_v1",&HIj100);
@@ -283,10 +283,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       //if(!NoiseFilter) continue;
       if(isPP && (!pVtx || !pBeamScrape)) continue;
       if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3 || !isInGoldenJSON(run,lumi))) continue;
+
       trkCh->GetEntry(i);
       if(doOnly1Vertex && nVtx!=1) continue;
       bool MinBias = 0;
-      for(int j = 0; j<20; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
+      for(int j = 0; j<21; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
+      HIj40 = HIj40_v1 || HIj40_v2;
       if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
       if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30) continue;
   
