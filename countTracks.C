@@ -248,7 +248,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       hltCh->SetBranchAddress("HLT_FullTrack53ForPPRef_v3",&t53);
     }else{
       for(int i = 0; i<20; i++) hltCh->SetBranchAddress(Form("HLT_HIL1MinimumBiasHF2AND_part%d_v1",i),&(HIMB[i]));
-      hltCh->SetBranchAddress("HLT_HIL1MinimumBiasHF2AND_v1"),&(HIMB[20]));
+      hltCh->SetBranchAddress("HLT_HIL1MinimumBiasHF2AND_v1",&(HIMB[20]));
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v1",&HIj40_v1);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_v2",&HIj40_v2);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_v1",&HIj60);
