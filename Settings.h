@@ -36,15 +36,16 @@ class Settings {
   static const int maxTrktriggerBin = 500;
   
 
-  /*static const int nCentBins = 31;
+  static const int nCentBins = 31;
   int lowCentBin[nCentBins] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,6,10,2,6,10,14,16,0,0,14};
   int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18,6,10,18};
   double nColl[nCentBins] = {1819,1433,1127,882,685.9,526.5,399.3,297.5,217.1,155.1,107.9,73.51,48.76,31.46,19.69,12.02,7.042,3.974,2.12,1.164,392.4,98.33,30.74,805.7,267.25,65.415,15.87,5.502,1079.1,754,10.686};
-  */
-  static const int nCentBins = 30;
+  
+  /*static const int nCentBins = 30;
   int lowCentBin[nCentBins] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,6,10,2,6,10,14,16,0,0};
   int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18,6,10};
   double nColl[nCentBins] = {1819,1433,1127,882,685.9,526.5,399.3,297.5,217.1,155.1,107.9,73.51,48.76,31.46,19.69,12.02,7.042,3.974,2.12,1.164,392.4,98.33,30.74,805.7,267.25,65.415,15.87,5.502,1079.1,754};
+  */
 
   TH2D *spec[nTriggers],               *HIspec[HInTriggers][nCentBins];
   TH1D *evtCount[nTriggers],           *HIevtCount[HInTriggers][nCentBins];

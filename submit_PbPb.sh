@@ -5,7 +5,7 @@ then
 fi
 
 now="RAA_$(date +"%Y_%m_%d__%H_%M_%S")"
-njobs=150
+njobs=250
 
 mkdir $now
 cp fileLists/PbPb_fileList.txt $now/fileList.txt 
