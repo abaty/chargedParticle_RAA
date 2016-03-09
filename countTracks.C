@@ -22,7 +22,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
-  bool useTrkCorrEverywhere = true;
+  bool useTrkCorrEverywhere = false;
   float caloMatchValue = 0.5;
   float jetEtaSelection = 2;
  
