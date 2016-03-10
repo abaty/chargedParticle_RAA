@@ -22,7 +22,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
-  bool useTrkCorrEverywhere = false;
+  bool useTrkCorrEverywhere = true;
   float caloMatchValue = 0.5;
   float jetEtaSelection = 2;
  
@@ -399,8 +399,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
           {
-            if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
-            if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
+            if((chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
+            //if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
             if(jtpt[jt]<50) continue;
             float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(TMath::ACos(TMath::Cos(jtphi[jt]-trkPhi[j])),2);
             if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
@@ -410,13 +410,19 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(!useTrkCorrEverywhere) correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)){
-            if(!isPP){
+            /*if(!isPP){
               float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
               trkSkim->Fill(skimEntry);   
-             }
+             }*/ //code for skimming tracks failing jet cut
             continue;//upper boundary on track pt
           }
-          if(useTrkCorrEverywhere && (trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15)) continue;  
+          if(useTrkCorrEverywhere && (trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15)){
+            /*if(!isPP){
+              float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
+              trkSkim->Fill(skimEntry);   
+             }*///code for skimming tracks failing track cuts
+            continue;
+          }  
 
           //dividing by pt at bin center instead of track by track pt (just a convention)
           float binCenter;
@@ -471,8 +477,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
           {
-            if(isPP && (chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
-            if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
+            if((chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
+            //if(!isPP &&  (ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>2)) continue;
             if(jtpt[jt]<50) continue;
             float R = TMath::Power(jteta[jt]-trkEta[j],2) + TMath::Power(TMath::ACos(TMath::Cos(jtphi[jt]-trkPhi[j])),2);
             if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
