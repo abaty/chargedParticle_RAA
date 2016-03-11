@@ -20,14 +20,14 @@ void hyperonFractions(){
   /*int nEvts = 50000;
   int PHEvts = 100000;
   int EPOSEvts = 50000; */
-  int nEvts = 50000;
-  int PHEvts = 100000;
+  int nEvts = 100000;
+  int PHEvts = 200000;
   int EPOSEvts = 60000; 
 
   const int nBins = 10;
   float ptBins[nBins+1] = {0.5,1.6,2.4,3.2,4,4.8,5.6,6.4,7.2,9.6,14.4};
  
-  TFile * fP =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet220_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
+  TFile * fP =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet30_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
   TTree * PythiatrackTree = (TTree*)fP->Get("ppTrack/trackTree");
 
   TFile * fEPOS =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/PbPb_60kEPOS_v1/HiForest_Epos_merged_60k_v1.root","read");
@@ -315,7 +315,7 @@ void hyperonFractions(){
     maxDiffp->SetBinContent(i,diff2);
   }
   
-  TFile *f2 = TFile::Open("HyperonFractions_pthat220.root","recreate");
+  TFile *f2 = TFile::Open("HyperonFractions.root","recreate");
   pi->Write();
   k->Write();
   sig->Write();
@@ -408,7 +408,7 @@ void hyperonFractions(){
   c2->SaveAs("speciesUncertaintyCorrection.png");   
   c2->SaveAs("speciesUncertaintyCorrection.pdf");   
 
-  TFile *f3 = TFile::Open("HyperonFractions_pthat220.root","update");
+  TFile *f3 = TFile::Open("HyperonFractions.root","update");
   for(int i = 0; i<8; i++)
   {
     if(i==0) netSyst->Write();
