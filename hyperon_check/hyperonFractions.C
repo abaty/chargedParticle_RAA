@@ -24,8 +24,8 @@ void hyperonFractions(){
   int PHEvts = 200000;
   int EPOSEvts = 60000; 
 
-  const int nBins = 10;
-  float ptBins[nBins+1] = {0.5,1.6,2.4,3.2,4,4.8,5.6,6.4,7.2,9.6,14.4};
+  const int nBins = 14;
+  float ptBins[nBins+1] = {0.5,0.8,1.2,1.6,2,2.4,3.2,4,4.8,5.6,6.4,7.2,9.6,12,14.4};
  
   TFile * fP =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet30_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
   TTree * PythiatrackTree = (TTree*)fP->Get("ppTrack/trackTree");
@@ -384,13 +384,13 @@ void hyperonFractions(){
   for(int i = 1; i<gen[1]->GetSize()-1; i++)
   {
     float uncert[8] = {0};
-    uncert[1] = eff[1]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffpi->GetBinContent(i);
-    uncert[2] = eff[2]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffk->GetBinContent(i);
-    uncert[3] = eff[3]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffsig->GetBinContent(i);
-    uncert[4] = eff[4]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffsigm->GetBinContent(i);
-    uncert[5] = eff[5]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffxi->GetBinContent(i);
-    uncert[6] = eff[6]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffomega->GetBinContent(i);
-    uncert[7] = eff[7]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffp->GetBinContent(i);
+    uncert[1] = eff[1]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffpi->GetBinContent(i)/2.0;
+    uncert[2] = eff[2]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffk->GetBinContent(i)/2.0;
+    uncert[3] = eff[3]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffsig->GetBinContent(i)/2.0;
+    uncert[4] = eff[4]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffsigm->GetBinContent(i)/2.0;
+    uncert[5] = eff[5]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffxi->GetBinContent(i)/2.0;
+    uncert[6] = eff[6]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffomega->GetBinContent(i)/2.0;
+    uncert[7] = eff[7]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffp->GetBinContent(i)/2.0;
     float uSum = 0;
     float quadrature = 0;
     for(int j = 1; j<8; j++){
