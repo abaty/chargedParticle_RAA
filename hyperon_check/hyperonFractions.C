@@ -398,7 +398,7 @@ void hyperonFractions(){
       uSum += uncert[j];
       quadrature = Quad(quadrature,uncert[j]);
     }
-    netSyst->SetBinContent(i,uSum);
+    netSyst->SetBinContent(i,1./(1+uSum)-1);
     std::cout << uSum << " " << quadrature << "\n" << std::endl;
   }
 
