@@ -85,6 +85,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   float pfEcal[50000];
   float pfHcal[50000];
   float trkChi2[50000];
+  float zVtx[20];
   unsigned char trkNHit[50000];
   unsigned char trkNlayer[50000];
   unsigned char trkNdof[50000];
@@ -199,6 +200,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     trkCh->SetBranchAddress("trkNdof",&trkNdof);
     trkCh->SetBranchAddress("trkAlgo",&trkAlgo);
     trkCh->SetBranchAddress("trkOriginalAlgo",&trkOriginalAlgo);
+    trkCh->SetBranchAddress("zVtx",&zVtx);
     if(isPP){
       trkCh->SetBranchAddress("nTrkTimesnVtx",&nTrkTimesnVtx);
       trkCh->SetBranchAddress("trkDzOverDzError",&trkDzOverDzError);
@@ -288,6 +290,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
       trkCh->GetEntry(i);
       if(doOnly1Vertex && nVtx!=1) continue;
+      
+      bool hasGoodVtx = 0; 
+      for(int vtx = 0; vtx<nVtx; vtx++){
+        if(TMath::Abs(zVtx[vtx])<15) hasGoodVtx = true;
+      }
+      if(hasGoodVtx==false) continue;
+
       bool MinBias = 0;
       for(int j = 0; j<21; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
       HIj40 = HIj40_v1 || HIj40_v2;
@@ -317,6 +326,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         if(isPP){
           bool isCompatibleWithVertex = false;
           for(int v = 0; v<nVtx; v++){
+            if(TMath::Abs(zVtx[v])>15) continue;
             if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
               isCompatibleWithVertex = true;
               break;
@@ -390,6 +400,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(isPP){
             bool isCompatibleWithVertex = false;
             for(int v = 0; v<nVtx; v++){
+              if(TMath::Abs(zVtx[v])>15) continue;
               if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
                 isCompatibleWithVertex = true;
                 break;
@@ -467,6 +478,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(isPP){
             bool isCompatibleWithVertex = false;
             for(int v = 0; v<nVtx; v++){
+              if(TMath::Abs(zVtx[v])>15) continue;
               if(TMath::Abs(trkDxyOverDxyError[j*nVtx+v])<3 && TMath::Abs(trkDzOverDzError[j*nVtx+v])<3){
                 isCompatibleWithVertex = true;
                 break;
