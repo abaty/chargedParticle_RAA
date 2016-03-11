@@ -22,7 +22,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
-  bool useTrkCorrEverywhere = true;
+  bool useTrkCorrEverywhere = false;
   float caloMatchValue = 0.5;
   float jetEtaSelection = 2;
  
@@ -135,10 +135,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TrkCorr* trkCorr;
   TrkCorr* trkCorr_trk;
   if(isPP){  
-    trkCorr = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
+    //trkCorr = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
+    trkCorr = new TrkCorr("TrkCorr_Mar11_Iterative_PbPb_chi2/");
     trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_pp_TrkTrig/");
   }else{  
-    trkCorr = new TrkCorr("TrkCorr_Feb16_Iterative_PbPb/");
+    //trkCorr = new TrkCorr("TrkCorr_Feb16_Iterative_PbPb/");
+    trkCorr = new TrkCorr("TrkCorr_Mar11_Iterative_PbPb_chi2/");
     trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
   }
   TFile * inputFile;
@@ -381,6 +383,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
           if(TMath::Abs(trkEta[j])>1) continue;
           if(highPurity[j]!=1) continue;
+//TODO
+          if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;
+      
           if( trkPtError[j]/trkPt[j]>0.3) continue;        
           if(isPP){
             bool isCompatibleWithVertex = false;

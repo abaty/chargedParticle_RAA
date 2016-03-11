@@ -20,14 +20,14 @@ void hyperonFractions(){
   /*int nEvts = 50000;
   int PHEvts = 100000;
   int EPOSEvts = 50000; */
-  int nEvts = 5000;
-  int PHEvts = 10000;
-  int EPOSEvts = 5000; 
+  int nEvts = 50000;
+  int PHEvts = 100000;
+  int EPOSEvts = 60000; 
 
-  const int nBins = 5;
-  float ptBins[nBins+1] = {0.5,2,4,6.4,9.6,14.4};
+  const int nBins = 10;
+  float ptBins[nBins+1] = {0.5,1.6,2.4,3.2,4,4.8,5.6,6.4,7.2,9.6,14.4};
  
-  TFile * fP =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet30_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
+  TFile * fP =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet220_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
   TTree * PythiatrackTree = (TTree*)fP->Get("ppTrack/trackTree");
 
   TFile * fEPOS =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/PbPb_60kEPOS_v1/HiForest_Epos_merged_60k_v1.root","read");
@@ -266,56 +266,56 @@ void hyperonFractions(){
   delete leg;
 
   for(int i = 1; i<pi->GetSize()-1; i++){
-    float diff1 = TMath::Abs(EPOSpi->GetBinContent(i)-pi->GetBinContent(i));
-    float diff2 = TMath::Abs(EPOSpi->GetBinContent(i)-pppi->GetBinContent(i));
-    float diff3 = TMath::Abs(pppi->GetBinContent(i)-pi->GetBinContent(i));
-    float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
-    maxDiffpi->SetBinContent(i,diff);
+    //float diff1 = TMath::Abs(EPOSpi->GetBinContent(i)-pi->GetBinContent(i));
+    float diff2 = EPOSpi->GetBinContent(i)-pppi->GetBinContent(i);
+    //float diff3 = TMath::Abs(pppi->GetBinContent(i)-pi->GetBinContent(i));
+    //float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
+    maxDiffpi->SetBinContent(i,diff2);
   }
   for(int i = 1; i<k->GetSize()-1; i++){
-    float diff1 = TMath::Abs(EPOSk->GetBinContent(i)-k->GetBinContent(i));
-    float diff2 = TMath::Abs(EPOSk->GetBinContent(i)-ppk->GetBinContent(i));
-    float diff3 = TMath::Abs(ppk->GetBinContent(i)-k->GetBinContent(i));
-    float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
-    maxDiffk->SetBinContent(i,diff);
+    //float diff1 = TMath::Abs(EPOSk->GetBinContent(i)-k->GetBinContent(i));
+    float diff2 = EPOSk->GetBinContent(i)-ppk->GetBinContent(i);
+    //float diff3 = TMath::Abs(ppk->GetBinContent(i)-k->GetBinContent(i));
+    //float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
+    maxDiffk->SetBinContent(i,diff2);
   }
   for(int i = 1; i<sig->GetSize()-1; i++){
-    float diff1 = TMath::Abs(EPOSsig->GetBinContent(i)-sig->GetBinContent(i));
-    float diff2 = TMath::Abs(EPOSsig->GetBinContent(i)-ppsig->GetBinContent(i));
-    float diff3 = TMath::Abs(ppsig->GetBinContent(i)-sig->GetBinContent(i));
-    float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
-    maxDiffsig->SetBinContent(i,diff);
+    //float diff1 = TMath::Abs(EPOSsig->GetBinContent(i)-sig->GetBinContent(i));
+    float diff2 = EPOSsig->GetBinContent(i)-ppsig->GetBinContent(i);
+    //float diff3 = TMath::Abs(ppsig->GetBinContent(i)-sig->GetBinContent(i));
+    //float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
+    maxDiffsig->SetBinContent(i,diff2);
   }
   for(int i = 1; i<sigm->GetSize()-1; i++){
-    float diff1 = TMath::Abs(EPOSsigm->GetBinContent(i)-sigm->GetBinContent(i));
-    float diff2 = TMath::Abs(EPOSsigm->GetBinContent(i)-ppsigm->GetBinContent(i));
-    float diff3 = TMath::Abs(ppsigm->GetBinContent(i)-sigm->GetBinContent(i));
-    float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
-    maxDiffsigm->SetBinContent(i,diff);
+    //float diff1 = TMath::Abs(EPOSsigm->GetBinContent(i)-sigm->GetBinContent(i));
+    float diff2 = EPOSsigm->GetBinContent(i)-ppsigm->GetBinContent(i);
+    //float diff3 = TMath::Abs(ppsigm->GetBinContent(i)-sigm->GetBinContent(i));
+    //float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
+    maxDiffsigm->SetBinContent(i,diff2);
   }
   for(int i = 1; i<xi->GetSize()-1; i++){
-    float diff1 = TMath::Abs(EPOSxi->GetBinContent(i)-xi->GetBinContent(i));
-    float diff2 = TMath::Abs(EPOSxi->GetBinContent(i)-ppxi->GetBinContent(i));
-    float diff3 = TMath::Abs(ppxi->GetBinContent(i)-xi->GetBinContent(i));
-    float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
-    maxDiffxi->SetBinContent(i,diff);
+    //float diff1 = TMath::Abs(EPOSxi->GetBinContent(i)-xi->GetBinContent(i));
+    float diff2 = EPOSxi->GetBinContent(i)-ppxi->GetBinContent(i);
+    //float diff3 = TMath::Abs(ppxi->GetBinContent(i)-xi->GetBinContent(i));
+    //float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
+    maxDiffxi->SetBinContent(i,diff2);
   }
   for(int i = 1; i<omega->GetSize()-1; i++){
-    float diff1 = TMath::Abs(EPOSomega->GetBinContent(i)-omega->GetBinContent(i));
-    float diff2 = TMath::Abs(EPOSomega->GetBinContent(i)-ppomega->GetBinContent(i));
-    float diff3 = TMath::Abs(ppomega->GetBinContent(i)-omega->GetBinContent(i));
-    float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
-    maxDiffomega->SetBinContent(i,diff);
+    //float diff1 = TMath::Abs(EPOSomega->GetBinContent(i)-omega->GetBinContent(i));
+    float diff2 = EPOSomega->GetBinContent(i)-ppomega->GetBinContent(i);
+    //float diff3 = TMath::Abs(ppomega->GetBinContent(i)-omega->GetBinContent(i));
+    //float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
+    maxDiffomega->SetBinContent(i,diff2);
   }
   for(int i = 1; i<p->GetSize()-1; i++){
-    float diff1 = TMath::Abs(EPOSp->GetBinContent(i)-p->GetBinContent(i));
-    float diff2 = TMath::Abs(EPOSp->GetBinContent(i)-ppp->GetBinContent(i));
-    float diff3 = TMath::Abs(ppp->GetBinContent(i)-p->GetBinContent(i));
-    float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
-    maxDiffp->SetBinContent(i,diff);
+    //float diff1 = TMath::Abs(EPOSp->GetBinContent(i)-p->GetBinContent(i));
+    float diff2 = EPOSp->GetBinContent(i)-ppp->GetBinContent(i);
+    //float diff3 = TMath::Abs(ppp->GetBinContent(i)-p->GetBinContent(i));
+    //float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
+    maxDiffp->SetBinContent(i,diff2);
   }
   
-  TFile *f2 = TFile::Open("HyperonFractions.root","recreate");
+  TFile *f2 = TFile::Open("HyperonFractions_pthat220.root","recreate");
   pi->Write();
   k->Write();
   sig->Write();
@@ -379,6 +379,8 @@ void hyperonFractions(){
     eff[i]->Divide(gen[i]);
   }
 
+
+  TH1D * netSyst = (TH1D*)eff[1]->Clone("netSyst");
   for(int i = 1; i<gen[1]->GetSize()-1; i++)
   {
     float uncert[8] = {0};
@@ -396,11 +398,20 @@ void hyperonFractions(){
       uSum += uncert[j];
       quadrature = Quad(quadrature,uncert[j]);
     }
+    netSyst->SetBinContent(i,uSum);
     std::cout << uSum << " " << quadrature << "\n" << std::endl;
   }
-  TFile *f3 = TFile::Open("HyperonFractions.root","update");
+
+  netSyst->GetYaxis()->SetTitle("Species Fraction Correction (%)");
+  netSyst->GetXaxis()->SetTitle("p_{T}");
+  netSyst->Draw();
+  c2->SaveAs("speciesUncertaintyCorrection.png");   
+  c2->SaveAs("speciesUncertaintyCorrection.pdf");   
+
+  TFile *f3 = TFile::Open("HyperonFractions_pthat220.root","update");
   for(int i = 0; i<8; i++)
   {
+    if(i==0) netSyst->Write();
     gen[i]->Write();
     mgen[i]->Write();
     eff[i]->Write();
