@@ -1,3 +1,4 @@
+#include "TCut.h"
 #include "TH1D.h"
 #include "TAttLine.h"
 #include "TAttMarker.h"
@@ -9,18 +10,25 @@
 #include "TChain.h"
 #include <iostream>
 
+double Quad(double a, double b)
+{
+  return TMath::Power(TMath::Power(a,2) + TMath::Power(b,2),0.5);
+}
+
 void hyperonFractions(){
   TH1::SetDefaultSumw2();
-  int nEvts = 50000;
-  int EPOSEvts = 50000; 
+  /*int nEvts = 50000;
+  int PHEvts = 100000;
+  int EPOSEvts = 50000; */
+  int nEvts = 5000;
+  int PHEvts = 10000;
+  int EPOSEvts = 5000; 
 
-  const int nBins = 6;
-  float ptBins[nBins+1] = {0.5,1,2,4,6.4,9.6,14.4};
+  const int nBins = 5;
+  float ptBins[nBins+1] = {0.5,2,4,6.4,9.6,14.4};
  
-  //TFile * f =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/Pythia8_Dijet15_pp_TuneCUETP8M1_Hydjet_MinBias_5020GeV_FOREST_758_PrivMC/HiForest_PYTHIA_QCD80_TuneCUETP8M1_cfi_5020GeV_tag_PPForestJECv6_merged/0.root","read");
-  TFile * f =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet30_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
-  //TTree * trackTree = (TTree*)f->Get("anaTrack/trackTree");
-  TTree * PythiatrackTree = (TTree*)f->Get("ppTrack/trackTree");
+  TFile * fP =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet30_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
+  TTree * PythiatrackTree = (TTree*)fP->Get("ppTrack/trackTree");
 
   TFile * fEPOS =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/PbPb_60kEPOS_v1/HiForest_Epos_merged_60k_v1.root","read");
   TTree * EPOS = (TTree*)fEPOS->Get("HiGenParticleAna/hi");
@@ -39,6 +47,7 @@ void hyperonFractions(){
   TH1D *sigm = new TH1D("sigm","sigm",nBins,ptBins);
   TH1D *xi = new TH1D("xi","xi",nBins,ptBins);
   TH1D *omega = new TH1D("omega","omega",nBins,ptBins);
+  TH1D *p = new TH1D("p","p",nBins,ptBins);
   TH1D *ppch = new TH1D("ppch","ppch",nBins,ptBins);
   TH1D *pppi = new TH1D("pppi","pppi",nBins,ptBins);
   TH1D *ppk = new TH1D("ppk","ppk",nBins,ptBins);
@@ -46,6 +55,7 @@ void hyperonFractions(){
   TH1D *ppsigm = new TH1D("ppsigm","ppsigm",nBins,ptBins);
   TH1D *ppxi = new TH1D("ppxi","ppxi",nBins,ptBins);
   TH1D *ppomega = new TH1D("ppomega","ppomega",nBins,ptBins);
+  TH1D *ppp = new TH1D("ppp","ppp",nBins,ptBins);
   TH1D *EPOSch = new TH1D("EPOSch","EPOSch",nBins,ptBins);
   TH1D *EPOSpi = new TH1D("EPOSpi","EPOSpi",nBins,ptBins);
   TH1D *EPOSk = new TH1D("EPOSk","EPOSk",nBins,ptBins);
@@ -53,12 +63,14 @@ void hyperonFractions(){
   TH1D *EPOSsigm = new TH1D("EPOSsigm","EPOSsigm",nBins,ptBins);
   TH1D *EPOSxi = new TH1D("EPOSxi","EPOSxi",nBins,ptBins);
   TH1D *EPOSomega = new TH1D("EPOSomega","EPOSomega",nBins,ptBins);
+  TH1D *EPOSp = new TH1D("EPOSp","EPOSp",nBins,ptBins);
   TH1D *maxDiffpi = new TH1D("maxDiffpi","",nBins,ptBins);
   TH1D *maxDiffk = new TH1D("maxDiffk","",nBins,ptBins);
   TH1D *maxDiffsig = new TH1D("maxDiffsig","",nBins,ptBins);
   TH1D *maxDiffsigm = new TH1D("maxDiffsigm","",nBins,ptBins);
   TH1D *maxDiffxi = new TH1D("maxDiffxi","",nBins,ptBins);
   TH1D *maxDiffomega = new TH1D("maxDiffomega","",nBins,ptBins);
+  TH1D *maxDiffp = new TH1D("maxDiffp","",nBins,ptBins);
 
 
   std::cout << "Hydjet" << std::endl; 
@@ -69,6 +81,7 @@ void hyperonFractions(){
   trackTree->Draw("pPt>>sigm","pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==3112)","",nEvts);
   trackTree->Draw("pPt>>xi","pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3312","",nEvts);
   trackTree->Draw("pPt>>omega","pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",nEvts);
+  trackTree->Draw("pPt>>p","pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(pPId)==2212","",nEvts);
 
   std::cout << "Pythia" << std::endl;
   PythiatrackTree->Draw("pPt>>ppch","pPt>0.5 && TMath::Abs(pEta)<1","",10*nEvts);
@@ -78,6 +91,7 @@ void hyperonFractions(){
   PythiatrackTree->Draw("pPt>>ppsigm","pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==3112)","",10*nEvts);
   PythiatrackTree->Draw("pPt>>ppxi","pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3312","",10*nEvts);
   PythiatrackTree->Draw("pPt>>ppomega","pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",10*nEvts);
+  PythiatrackTree->Draw("pPt>>ppp","pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(pPId)==2212","",10*nEvts);
 
   std::cout << "EPOS" << std::endl;
   EPOS->Draw("pt>>EPOSch","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(chg)>0","",EPOSEvts);
@@ -87,6 +101,7 @@ void hyperonFractions(){
   EPOS->Draw("pt>>EPOSsigm","pt>0.5 && TMath::Abs(eta)<1 && ( TMath::Abs(pdg)==3112)","",EPOSEvts);
   EPOS->Draw("pt>>EPOSxi","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(pdg)==3312","",EPOSEvts);
   EPOS->Draw("pt>>EPOSomega","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(pdg)==3334","",EPOSEvts);
+  EPOS->Draw("pt>>EPOSp","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(pdg)==2212","",EPOSEvts);
   
   TLegend *leg;
   pi->Divide(ch);
@@ -226,76 +241,171 @@ void hyperonFractions(){
   c2->SaveAs("hyperonFrac_omega.png");
   c2->SaveAs("hyperonFrac_omega.pdf");
   delete leg;
+  
+  p->Divide(ch);
+  p->GetYaxis()->SetTitle("Ch. Particle Fraction");
+  p->GetYaxis()->SetRangeUser(0,0.05);
+  p->GetXaxis()->SetTitle("p_{T}");
+  p->Draw();
+  ppp->Divide(ppch);
+  ppp->SetMarkerColor(kRed);
+  ppp->SetLineColor(kRed);
+  ppp->Draw("same");
+  EPOSp->Divide(EPOSch);
+  EPOSp->SetMarkerColor(kBlue);
+  EPOSp->SetLineColor(kBlue);
+  EPOSp->Draw("same");
+  leg = new TLegend(0.2,0.7,0.6,0.9);
+  leg->AddEntry(p,"MB Hydjet","p");
+  leg->AddEntry(ppp,"PYTHIA Dijet 30","p");
+  leg->AddEntry(EPOSp,"MB PbPb EPOS","p");
+  leg->AddEntry((TObject*)0,"p+#bar{p}, |#eta|<1","");
+  leg->Draw("same");
+  c2->SaveAs("hyperonFrac_p.png");
+  c2->SaveAs("hyperonFrac_p.pdf");
+  delete leg;
 
-  for(int i = 1; i<pi->GetSize(); i++){
+  for(int i = 1; i<pi->GetSize()-1; i++){
     float diff1 = TMath::Abs(EPOSpi->GetBinContent(i)-pi->GetBinContent(i));
     float diff2 = TMath::Abs(EPOSpi->GetBinContent(i)-pppi->GetBinContent(i));
     float diff3 = TMath::Abs(pppi->GetBinContent(i)-pi->GetBinContent(i));
     float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
     maxDiffpi->SetBinContent(i,diff);
   }
-  for(int i = 1; i<k->GetSize(); i++){
+  for(int i = 1; i<k->GetSize()-1; i++){
     float diff1 = TMath::Abs(EPOSk->GetBinContent(i)-k->GetBinContent(i));
     float diff2 = TMath::Abs(EPOSk->GetBinContent(i)-ppk->GetBinContent(i));
     float diff3 = TMath::Abs(ppk->GetBinContent(i)-k->GetBinContent(i));
     float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
     maxDiffk->SetBinContent(i,diff);
   }
-  for(int i = 1; i<sig->GetSize(); i++){
+  for(int i = 1; i<sig->GetSize()-1; i++){
     float diff1 = TMath::Abs(EPOSsig->GetBinContent(i)-sig->GetBinContent(i));
     float diff2 = TMath::Abs(EPOSsig->GetBinContent(i)-ppsig->GetBinContent(i));
     float diff3 = TMath::Abs(ppsig->GetBinContent(i)-sig->GetBinContent(i));
     float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
     maxDiffsig->SetBinContent(i,diff);
   }
-  for(int i = 1; i<sigm->GetSize(); i++){
+  for(int i = 1; i<sigm->GetSize()-1; i++){
     float diff1 = TMath::Abs(EPOSsigm->GetBinContent(i)-sigm->GetBinContent(i));
     float diff2 = TMath::Abs(EPOSsigm->GetBinContent(i)-ppsigm->GetBinContent(i));
     float diff3 = TMath::Abs(ppsigm->GetBinContent(i)-sigm->GetBinContent(i));
     float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
     maxDiffsigm->SetBinContent(i,diff);
   }
-  for(int i = 1; i<xi->GetSize(); i++){
+  for(int i = 1; i<xi->GetSize()-1; i++){
     float diff1 = TMath::Abs(EPOSxi->GetBinContent(i)-xi->GetBinContent(i));
     float diff2 = TMath::Abs(EPOSxi->GetBinContent(i)-ppxi->GetBinContent(i));
     float diff3 = TMath::Abs(ppxi->GetBinContent(i)-xi->GetBinContent(i));
     float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
     maxDiffxi->SetBinContent(i,diff);
   }
-  for(int i = 1; i<omega->GetSize(); i++){
+  for(int i = 1; i<omega->GetSize()-1; i++){
     float diff1 = TMath::Abs(EPOSomega->GetBinContent(i)-omega->GetBinContent(i));
     float diff2 = TMath::Abs(EPOSomega->GetBinContent(i)-ppomega->GetBinContent(i));
     float diff3 = TMath::Abs(ppomega->GetBinContent(i)-omega->GetBinContent(i));
     float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
     maxDiffomega->SetBinContent(i,diff);
   }
+  for(int i = 1; i<p->GetSize()-1; i++){
+    float diff1 = TMath::Abs(EPOSp->GetBinContent(i)-p->GetBinContent(i));
+    float diff2 = TMath::Abs(EPOSp->GetBinContent(i)-ppp->GetBinContent(i));
+    float diff3 = TMath::Abs(ppp->GetBinContent(i)-p->GetBinContent(i));
+    float diff = TMath::Max(diff3,TMath::Max(diff1,diff2));
+    maxDiffp->SetBinContent(i,diff);
+  }
   
-  TFile *f2 = TFile::Open("HydjetFractions.root","recreate");
+  TFile *f2 = TFile::Open("HyperonFractions.root","recreate");
   pi->Write();
   k->Write();
   sig->Write();
   sigm->Write();
   xi->Write();
   omega->Write();
+  p->Write();
   pppi->Write();
   ppk->Write();
   ppsig->Write();
   ppsigm->Write();
   ppxi->Write();
   ppomega->Write();
+  ppp->Write();
   EPOSpi->Write();
   EPOSk->Write();
   EPOSsig->Write();
   EPOSsigm->Write();
   EPOSxi->Write();
   EPOSomega->Write();
-  maxDiffpi->SetBinContent(i,diff);
-  maxDiffk->SetBinContent(i,diff);
-  maxDiffsig->SetBinContent(i,diff);
-  maxDiffsigm->SetBinContent(i,diff);
-  maxDiffomega->SetBinContent(i,diff);
-  maxDiffxi->SetBinContent(i,diff);
+  EPOSp->Write();
+  maxDiffpi->Write();
+  maxDiffk->Write();
+  maxDiffsig->Write();
+  maxDiffsigm->Write();
+  maxDiffomega->Write();
+  maxDiffxi->Write();
+  maxDiffp->Write();
   f2->Close();
+  
+  TFile * fPH =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/Pythia8_Dijet15_pp_TuneCUETP8M1_Hydjet_MinBias_5020GeV_FOREST_758_PrivMC/HiForest_PYTHIA_QCD80_TuneCUETP8M1_cfi_5020GeV_tag_PPForestJECv6_merged/0.root","read");
+  TTree * PHtrackTree = (TTree*)fPH->Get("anaTrack/trackTree");
+
+ 
+  TCut ts = "!(mtrkPtError/mtrkPt>0.3 || TMath::Abs(mtrkDz1/mtrkDzError1)>3 || TMath::Abs(mtrkDxy1/mtrkDxyError1)>3 || mhighPurity==0)";
+ 
+  TH1D *gen[8];
+  TH1D *mgen[8];
+  for(int i = 0; i<8; i++) gen[i] = new TH1D(Form("gen%d",i),Form("gen%d",i),nBins,ptBins);
+  for(int i = 0; i<8; i++) mgen[i] = new TH1D(Form("mgen%d",i),Form("gen%d",i),nBins,ptBins);
+  PHtrackTree->Draw("pPt>>gen0","TMath::Abs(pEta)<1","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen1","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==211","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen2","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==321","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen3","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3222","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen4","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3112","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen5","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3312","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen6","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen7","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==2212","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen0",ts && "TMath::Abs(pEta)<1 ","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen1",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==211","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen2",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==321","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen3",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3222","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen4",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3112","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen5",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3312","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen6",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen7",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==2212","",PHEvts);
+
+  TH1D * eff[8];
+  for(int i = 0; i<8; i++){
+    eff[i] = (TH1D*)mgen[i]->Clone(Form("eff%d",i));
+    eff[i]->Divide(gen[i]);
+  }
+
+  for(int i = 1; i<gen[1]->GetSize()-1; i++)
+  {
+    float uncert[8] = {0};
+    uncert[1] = eff[1]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffpi->GetBinContent(i);
+    uncert[2] = eff[2]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffk->GetBinContent(i);
+    uncert[3] = eff[3]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffsig->GetBinContent(i);
+    uncert[4] = eff[4]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffsigm->GetBinContent(i);
+    uncert[5] = eff[5]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffxi->GetBinContent(i);
+    uncert[6] = eff[6]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffomega->GetBinContent(i);
+    uncert[7] = eff[7]->GetBinContent(i)/eff[0]->GetBinContent(i)*maxDiffp->GetBinContent(i);
+    float uSum = 0;
+    float quadrature = 0;
+    for(int j = 1; j<8; j++){
+      std::cout << j << " " << uncert[j] << std::endl; 
+      uSum += uncert[j];
+      quadrature = Quad(quadrature,uncert[j]);
+    }
+    std::cout << uSum << " " << quadrature << "\n" << std::endl;
+  }
+  TFile *f3 = TFile::Open("HyperonFractions.root","update");
+  for(int i = 0; i<8; i++)
+  {
+    gen[i]->Write();
+    mgen[i]->Write();
+    eff[i]->Write();
+  }
+  f3->Close();
 }
 
 
