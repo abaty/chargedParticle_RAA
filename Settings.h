@@ -73,6 +73,8 @@ class Settings {
   TH1D * RAA_trk[nCentBins];
 
   TH2D *h_scale, *h_scale_trk, *h_HIscale, *h_HIscale_trk;
+  TH2D *h_normErr, *h_normErr_trk, *h_HInormErr, *h_HInormErr_trk;
+  TH1D *h_normSyst, *h_normSyst_trk, *h_HInormSyst[nCentBins], *h_HInormSyst_trk[nCentBins];
   
   Settings();
 };

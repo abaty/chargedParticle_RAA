@@ -107,10 +107,12 @@ void makeSpectrum()
   float HIscale_trk[s.HInTriggers_trk][3];
   s.h_scale = new TH2D("h_scale","h_scale",10,0,10,10,0,10);
   s.h_scale_trk = new TH2D("h_scale_trk","h_scale_trk",10,0,10,10,0,10);
-  for(int i = 0; i<3; i++){
-    s.h_HIscale = new TH2D("h_HIscale","h_HIscale",10,0,10,10,0,10);
-    s.h_HIscale_trk = new TH2D("h_HIscale_trk","h_HIscale_trk",10,0,10,10,0,10);
-  } 
+  s.h_HIscale = new TH2D("h_HIscale","h_HIscale",10,0,10,10,0,10);
+  s.h_HIscale_trk = new TH2D("h_HIscale_trk","h_HIscale_trk",10,0,10,10,0,10);
+  s.h_normErr = new TH2D("h_normErr","h_normErr",10,0,10,10,0,10);
+  s.h_normErr_trk = new TH2D("h_normErr_trk","h_normErr_trk",10,0,10,10,0,10);
+  s.h_HInormErr = new TH2D("h_HInormErr","h_HInormErr",10,0,10,10,0,10);
+  s.h_HInormErr_trk = new TH2D("h_HInormErr_trk","h_HInormErr_trk",10,0,10,10,0,10);
   //*****************************************************************************************************************************************************
   //pp jet triggers
   for(int i = 0; i<s.nTriggers; i++)
@@ -118,6 +120,7 @@ void makeSpectrum()
     scale[i] = 1;//using 68mb as inelastic pp xsection
     for(int j = 0; j<i; j++){
       scale[i] = scale[i]*s.evtCount[j]->Integral(s.evtCount[j]->FindBin(s.triggerOverlapBins[j+1]),s.evtCount[j]->FindBin(s.maxJetBin))/(double)s.evtCount[j+1]->Integral(s.evtCount[j+1]->FindBin(s.triggerOverlapBins[j+1]),s.evtCount[j+1]->FindBin(s.maxJetBin));
+      if(i>0) s.h_normErr->SetBinContent(i,1,TMath::Power(1.0/s.evtCount[j]->Integral(s.evtCount[j]->FindBin(s.triggerOverlapBins[j+1]),s.evtCount[j]->FindBin(s.maxJetBin))+1.0/s.evtCount[j+1]->Integral(s.evtCount[j+1]->FindBin(s.triggerOverlapBins[j+1]),s.evtCount[j+1]->FindBin(s.maxJetBin)),0.5));//error on last overlap
     }
     std::cout << scale[i] << std::endl;
     s.spec[i]->Scale(scale[i]);
@@ -155,6 +158,7 @@ void makeSpectrum()
     scale_trk[i] = 1;//using 68mb as inelastic pp xsection
     for(int j = 0; j<i; j++){
       scale_trk[i] = scale_trk[i]*s.evtCount_trk[j]->Integral(s.evtCount_trk[j]->FindBin(s.triggerOverlapBins_trk[j+1]),s.evtCount_trk[j]->FindBin(s.maxTrktriggerBin))/(double)s.evtCount_trk[j+1]->Integral(s.evtCount_trk[j+1]->FindBin(s.triggerOverlapBins_trk[j+1]),s.evtCount_trk[j+1]->FindBin(s.maxTrktriggerBin));
+      if(i>0) s.h_normErr_trk->SetBinContent(i,1,TMath::Power(1.0/s.evtCount_trk[j]->Integral(s.evtCount_trk[j]->FindBin(s.triggerOverlapBins_trk[j+1]),s.evtCount_trk[j]->FindBin(s.maxTrktriggerBin))+1.0/s.evtCount_trk[j+1]->Integral(s.evtCount_trk[j+1]->FindBin(s.triggerOverlapBins_trk[j+1]),s.evtCount_trk[j+1]->FindBin(s.maxTrktriggerBin)),0.5));
     }
     std::cout <<"pp scale: Trigger " << i  <<" "<< scale_trk[i] << std::endl;
     s.spec_trk[i]->Scale(scale_trk[i]);
@@ -198,6 +202,7 @@ void makeSpectrum()
       for(int c = combinationCentUpperBoundary[m]; c>=combinationCentLowerBoundary[m]; c--) tempEvtCount[i][m]->Add(s.HIevtCount[i][c]);
       for(int j = 0; j<i; j++){
         HIscale[i][m] = HIscale[i][m]*tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j][m]->FindBin(s.maxJetBin))/(double)tempEvtCount[j+1][m]->Integral(tempEvtCount[j+1][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j+1][m]->FindBin(s.maxJetBin));
+        if(i>0) s.h_HInormErr->SetBinContent(i,m+1,TMath::Power(1.0/tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j][m]->FindBin(s.maxJetBin))+1.0/tempEvtCount[j+1][m]->Integral(tempEvtCount[j+1][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j+1][m]->FindBin(s.maxJetBin)),0.5));
       }
       std::cout <<"PbPb scale: Trigger and cent region "<< i<<" "<<m<<" "<<HIscale[i][m] << std::endl;
     }
@@ -267,6 +272,7 @@ void makeSpectrum()
       for(int c = combinationCentUpperBoundary_trk[m]; c>=combinationCentLowerBoundary_trk[m]; c--) tempEvtCount_trk[i][m]->Add(s.HIevtCount_trk[i][c]);
       for(int j = 0; j<i; j++){
         HIscale_trk[i][m] = HIscale_trk[i][m]*tempEvtCount_trk[j][m]->Integral(tempEvtCount_trk[j][m]->FindBin(s.HItriggerOverlapBins_trk[j+1]),tempEvtCount_trk[j][m]->FindBin(s.maxTrktriggerBin))/(double)tempEvtCount_trk[j+1][m]->Integral(tempEvtCount_trk[j+1][m]->FindBin(s.HItriggerOverlapBins_trk[j+1]),tempEvtCount_trk[j+1][m]->FindBin(s.maxTrktriggerBin));
+        if(i>0) s.h_HInormErr_trk->SetBinContent(i,m+1,TMath::Power(1.0/tempEvtCount_trk[j][m]->Integral(tempEvtCount_trk[j][m]->FindBin(s.HItriggerOverlapBins_trk[j+1]),tempEvtCount_trk[j][m]->FindBin(s.maxTrktriggerBin))+1.0/tempEvtCount_trk[j+1][m]->Integral(tempEvtCount_trk[j+1][m]->FindBin(s.HItriggerOverlapBins_trk[j+1]),tempEvtCount_trk[j+1][m]->FindBin(s.maxTrktriggerBin)),0.5));
       }
       std::cout <<"PbPb scale: Trigger and cent region "<< i<<" "<<m<<" "<<HIscale_trk[i][m] << std::endl;
     }
@@ -373,13 +379,62 @@ void makeSpectrum()
   int nVtx = 0, nVtx_trk = 0;
   for(int i = 1; i<s.nVtxMB->GetSize()+1;i++) nVtx = nVtx+i*s.nVtxMB->GetBinContent(s.nVtxMB->FindBin(i));
   for(int i = 1; i<s.nVtxMB_trk->GetSize()+1;i++) nVtx_trk = nVtx_trk+i*s.nVtxMB_trk->GetBinContent(s.nVtxMB_trk->FindBin(i));
-  //*************************OUTPUT**********************************************************
   
   TFile * outF = TFile::Open("Spectra.root","recreate");
+  //propagating nomalization errors
+  //**************************************************************SYSTEMATICS***************************************************
+  for(int m = 1; m<4; m++){
+    for(int i = 1; i<10; i++){
+      s.h_normErr->SetBinContent(i,m,TMath::Power(TMath::Power(s.h_normErr->GetBinContent(i,m),2)+TMath::Power(s.h_normErr->GetBinContent(i-1,m),2),0.5));
+      s.h_normErr_trk->SetBinContent(i,m,TMath::Power(TMath::Power(s.h_normErr_trk->GetBinContent(i,m),2)+TMath::Power(s.h_normErr_trk->GetBinContent(i-1,m),2),0.5));
+      s.h_HInormErr->SetBinContent(i,m,TMath::Power(TMath::Power(s.h_HInormErr->GetBinContent(i,m),2)+TMath::Power(s.h_HInormErr->GetBinContent(i-1,m),2),0.5));
+      s.h_HInormErr_trk->SetBinContent(i,m,TMath::Power(TMath::Power(s.h_HInormErr_trk->GetBinContent(i,m),2)+TMath::Power(s.h_HInormErr_trk->GetBinContent(i-1,m),2),0.5));
+    }
+  }
+  s.h_normErr->Write();
+  s.h_normErr_trk->Write();
+  s.h_HInormErr->Write();
+  s.h_HInormErr_trk->Write();
+ 
+  //adding up normalization systematics 
+  s.h_normSyst = (TH1D*)s.pp->Clone("h_normSyst");
+  s.h_normSyst->Reset();
+  s.h_normSyst_trk = (TH1D*)s.pp_trk->Clone("h_normSyst_trk");
+  s.h_normSyst_trk->Reset();
+  for(int c = 0; c<s.nCentBins; c++){
+    s.h_HInormSyst[c] = (TH1D*) s.HI[c]->Clone(Form("h_HInormSyst_%d_%d",5*s.lowCentBin[c],5*s.highCentBin[c]));
+    s.h_HInormSyst_trk[c] = (TH1D*) s.HI_trk[c]->Clone(Form("h_HInormSyst_trk_%d_%d",5*s.lowCentBin[c],5*s.highCentBin[c]));
+    s.h_HInormSyst[c]->Reset();
+    s.h_HInormSyst_trk[c]->Reset();
+  }
+  for(int j = 1; j<s.h_normSyst->GetSize()-1; j++){
+    for(int i = 0; i<s.nTriggers; i++) s.h_normSyst->SetBinContent(j,s.h_normSyst->GetBinContent(j)+s.h_normErr->GetBinContent(i,1)*s.ppUsedByTrigger[i]->GetBinContent(j)/s.pp->GetBinContent(j)); 
+    for(int i = 0; i<s.nTriggers_trk; i++)  s.h_normSyst_trk->SetBinContent(j,s.h_normSyst_trk->GetBinContent(j)+s.h_normErr_trk->GetBinContent(i,1)*s.ppUsedByTrigger_trk[i]->GetBinContent(j)/s.pp_trk->GetBinContent(j)); 
+  }
+  s.h_normSyst->Write();
+  s.h_normSyst_trk->Write();
+  for(int c = 0; c<s.nCentBins; c++){ 
+    for(int cc = s.lowCentBin[c]; cc<s.highCentBin[c]; cc++){ 
+      for(int j = 1; j<s.h_HInormSyst[c]->GetSize()-1; j++){
+        for(int i = 0; i<s.HInTriggers; i++) s.h_HInormSyst[c]->SetBinContent(j,s.h_HInormSyst[c]->GetBinContent(j)+s.h_HInormErr->GetBinContent(i,(cc<6)?1:((cc<10)?2:3))*s.HIUsedByTrigger[i][cc]->GetBinContent(j)/s.HI[c]->GetBinContent(j));
+        for(int i = 0; i<s.HInTriggers_trk; i++)  s.h_HInormSyst_trk[c]->SetBinContent(j,s.h_HInormSyst_trk[c]->GetBinContent(j)+s.h_HInormErr_trk->GetBinContent(i,(cc<6)?1:2)*s.HIUsedByTrigger_trk[i][cc]->GetBinContent(j)/s.HI_trk[c]->GetBinContent(j)); 
+      }
+    }
+    s.h_HInormSyst[c]->Write();
+    s.h_HInormSyst_trk[c]->Write();  
+  }
+  
+  //*************************OUTPUT**********************************************************
+  
   s.pp_perMBTrigger = (TH1D*)s.pp->Clone("pp_NotperMBTrigger");
   s.pp_perMBTrigger_trk = (TH1D*)s.pp_trk->Clone("pp_NotperMBTrigger_trk");
+  s.pp_perMBTrigger->Scale(1.0/((scale[s.nTriggers-1])*(25.775*1000000000)));//25.775 pb GOLDEN JSON LUMI for jet80 trigger
+  s.pp_perMBTrigger_trk->Scale(1.0/((scale_trk[s.nTriggers_trk-1])*(5.714069*1000000000)));//25.775 pb GOLDEN JSON LUMI for track53 trigger
+
   s.pp_perMBTrigger->Write();
   s.pp_perMBTrigger_trk->Write();
+  s.pp_perMBTrigger->SetDirectory(0);
+  s.pp_perMBTrigger_trk->SetDirectory(0);
   s.pp->Scale(1/(float)nVtx);
   s.pp_trk->Scale(1/(float)nVtx);
   s.pp->Write();
@@ -458,6 +513,8 @@ void makeSpectrum()
   s.h_scale_trk->Write();
   s.h_HIscale->Write();
   s.h_HIscale_trk->Write();
+
+ 
   
   makePlotsPbPb(s);
   outF->Close();
