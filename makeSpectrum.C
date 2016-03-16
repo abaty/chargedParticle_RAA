@@ -17,6 +17,7 @@
 #include "THStack.h"
 #include "ppPlotting.C"
 #include "PbPbPlotting.C"
+#include "prettyPlotting.C"
 
 void makeSpectrum()
 {
@@ -519,4 +520,5 @@ void makeSpectrum()
   makePlotsPbPb(s);
   outF->Close();
   makePlotsPP(s);
+  prettyPlotting(s);
 }
