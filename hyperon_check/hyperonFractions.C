@@ -119,8 +119,8 @@ void hyperonFractions(int isPP = 0){
 
     std::cout << "EPOS" << std::endl;
     EPOS->Draw("pt>>EPOSch","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(chg)>0","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSpi","pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==211 || TMath::Abs(pPId)==213)","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSk","pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==321 || TMath::Abs(pPId)==323)","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSpi","pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==211 || TMath::Abs(pdg)==213)","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSk","pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==321 || TMath::Abs(pdg)==323)","",EPOSEvts);
     EPOS->Draw("pt>>EPOSsig","pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==3222)","",EPOSEvts);
     EPOS->Draw("pt>>EPOSsigm","pt>0.5 && TMath::Abs(eta)<1 && ( TMath::Abs(pdg)==3112)","",EPOSEvts);
     EPOS->Draw("pt>>EPOSxi","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(TMath::Abs(pdg)-3312)<=2","",EPOSEvts);

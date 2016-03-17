@@ -346,7 +346,7 @@ void makePlotsPbPb(Settings s)
     s.RAA_trk[c] = (TH1D*)s.HI_trk[c]->Clone(Form("RAA_trk_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     //s.RAA_trk[c]->Scale(1/s.nColl[c]);//for using lumi
     //s.RAA_trk[c]->Divide(s.pp_trk); //for using lumi
-    s.RAA_trk[c]->Scale(70.0/s.nColl[c]);//TAA
+    s.RAA_trk[c]->Scale(1.0/s.TAA[c]);//TAA
     s.RAA_trk[c]->Divide(s.pp_perMBTrigger_trk);//for not using lumi
     //s.RAA_trk[c]->Write();
 

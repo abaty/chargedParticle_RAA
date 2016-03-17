@@ -110,7 +110,7 @@ void prettyPlotting(Settings s){
     h[c]->GetYaxis()->SetRangeUser(0,1.4);
     h[c]->Draw();
   
-    float lumiUncert = 0.1;
+    float lumiUncert = Quad(0.1,s.TAAuncert[c]/100.0);//10% for pp lumi, added in quad with TAA
     bLumi->SetFillColor(kGray);
     bLumi->SetLineWidth(0);
     bLumi->DrawBox(0.9,1-lumiUncert,1.5,1+lumiUncert);
