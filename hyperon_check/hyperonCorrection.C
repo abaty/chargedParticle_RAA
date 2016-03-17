@@ -3,14 +3,18 @@
 
 #include "TH1D.h"
 #include "TFile.h"
+#include "TMath.h"
 #include <iostream>
-void applyHyperonCorrection(bool isPP, TH1D* h){
+#include <string>
+
+//sign is -1 for removing correction for divinding by it
+TH1D* returnHyperonCorrection(bool isPP, TH1D* h, std::string dirToCorrection=""){
 
   if(isPP){
 
   }else{
     std::cout << "Opening PbPb Hyperon Correction file..." << std::endl;
-    TFile * hyperFile = TFile::Open("HyperonFractions.root","read");
+    TFile * hyperFile = TFile::Open(Form("%sHyperonFractions.root",dirToCorrection.c_str()),"read");
     TH1D * hyperonCorr = (TH1D*)hyperFile->Get("netSyst");
 
     //zeroing out the lower and upper overlfow bins
@@ -24,12 +28,11 @@ void applyHyperonCorrection(bool isPP, TH1D* h){
     {
       float scale = hyperonCorr->GetBinContent(hyperonCorr->FindBin(h->GetBinCenter(i)));
       scale = 1+scale;
-      h->SetBinContent(i,h->GetBinContent(i)*scale); 
-      h->SetBinError(i,h->GetBinError(i)*scale); 
+      h->SetBinContent(i,scale); 
+      h->SetBinError(i,0); 
     }
     hyperFile->Close();
   }
-  std::cout << "Done applying hyperon correction!" << std::endl;
-  return;
+  return h;
 }
 #endif

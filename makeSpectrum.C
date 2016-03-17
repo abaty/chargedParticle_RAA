@@ -414,6 +414,8 @@ void makeSpectrum()
   }
   s.h_normSyst->Write();
   s.h_normSyst_trk->Write();
+  s.h_normSyst->SetDirectory(0);
+  s.h_normSyst_trk->SetDirectory(0);
   for(int c = 0; c<s.nCentBins; c++){ 
     for(int cc = s.lowCentBin[c]; cc<s.highCentBin[c]; cc++){ 
       for(int j = 1; j<s.h_HInormSyst[c]->GetSize()-1; j++){
@@ -423,6 +425,8 @@ void makeSpectrum()
     }
     s.h_HInormSyst[c]->Write();
     s.h_HInormSyst_trk[c]->Write();  
+    s.h_HInormSyst[c]->SetDirectory(0);
+    s.h_HInormSyst_trk[c]->SetDirectory(0);  
   }
   
   //*************************OUTPUT**********************************************************

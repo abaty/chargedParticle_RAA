@@ -316,6 +316,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       }
   
       float maxTrackPt = 0;
+      float eventMultiplicity = 0;
       for(int j=0; j<nTrk; j++)
       {
         if(TMath::Abs(trkEta[j])>1 || !highPurity[j]) continue;

@@ -145,6 +145,7 @@ void makePlotsPbPb(Settings s)
   for(int c = 0; c<s.nCentBins;c++){
     s.HI[c]->SetMarkerSize(0.8);
     s.HI[c]->GetYaxis()->SetRangeUser(TMath::Max(s.HI[20]->GetMinimum()/200.0,1e-15),s.HI[20]->GetMaximum()*10);
+    s.HI[c]->GetXaxis()->SetRangeUser(0.7,400);
     s.HI[c]->Draw();
     s.HIUsedByTrigger[0][c]->SetFillColor(kGray);
     s.HIUsedByTrigger[4][c]->SetFillColor(kCyan+2);
@@ -174,8 +175,10 @@ void makePlotsPbPb(Settings s)
   for(int c = 0; c<s.nCentBins;c++){
     c1->Clear();
     s.RAA[c] = (TH1D*)s.HI[c]->Clone(Form("RAA_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
-    s.RAA[c]->Scale(1/s.nColl[c]);
-    s.RAA[c]->Divide(s.pp); 
+    //s.RAA[c]->Scale(1/s.nColl[c]);//for not using lumi
+    //s.RAA[c]->Divide(s.pp);//for not using lumi
+    s.RAA[c]->Scale(70.0/s.nColl[c]);//TAA
+    s.RAA[c]->Divide(s.pp_perMBTrigger);//for not using lumi
     s.RAA[c]->Write();
 
     s.RAA[c]->GetYaxis()->SetRangeUser(0,1.2); 
@@ -309,6 +312,7 @@ void makePlotsPbPb(Settings s)
     c2->Clear();
     s.HI_trk[c]->SetMarkerSize(0.8);
     s.HI_trk[c]->GetYaxis()->SetRangeUser(TMath::Max(s.HI_trk[20]->GetMinimum()/200.0,1e-15),s.HI_trk[20]->GetMaximum()*10);
+    s.HI_trk[c]->GetXaxis()->SetRangeUser(0.7,400);
     s.HI_trk[c]->Draw();
     s.HIUsedByTrigger_trk[0][c]->SetFillColor(kGray);
     s.HIUsedByTrigger_trk[3][c]->SetFillColor(kBlue);
@@ -340,8 +344,10 @@ void makePlotsPbPb(Settings s)
   for(int c = 0; c<s.nCentBins;c++){
     c2->Clear();
     s.RAA_trk[c] = (TH1D*)s.HI_trk[c]->Clone(Form("RAA_trk_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
-    s.RAA_trk[c]->Scale(1/s.nColl[c]);
-    s.RAA_trk[c]->Divide(s.pp_trk); 
+    //s.RAA_trk[c]->Scale(1/s.nColl[c]);//for using lumi
+    //s.RAA_trk[c]->Divide(s.pp_trk); //for using lumi
+    s.RAA_trk[c]->Scale(70.0/s.nColl[c]);//TAA
+    s.RAA_trk[c]->Divide(s.pp_perMBTrigger_trk);//for not using lumi
     //s.RAA_trk[c]->Write();
 
     s.RAA_trk[c]->GetYaxis()->SetRangeUser(0,1.2); 
