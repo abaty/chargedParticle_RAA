@@ -11,6 +11,7 @@
 #include "getTrkCorr.h"
 #include "TrkSettings.h"
 #include "goldenJSON.h"
+#include "EventSelectionCorrector.C"
 #include "Settings.h"
 #include <iostream>
 #include <fstream>
@@ -142,6 +143,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_PbPb/");
     trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
   }
+  EventSelectionCorrector corrEvSel;
+
   TFile * inputFile;
   TTree * trkCh;
   TTree * jetCh;
@@ -313,15 +316,18 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           maxJtPt = jtpt[j];
           maxJtEta = jteta[j];
         }
-      }
+      }//end maxJt
   
       float maxTrackPt = 0;
       float eventMultiplicity = 0;
       for(int j=0; j<nTrk; j++)
       {
-        if(TMath::Abs(trkEta[j])>1 || !highPurity[j]) continue;
-        if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7  || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; //track trigger cuts
-       
+        if(TMath::Abs(trkEta[j])>2.4) continue;
+        if(!highPurity[j]) continue;
+        if(trkPt[j]<0.5 || trkPt[j]>400) continue;
+        if(trkPtError[j]/trkPt[j]>0.1) continue; 
+        if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;      
+        if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
         if(isPP){
           bool isCompatibleWithVertex = false;
           for(int v = 0; v<nVtx; v++){
@@ -337,8 +343,19 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
         if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
         if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
+        eventMultiplicity++;          
+
+        //applying some tighter cuts before doing the maxTrackPt calculaiton
+        if(TMath::Abs(trkEta[j])>1) continue;
+        if(trkNHit[j]<11  || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7) continue; //track trigger cuts
         if(trkPt[j]>maxTrackPt) maxTrackPt = trkPt[j];
-      }
+      }//end maxTrck
+ 
+      float evtSelCorrection;
+      if(isPP) evtSelCorrection = corrEvSel.getEventWeightFromData(eventMultiplicity,nVtx);
+      //float eventSelectionCorrection = getEventWeightFromMC(eventMultiplicity,nVtx);
+      else     evtSelCorrection = 1;
+ 
       int PD = PDindx[nFile];
       if(MinBias && PD==0)
       {
@@ -423,6 +440,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           float correction;
           if(!useTrkCorrEverywhere) correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          correction = correction*evtSelCorrection;
+
           if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)){
             /*if(!isPP){
               float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
@@ -503,6 +522,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(isPP) binCenter = s.spec_trk[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
           else     binCenter = s.HIspec_trk[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
           float correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          correction = correction*evtSelCorrection;
           //dividing by pt at bin center instead of track by track pt (just a convention)
           if(isPP){
             if(MinBias && PD==0) s.spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 

@@ -88,17 +88,21 @@ void prettyPlotting(Settings s){
   for(int c = 0; c<s.nCentBins; c++){
     //adding up uncertainties
     for(int i = 1; i<s.RAA_totSyst[c]->GetSize()-1; i++){
-      s.RAA_totSyst[c]->SetBinContent(i,0.0707);//5% difference in data/MC for both PbPb and pp (sqrt(2) times 5)
+      s.RAA_totSyst[c]->SetBinContent(i,0);
+    
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (PbPb)
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
+      
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% for nonclosure PbPb
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% for nonclosure pp 
+      
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),hyperonPbPb->GetBinContent(i)-1));
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),hyperonpp->GetBinContent(i)-1));
+      
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),hyperonPbPb->GetBinContent(i)-1));//PbPb hyperon study
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),hyperonpp->GetBinContent(i)-1));//pp hyperon study
     }
     s.RAA_totSyst[c]->Write();
-
-
-
-
 
     //plotting
     canv->Clear();
