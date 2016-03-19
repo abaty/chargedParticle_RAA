@@ -419,8 +419,8 @@ void makeSpectrum()
   for(int c = 0; c<s.nCentBins; c++){ 
     for(int cc = s.lowCentBin[c]; cc<s.highCentBin[c]; cc++){ 
       for(int j = 1; j<s.h_HInormSyst[c]->GetSize()-1; j++){
-        for(int i = 0; i<s.HInTriggers; i++) s.h_HInormSyst[c]->SetBinContent(j,s.h_HInormSyst[c]->GetBinContent(j)+s.h_HInormErr->GetBinContent(i,(cc<6)?1:((cc<10)?2:3))*s.HIUsedByTrigger[i][cc]->GetBinContent(j)/s.HI[c]->GetBinContent(j));
-        for(int i = 0; i<s.HInTriggers_trk; i++)  s.h_HInormSyst_trk[c]->SetBinContent(j,s.h_HInormSyst_trk[c]->GetBinContent(j)+s.h_HInormErr_trk->GetBinContent(i,(cc<6)?1:2)*s.HIUsedByTrigger_trk[i][cc]->GetBinContent(j)/s.HI_trk[c]->GetBinContent(j)); 
+        for(int i = 0; i<s.HInTriggers; i++) if(s.HI[c]->GetBinContent(j)!=0) s.h_HInormSyst[c]->SetBinContent(j,s.h_HInormSyst[c]->GetBinContent(j)+s.h_HInormErr->GetBinContent(i,(cc<6)?1:((cc<10)?2:3))*s.HIUsedByTrigger[i][cc]->GetBinContent(j)/s.HI[c]->GetBinContent(j));
+        for(int i = 0; i<s.HInTriggers_trk; i++)  if(s.HI_trk[c]->GetBinContent(j)!=0) s.h_HInormSyst_trk[c]->SetBinContent(j,s.h_HInormSyst_trk[c]->GetBinContent(j)+s.h_HInormErr_trk->GetBinContent(i,(cc<6)?1:2)*s.HIUsedByTrigger_trk[i][cc]->GetBinContent(j)/s.HI_trk[c]->GetBinContent(j)); 
       }
     }
     s.h_HInormSyst[c]->Write();

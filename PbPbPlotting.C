@@ -82,7 +82,7 @@ void makePlotsPbPb(Settings s)
     leg->AddEntry(s.HIJetsByTrigger[2][c],"jet 60 (III)","p");
     leg->AddEntry(s.HIJetsByTrigger[3][c],"jet 80 (IV)","p");
     leg->AddEntry(s.HIJetsByTrigger[4][c],"jet 100 (V)","p");
-    leg->AddEntry((TObject*)0,"akVs4Calo Jets, |#eta|<2","");
+    leg->AddEntry((TObject*)0,"akPu4Calo Jets, |#eta|<2","");
     leg->AddEntry((TObject*)0,Form("%d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
     c1->SaveAs(Form("plots/png/HIJets_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
@@ -383,6 +383,36 @@ void makePlotsPbPb(Settings s)
     c2->SaveAs(Form("plots/png/HI_jetVsTrkTriggers_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c2->SaveAs(Form("plots/pdf/HI_JetVsTrkTriggers_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
   }
+  
+  c2->SetLogx();
+  for(int c = 0; c<s.nCentBins; c++)
+  {
+    s.h_HInormSyst[c]->GetXaxis()->SetRangeUser(0.7,400);
+    s.h_HInormSyst[c]->GetXaxis()->SetTitle("p_{T}");
+    s.h_HInormSyst[c]->GetYaxis()->SetRangeUser(0,0.04);
+    s.h_HInormSyst[c]->GetYaxis()->SetTitle("Normalization Uncertainty");
+    leg = new TLegend(0.2,0.7,0.4,0.9);
+    leg->AddEntry((TObject*)0,Form("%d_%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
+    leg->AddEntry((TObject*)0,"Jet Triggers","");
+    s.h_HInormSyst[c]->Draw();
+    s.h_HInormSyst[c]->Print("All");
+    leg->Draw("same");
+    c2->SaveAs(Form("plots/png/HI_normalizationError_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c2->SaveAs(Form("plots/pdf/HI_normalizationError_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    delete leg;
+  }
+  s.h_normSyst->GetXaxis()->SetRangeUser(0.7,400);
+  s.h_normSyst->GetXaxis()->SetTitle("p_{T}");
+  s.h_normSyst->GetYaxis()->SetRangeUser(0,0.04);
+  s.h_normSyst->GetYaxis()->SetTitle("Normalization Uncertainty");
+  leg = new TLegend(0.2,0.7,0.4,0.9);
+  leg->AddEntry(s.h_normSyst,"pp Jet Triggers","");
+  s.h_normSyst->Draw();
+  leg->Draw("same");
+  c2->SaveAs("plots/png/pp_normalizationError.png");
+  c2->SaveAs("plots/pdf/pp_normalizationError.pdf");
+  delete leg;
+
   delete c2;
 
   return;

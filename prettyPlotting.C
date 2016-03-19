@@ -20,6 +20,7 @@
 #include "hyperon_check/hyperonCorrection.C"
 #include "TFrame.h"
 
+void get276RAA(TCanvas * c276, Settings s, int centralityBin);
 
 double Quad(double a, double b)
 {
@@ -44,7 +45,7 @@ void prettyPlotting(Settings s){
   TH1D * hyperonPbPb = (TH1D*)h[0]->Clone("hyperonPbPb");
   TH1D * hyperonpp = (TH1D*)h[0]->Clone("hyperonpp");
   returnHyperonCorrection(0,hyperonPbPb,"hyperon_check/");
-  returnHyperonCorrection(0,hyperonpp,"hyperon_check/");//need to change to pp
+  returnHyperonCorrection(1,hyperonpp,"hyperon_check/");//need to change to pp
   hyperonPbPb->Print("All");
   hyperonpp->Print("All");
   for(int c = 0; c<s.nCentBins; c++){
@@ -94,7 +95,7 @@ void prettyPlotting(Settings s){
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
       
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% for nonclosure PbPb
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% for nonclosure pp 
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//for nonclosure pp 
       
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
@@ -110,7 +111,7 @@ void prettyPlotting(Settings s){
     h[c]->GetYaxis()->SetRangeUser(0,1.4);
     h[c]->Draw();
   
-    float lumiUncert = Quad(0.1,s.TAAuncert[c]/100.0);//10% for pp lumi, added in quad with TAA
+    float lumiUncert = Quad(0.05,s.TAAuncert[c]/100.0);//10% for pp lumi, added in quad with TAA
     bLumi->SetFillColor(kGray);
     bLumi->SetLineWidth(0);
     bLumi->DrawBox(0.9,1-lumiUncert,1.5,1+lumiUncert);
@@ -148,10 +149,71 @@ void prettyPlotting(Settings s){
     canv->GetFrame()->Draw();    
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
+
+    TH1D * raa276;
+    if(c==0){
+      get276RAA(canv,s,c);
+    }
     delete line1;
   }
   inputPlots->Close();
   
+  return;
+}
+
+
+void get276RAA(TCanvas * c276, Settings s, int centralityBin){
+  float raaaxis[28] = {1,1.1,1.2,1.4,1.6,1.8,2,2.2,2.4,3.2,4,4.8,5.6,6.4,7.2,9.6,12,14.4,19.2,24,28.8,35.2,41.6,48,60.8,73.6,86.4,103.6};
+    if(centralityBin==23) centralityBin=2;
+    if(centralityBin==24) centralityBin=3;
+    if(centralityBin==25) centralityBin=4;
+    if(centralityBin==30) centralityBin=5;
+    float raaval[27][6] = {{3.591e-01, 3.701e-01, 3.887e-01, 4.059e-01, 4.181e-01, 4.204e-01, 4.202e-01, 4.104e-01, 3.622e-01, 2.640e-01, 1.882e-01, 1.487e-01, 1.3604e-01, 1.380e-01, 1.519e-01, 1.820e-01, 2.226e-01, 2.768e-01, 3.678e-01, 4.003e-01, 4.395e-01, 5.270e-01, 5.161e-01, 5.303e-01, 6.400e-01, 5.331e-01, 5.202e-01},
+    {3.683e-01, 3.796e-01, 4.004e-01, 4.182e-01, 4.305e-01, 4.362e-01, 4.350e-01, 4.292e-01, 3.844e-01, 2.830e-01, 2.109e-01 , 1.717e-01, 1.616e-01, 1.628e-01 , 1.791e-01, 2.103e-01, 2.458e-01, 2.958e-01, 4.071e-01, 3.688e-01, 4.087e-01, 4.884e-01, 7.80e-01, 5.579e-01, 6.219e-01, 6.075e-01, 5.558e-01},
+    { 3.999e-01 , 4.134e-01, 4.344e-01, 4.539e-01 , 4.673e-01, 4.731e-01,  4.748e-01, 4.693e-01, 4.290e-01 , 3.348e-01, 2.647e-01, 2.252e-01,  2.148e-01, 2.153e-01 , 2.358e-01, 2.682e-01, 3.176e-01, 3.950e-01, 4.970e-01, 4.893e-01, 4.702e-01, 6.024e-01, 8.08e-01, 7.215e-01, 7.242e-01, 5.498e-01 , 6.87e-01},
+    {4.708e-01, 4.840e-01, 5.070e-01, 5.257e-01, 5.391e-01, 5.440e-01, 5.473e-01, 5.421e-01, 5.169e-01, 4.355e-01, 3.766e-01, 3.447e-01, 3.413e-01, 3.468e-01, 3.613e-01, 4.165e-01, 4.619e-01, 5.451e-01, 6.290e-01, 6.017e-01, 7.022e-01, 7.52e-01, 8.72e-01, 1.118e+00, 8.99e-01, 1.66e+00, 7.50e-01},
+    {5.568e-01,  5.675e-01, 5.843e-01, 6.004e-01, 6.076e-01, 6.139e-01, 6.167e-01, 6.176e-01, 6.088e-01, 5.544e-01, 5.236e-01, 5.099e-01, 5.152e-01, 5.115e-01, 5.412e-01, 5.832e-01, 6.419e-01, 6.805e-01, 7.546e-01,  5.90e-01, 9.08e-01, 6.36e-01, 2.110e+00, 7.416e-01, 9.84e-01, 6.98e-01, 8.60e-01 },
+    {6.053e-01, 6.102e-01, 6.154e-01, 6.250e-01, 6.297e-01, 6.341e-01, 6.406e-01, 6.456e-01, 6.492e-01, 6.390e-01 , 6.256e-01, 6.057e-01, 6.107e-01, 6.185e-01, 6.418e-01, 6.522e-01, 7.560e-01, 7.219e-01, 6.55e-01, 7.05e-01, 4.37e-01, 1.026e+00, 4.690e-01, 7.209e-01, 7.81e-01, 7.51e-01, 6.36e-01}};
+    float raavalstat[27][6] = {{3e-04, 3e-04, 3e-04, 4e-04, 4e-04, 5e-04, 6e-04, 7e-04, 5e-04, 7e-04, 8e-04, 1.0e-03, 1.36e-03, 1.9e-03, 2.0e-03, 4.3e-03, 8.5e-03, 1.23e-02, 2.70e-02, 4.23e-02, 5.59e-02, 7.33e-02, 8.78e-02, 2.90e-02, 5.41e-02, 5.98e-02, 9.06e-02},
+    {},
+    {},
+    {},
+    {},
+    {}};
+    float raavalsyst[27][6] = {{2.62e-02, 2.70e-02, 2.84e-02, 2.96e-02, 3.05e-02, 3.07e-02, 3.07e-02, 3.00e-02, 2.65e-02, 1.93e-02, 1.38e-02, 1.09e-02, 1.000e-02, 1.02e-02, 1.12e-02, 1.37e-02, 1.70e-02, 2.22e-02, 3.12e-02, 3.53e-02, 4.06e-02, 5.35e-02, 5.72e-02, 6.10e-02, 7.73e-02, 6.47e-02, 6.36e-02},
+    {},
+    {},
+    {},
+    {},
+    {}};
+  TH1D * p;
+  p = new TH1D("raa276",";p_{T};R_{AA}",27,raaaxis);
+  for(int i = 1; i<p->GetSize()-1; i++){
+    p->SetBinContent(i,raaval[i-1]);
+    p->SetBinError(i,raavalstat[i-1]); 
+  }
+  p->SetMarkerColor(kRed);
+  p->SetLineColor(kRed);
+  p->Draw("same");
+  TBox *bp[27];
+  for(int i = 0; i<27; i++) bp[i] = new TBox(0.1,0.1,0.2,0.2);
+  for(int i = 1; i<p->GetSize()-1; i++){
+    bp[i-1]->SetFillStyle(0);
+    bp[i-1]->SetLineColor(kRed);
+    bp[i-1]->SetLineWidth(1);
+    bp[i-1]->SetX1(p->GetXaxis()->GetBinLowEdge(i));
+    bp[i-1]->SetX2(p->GetXaxis()->GetBinUpEdge(i));
+    bp[i-1]->SetY1((p->GetBinContent(i))*(1-raavalsyst[i-1]));
+    bp[i-1]->SetY2((p->GetBinContent(i)*(1+raavalsyst[i-1])));
+    bp[i-1]->Draw("same");
+  }
+  TLegend * legRaa276 = new TLegend(0.5,0.75,0.9,0.9);
+  legRaa276->AddEntry(p,"CMS 2.76 TeV R_{AA}","p");
+  legRaa276->Draw("same");
+  c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.png",5*s.lowCentBin[0],5*s.highCentBin[0]));
+  c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[0],5*s.highCentBin[0]));
+  delete legRaa276;
+  for(int i = 0; i<27; i++) delete bp[i];
   return;
 }
 #endif
