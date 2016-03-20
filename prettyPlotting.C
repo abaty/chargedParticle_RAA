@@ -1,6 +1,7 @@
 #ifndef PRETTYPLOT
 #define PRETTYPLOT
 
+#include "TGraph.h"
 #include "TAttMarker.h"
 #include "TLine.h"
 #include "TAttLine.h"
@@ -19,8 +20,12 @@
 #include "Settings.h"
 #include "hyperon_check/hyperonCorrection.C"
 #include "TFrame.h"
+#include <vector>
+#include <string>
+#include <fstream>
 
 void get276RAA(TCanvas * c276, Settings s, int centralityBin);
+void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin);
 
 double Quad(double a, double b)
 {
@@ -150,9 +155,13 @@ void prettyPlotting(Settings s){
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
 
-    TH1D * raa276;
     if(c==0 || c==1 || c==23 || c==24 || c==25 || c==30){
-      get276RAA(canv,s,c);
+      TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
+      get276RAA(canv_276,s,c);
+    }
+    if(c==0 || c==1  || c==24){
+      TCanvas * canv_th = (TCanvas*)canv->Clone("canv_th");
+      gettheoryRAA(canv_th,s,c);
     }
     delete line1;
   }
@@ -215,6 +224,55 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin){
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
   delete legRaa276;
   for(int i = 0; i<27; i++) delete bp[i];
+  return;
+}
+
+void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin){
+  float temp_x;
+  float temp_y;
+  vector<float> x;
+  vector<float> y_d;
+  vector<float> y_u;
+  int theoryCent_Low, theoryCent_High;
+  if(centralityBin==0 || centralityBin==1){theoryCent_Low=0; theoryCent_High=10;}
+  if(centralityBin==24){theoryCent_Low=30; theoryCent_High=50;}
+  ifstream input_file_d(Form("theoryPredictions/IvanVitev/R-%d%d.5100GeVch.dn",theoryCent_Low,theoryCent_High));
+  ifstream input_file_u(Form("theoryPredictions/IvanVitev/R-%d%d.5100GeVch.up",theoryCent_Low,theoryCent_High));
+  //get datai
+  std::cout << "reading theory prediction data" << std::endl;
+  while(!input_file_d.eof()){ 
+    input_file_d>>temp_x;
+    input_file_d>>temp_y;
+    //std::cout << temp_x << " " << temp_y << std::endl;
+    x.push_back(temp_x);
+    y_d.push_back(temp_y);
+  }
+  while(!input_file_u.eof()){ 
+    input_file_u>>temp_x;
+    input_file_u>>temp_y;
+    //std::cout << temp_y << std::endl;
+    y_u.push_back(temp_y);
+  }
+  std::cout << "done reading " << x.size() << " Points"  << std::endl;
+  
+  //put data in histograms
+  const int graphPts = 1952;
+  TGraph * vitev = new TGraph(2*graphPts);
+  for (int i=0;i<graphPts;i++) {
+    //std::cout << x[i] << " " << y_d[i] << " " << y_u[i] << std::endl;
+    vitev->SetPoint(i,x[i],y_d[i]);
+    vitev->SetPoint(graphPts+i,x[graphPts-i-1],y_u[graphPts-i-1]);
+  }
+  vitev->SetFillStyle(3002);
+  vitev->SetFillColor(kRed);
+  vitev->SetLineWidth(0);
+  vitev->Draw("same f");
+  TLegend * leg_th = new TLegend(0.5,0.75,0.9,0.85);
+  leg_th->AddEntry(vitev,Form("Y. Chien et al. %d-%d%s (arXiv:1509.02936)",theoryCent_Low,theoryCent_High,"%"),"f");
+  leg_th->Draw("same");
+  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
+  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
+  delete leg_th;
   return;
 }
 #endif
