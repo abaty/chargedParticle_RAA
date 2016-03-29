@@ -518,9 +518,7 @@ void makeSpectrum()
   s.h_scale_trk->Write();
   s.h_HIscale->Write();
   s.h_HIscale_trk->Write();
-
  
-  
   makePlotsPbPb(s);
   outF->Close();
   makePlotsPP(s);

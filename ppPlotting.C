@@ -313,6 +313,9 @@ void makePlotsPP(Settings s)
   jtVsTrk->GetYaxis()->SetTitle("pp Jet triggers/pp Track triggers");
   jtVsTrk->GetYaxis()->SetRangeUser(0.5,1.5);
   jtVsTrk->Draw();
+  TLegend *leg3 = new TLegend(0.2,0.7,0.4,0.9);
+  leg3->AddEntry((TObject*)0,"|#eta|<1 pp","");
+  leg3->Draw("same");
   c2->SaveAs("plots/png/pp_jetVsTrkTriggers.png");
   c2->SaveAs("plots/pdf/pp_JetVsTrkTriggers.pdf");
 
@@ -321,6 +324,7 @@ void makePlotsPP(Settings s)
   delete lat;
   delete leg;
   delete leg2;
+  delete leg3;
   delete leg_trk; 
   delete leg2_trk; 
   delete RpPb;

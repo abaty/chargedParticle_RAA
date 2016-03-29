@@ -1,6 +1,8 @@
 #ifndef PRETTYPLOT
 #define PRETTYPLOT
 
+#include "TPad.h"
+#include "TAttPad.h"
 #include "TGraph.h"
 #include "TAttMarker.h"
 #include "TLine.h"
@@ -13,6 +15,7 @@
 #include "TAttAxis.h"
 #include "TAttText.h"
 #include "TCanvas.h"
+#include "TAttCanvas.h"
 #include "TBox.h"
 #include "TAttFill.h"
 #include "tdrstyle.C"
@@ -35,8 +38,12 @@ double Quad(double a, double b)
 void prettyPlotting(Settings s){
   TFile * inputPlots = TFile::Open("Spectra.root","Update");
   TH1D * h[s.nCentBins];
+  TH1D * pbpbSpec[s.nCentBins];
+  TH1D * ppSpec;
 
   for(int c = 0; c<s.nCentBins; c++) h[c] = (TH1D*)inputPlots->Get(Form("RAA_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+  for(int c = 0; c<s.nCentBins; c++) pbpbSpec[c] = (TH1D*)inputPlots->Get(Form("PbPbTrackSpectrum_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+  ppSpec = (TH1D*)inputPlots->Get(Form("pp_NotperMBTrigger"));
   for(int c = 0; c<s.nCentBins; c++){
      h[c]->SetDirectory(0);
      h[c]->GetYaxis()->CenterTitle(true);
@@ -46,6 +53,14 @@ void prettyPlotting(Settings s){
      s.RAA_totSyst[c] = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
      s.RAA_totSyst[c]->Reset();
      s.RAA_totSyst[c]->SetDirectory(inputPlots);
+     s.PbPb_totSyst[c] = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+     s.PbPb_totSyst[c]->Reset();
+     s.PbPb_totSyst[c]->SetDirectory(inputPlots);
+     if(c==0){
+       s.pp_totSyst = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+       s.pp_totSyst->Reset();
+       s.pp_totSyst->SetDirectory(inputPlots);
+     }
   }
   TH1D * hyperonPbPb = (TH1D*)h[0]->Clone("hyperonPbPb");
   TH1D * hyperonpp = (TH1D*)h[0]->Clone("hyperonpp");
@@ -57,6 +72,7 @@ void prettyPlotting(Settings s){
     h[c]->Multiply(hyperonPbPb);
     h[c]->Divide(hyperonpp);
   }
+
 
   setTDRStyle();
   TLine * line1;
@@ -90,25 +106,54 @@ void prettyPlotting(Settings s){
   canv->SetTicky(0);
  
   gStyle->SetErrorX(0);
+  
 
   for(int c = 0; c<s.nCentBins; c++){
     //adding up uncertainties
     for(int i = 1; i<s.RAA_totSyst[c]->GetSize()-1; i++){
       s.RAA_totSyst[c]->SetBinContent(i,0);
+      s.PbPb_totSyst[c]->SetBinContent(i,0);
+      if(c==0) s.pp_totSyst->SetBinContent(i,0);
     
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (PbPb)
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//4% difference in data/MC (PbPb)
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//4% difference in data/MC (PbPb)
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//4% difference in data/MC (pp)
       
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% for nonclosure PbPb
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//for nonclosure pp 
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure PbPb
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure (PbPb)
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% for nonclosure pp 
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% for nonclosure in pp
+      
+      //!this sytematic is largely bullshit since we don't know the data fake rate!
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//3% for MC-based fake rate PbPb
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.03));//3% difference in data/MC (PbPb)
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//for MC-based fake rate pp 
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//for MC-based faked rate pp
+      
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% resolution for not unfolding
       
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
       
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),hyperonPbPb->GetBinContent(i)-1));//PbPb hyperon study
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),hyperonpp->GetBinContent(i)-1));//pp hyperon study
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb->GetBinContent(i)-1,0.015)));//PbPb hyperon study
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb->GetBinContent(i)-1,0.015)));//PbPb hyperon study
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
+      
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//pp hyperon study
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.03));//pp uncertainty for pileup
+      
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.05));//pplumi uncertainty for spectrum
     }
     s.RAA_totSyst[c]->Write();
+    s.PbPb_totSyst[c]->Write();
+    if(c==0) s.pp_totSyst->Write();
 
     //plotting
     canv->Clear();
@@ -165,6 +210,110 @@ void prettyPlotting(Settings s){
     }
     delete line1;
   }
+
+  TCanvas * canv2 = new TCanvas("canv2","canv2",700,800);
+  canv2->SetBorderSize(0);
+  TPad * pad1 = new TPad("pad1","pad1",0.0,0.3,1.0,1.0,0);
+  TPad * pad2 = new TPad("pad2","pad2",0.0,0.0,1.0,0.3,0);
+  canv2->SetLineWidth(0);
+  pad1->SetBottomMargin(0);
+  pad1->SetLeftMargin(0.15);
+  pad1->SetTopMargin(0.08);
+  pad1->SetBorderSize(0);
+  pad1->Draw();
+  pad2->SetTopMargin(0);
+  pad2->SetLeftMargin(0.15);
+  pad2->SetBottomMargin(0.3);
+  pad2->SetBorderSize(0);
+  pad2->Draw();
+  pad1->cd();
+  pad1->SetLogx();
+  pad1->SetLogy();
+  pbpbSpec[0]->GetXaxis()->SetRangeUser(0.7,390);
+  pbpbSpec[0]->GetYaxis()->SetTitle("#frac{1}{N_{evt}}E#frac{d^{3}N}{dp^{3}} (GeV^{-2})");
+  pbpbSpec[0]->GetYaxis()->SetTitleOffset(1.2);
+  pbpbSpec[0]->GetYaxis()->SetTitleSize(0.05);
+  pbpbSpec[0]->GetYaxis()->SetLabelSize(0.04);
+  pbpbSpec[0]->SetMarkerStyle(24);
+  pbpbSpec[0]->Scale(10);
+  pbpbSpec[0]->GetYaxis()->SetRangeUser(1e-17,1e4);
+  pbpbSpec[0]->Draw();
+  pbpbSpec[1]->SetMarkerColor(kBlue);
+  pbpbSpec[1]->SetLineColor(kBlue);
+  pbpbSpec[1]->SetMarkerStyle(25);
+  pbpbSpec[1]->Scale(3);
+  pbpbSpec[1]->Draw("same");
+  pbpbSpec[23]->SetMarkerColor(kRed);
+  pbpbSpec[23]->SetLineColor(kRed);
+  pbpbSpec[23]->SetMarkerStyle(28);
+  pbpbSpec[23]->Draw("same");
+  pbpbSpec[24]->SetMarkerStyle(20);
+  pbpbSpec[25]->SetMarkerColor(kBlue);
+  pbpbSpec[25]->SetLineColor(kBlue);
+  pbpbSpec[24]->Draw("same");
+  pbpbSpec[25]->SetMarkerStyle(21);
+  pbpbSpec[25]->Draw("same");
+  pbpbSpec[30]->SetMarkerColor(kRed);
+  pbpbSpec[30]->SetLineColor(kRed);
+  pbpbSpec[30]->SetMarkerStyle(34);
+  pbpbSpec[30]->Draw("same");
+  ppSpec->SetMarkerStyle(5);
+  ppSpec->Scale(1/70.0);//scaled by inelastic xsection of 70 mb
+  ppSpec->Print("All");
+  ppSpec->Draw("same");
+  TLegend * specLeg = new TLegend(0.25,0.1,0.45,0.5);
+  specLeg->AddEntry((TObject*)0,"|#eta|<1",""); 
+  specLeg->AddEntry(pbpbSpec[0],Form("0-5%s (x10)","%"),"p");  
+  specLeg->AddEntry(pbpbSpec[1],Form("5-10%s (x3)","%"),"p");  
+  specLeg->AddEntry(pbpbSpec[23],Form("10-30%s","%"),"p");  
+  specLeg->AddEntry(pbpbSpec[24],Form("30-50%s","%"),"p");  
+  specLeg->AddEntry(pbpbSpec[25],Form("50-70%s","%"),"p");  
+  specLeg->AddEntry(pbpbSpec[30],Form("70-90%s","%"),"p");  
+  specLeg->AddEntry(ppSpec,"pp","p"); 
+  specLeg->Draw("same"); 
+ 
+  pad2->cd();
+  pad2->SetLogx();
+  s.PbPb_totSyst[0]->GetYaxis()->SetTitleOffset(0.8);
+  s.PbPb_totSyst[0]->GetYaxis()->SetTitleFont(42);
+  s.PbPb_totSyst[0]->GetYaxis()->SetTitleSize(0.08);
+  s.PbPb_totSyst[0]->GetYaxis()->SetLabelSize(0.08);
+  s.PbPb_totSyst[0]->GetXaxis()->SetTitleFont(42);
+  s.PbPb_totSyst[0]->GetYaxis()->SetTitle(Form("Syst. Uncert. (%s)","%"));
+  s.PbPb_totSyst[0]->GetXaxis()->SetRangeUser(0.7,390);
+  s.PbPb_totSyst[0]->GetXaxis()->SetTitle("p_{T} (GeV)");
+  s.PbPb_totSyst[0]->GetXaxis()->SetTitleSize(0.08);
+  s.PbPb_totSyst[0]->GetXaxis()->SetLabelSize(0.08);
+  s.PbPb_totSyst[0]->SetFillColor(kOrange);
+  s.PbPb_totSyst[0]->Scale(100);
+  s.PbPb_totSyst[0]->GetYaxis()->SetRangeUser(0.0,20);
+  s.PbPb_totSyst[0]->Draw();
+  s.PbPb_totSyst[30]->SetFillColor(kRed);
+  s.PbPb_totSyst[30]->SetFillStyle(3004);
+  s.PbPb_totSyst[30]->Scale(100);
+  s.PbPb_totSyst[30]->Draw("same");
+  s.pp_totSyst->SetFillColor(kBlack);
+  s.pp_totSyst->SetFillStyle(3005);
+  s.pp_totSyst->Scale(100);
+  s.pp_totSyst->Draw("same");
+  TLegend * systLeg = new TLegend(0.6,0.6,0.9,0.98);
+  systLeg->AddEntry(s.PbPb_totSyst[0],Form("0-5%s","%"),"f");
+  systLeg->AddEntry(s.PbPb_totSyst[30],Form("70-90%s","%"),"f");
+  systLeg->AddEntry(s.pp_totSyst,"pp","f");
+  systLeg->Draw("same");
+
+  CMS_lumi( canv2, 0, 33 );
+  canv2->Update();
+  canv2->RedrawAxis();
+  //canv2->GetFrame()->Draw();    
+  canv2->SaveAs("plots/prettyPlots/Spectra_perEventYield.png");
+  canv2->SaveAs("plots/prettyPlots/Spectra_perEventYield.pdf");
+  canv2->SaveAs("plots/prettyPlots/Spectra_perEventYield.C");
+
+  s.PbPb_totSyst[0]->Print("All");
+  s.pp_totSyst->Print("All");
+  s.RAA_totSyst[30]->Print("All");
+
   inputPlots->Close();
   
   return;

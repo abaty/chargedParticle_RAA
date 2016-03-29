@@ -380,8 +380,12 @@ void makePlotsPbPb(Settings s)
     HIjtVsTrk[c]->GetYaxis()->SetTitle("PbPb Jet triggers/PbPb Track triggers");
     HIjtVsTrk[c]->GetYaxis()->SetRangeUser(0.5,1.5);
     HIjtVsTrk[c]->Draw();
+    leg = new TLegend(0.2,0.7,0.4,0.9);
+    leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
+    leg->Draw("same");
     c2->SaveAs(Form("plots/png/HI_jetVsTrkTriggers_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c2->SaveAs(Form("plots/pdf/HI_JetVsTrkTriggers_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    delete leg;
   }
   
   c2->SetLogx();
