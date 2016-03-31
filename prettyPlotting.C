@@ -1,6 +1,7 @@
 #ifndef PRETTYPLOT
 #define PRETTYPLOT
 
+#include "TGraphAsymmErrors.h"
 #include "TPad.h"
 #include "TAttPad.h"
 #include "TGraph.h"
@@ -28,7 +29,7 @@
 #include <fstream>
 
 void get276RAA(TCanvas * c276, Settings s, int centralityBin);
-void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin);
+void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString);
 
 double Quad(double a, double b)
 {
@@ -158,6 +159,7 @@ void prettyPlotting(Settings s){
     //plotting
     canv->Clear();
     h[c]->GetXaxis()->SetRangeUser(0.7,350);
+    h[c]->GetXaxis()->SetLabelOffset(-0.005);
     h[c]->GetYaxis()->SetRangeUser(0,1.45);
     h[c]->Draw();
   
@@ -206,7 +208,7 @@ void prettyPlotting(Settings s){
     }
     if(c==0 || c==1  || c==24){
       TCanvas * canv_th = (TCanvas*)canv->Clone("canv_th");
-      gettheoryRAA(canv_th,s,c);
+      gettheoryRAA(canv_th,s,c,"");
     }
     delete line1;
   }
@@ -345,6 +347,49 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin){
     {3.34e-02,  3.44e-02, 3.60e-02, 3.73e-02, 3.83e-02, 3.86e-02, 3.89e-02, 3.85e-02, 3.67e-02, 3.10e-02, 2.68e-02, 2.45e-02, 2.43e-02, 2.47e-02, 2.58e-02, 3.00e-02, 3.34e-02, 4.04e-02, 4.81e-02 , 4.76e-02, 5.76e-02 , 6.9e-02, 8.9e-02, 1.19e-01, 1.01e-01 , 1.9e-01, 8.6e-02},
     {3.95e-02, 4.03e-02, 4.15e-02, 4.26e-02, 4.31e-02 , 4.36e-02 , 4.38e-02, 4.39e-02,  4.33e-02, 3.94e-02, 3.72e-02, 3.63e-02, 3.67e-02, 3.65e-02, 3.87e-02 , 4.20e-02, 4.65e-02, 5.04e-02, 5.77e-02, 4.7e-02,  7.5e-02, 5.8e-02, 2.15e-01, 7.89e-02, 1.11e-01, 7.9e-02, 9.8e-02},
     {4.30e-02, 4.33e-02, 4.37e-02, 4.44e-02, 4.47e-02, 4.50e-02, 4.55e-02, 4.59e-02, 4.61e-02, 4.54e-02, 4.45e-02, 4.31e-02, 4.35e-02, 4.41e-02, 4.59e-02, 4.69e-02, 5.47e-02 , 5.35e-02, 5.0e-02, 5.6e-02, 3.6e-02, 9.4e-02, 4.78e-02, 7.67e-02, 8.8e-02, 8.5e-02,  7.3e-02 }};
+//ATLAS Data below
+double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259999999999999, 1.0594999999999999, 1.21, 1.385, 1.5899999999999999, 
+    1.825, 2.095, 2.4050000000000002, 2.755, 3.1550000000000002, 3.62, 4.15, 4.755, 5.455, 6.255, 
+    7.17, 8.219999999999999, 9.39, 10.75, 12.35, 14.149999999999999, 16.2, 18.6, 21.35, 24.450000000000003, 
+    28.05, 33.85, 42.6, 53.65, 67.55, 85.05, 106.9, 134.5 };
+  double p8800_d40x1y1_xerrminus[] = { 0.03649999999999998, 0.04200000000000004, 0.04800000000000004, 0.05500000000000005, 0.06299999999999994, 0.0704999999999999, 0.08000000000000007, 0.09499999999999997, 0.10999999999999988, 
+    0.125, 0.14500000000000024, 0.16500000000000004, 0.18500000000000005, 0.2150000000000003, 0.25, 0.28000000000000025, 0.3250000000000002, 0.375, 0.4249999999999998, 
+    0.4900000000000002, 0.5599999999999987, 0.6100000000000012, 0.75, 0.8499999999999996, 0.9499999999999993, 1.0999999999999996, 1.3000000000000007, 1.4500000000000028, 1.6500000000000021, 
+    1.9499999999999993, 3.8500000000000014, 4.899999999999999, 6.149999999999999, 7.75, 9.75, 12.100000000000009, 15.5 };
+  double p8800_d40x1y1_xerrplus[] = { 0.03649999999999998, 0.04200000000000004, 0.04799999999999993, 0.05499999999999994, 0.06300000000000006, 0.07050000000000001, 0.08000000000000007, 0.09499999999999997, 0.1100000000000001, 
+    0.125, 0.14500000000000002, 0.1649999999999996, 0.18500000000000005, 0.21499999999999986, 0.25, 0.27999999999999936, 0.3250000000000002, 0.375, 0.4249999999999998, 
+    0.4900000000000002, 0.5600000000000005, 0.6099999999999994, 0.75, 0.8499999999999996, 0.9500000000000011, 1.1000000000000014, 1.2999999999999972, 1.4499999999999993, 1.6499999999999986, 
+    1.9499999999999993, 3.8500000000000014, 4.899999999999999, 6.149999999999999, 7.75, 9.75, 12.099999999999994, 15.5 };
+  double p8800_d40x1y1_yval[] = { 0.271, 0.289, 0.311, 0.336, 0.361, 0.388, 0.413, 0.434, 0.452, 
+    0.452, 0.451, 0.427, 0.388, 0.336, 0.277, 0.221, 0.18, 0.154, 0.142, 
+    0.141, 0.15, 0.164, 0.179, 0.201, 0.225, 0.245, 0.276, 0.322, 0.348, 
+    0.351, 0.43, 0.51, 0.545, 0.562, 0.609, 0.614, 0.645 };
+  double p8800_d40x1y1_yerrminus[] = { 0.013550227909083301, 0.013872270934854176, 0.014306324856094243, 0.01545642218553828, 0.01696752574610983, 0.01823669384637468, 0.019411929667099048, 0.019965226955774882, 0.02124573099330781, 
+    0.02079447651772941, 0.02074962533106562, 0.019647615175639, 0.017467284258292703, 0.015130785486550263, 0.012479887553980606, 0.00996562982505371, 0.008309705409940835, 0.006824980471766933, 0.006475822777068562, 
+    0.0063590999999999995, 0.006738323233564861, 0.007493920736170086, 0.00786989536143906, 0.00896423945463306, 0.009902556488099425, 0.011100960544025009, 0.012590562179664576, 0.016180299750004633, 0.017744587907302888, 
+    0.017897558492710672, 0.022757524030526697, 0.029549208111216793, 0.039004641390480696, 0.045396939324143876, 0.057652714784301354, 0.0751115513087035, 0.11254279685968356 };
+  double p8800_d40x1y1_yerrplus[] = { 0.013550227909083301, 0.013872270934854176, 0.014306324856094243, 0.01545642218553828, 0.01696752574610983, 0.01823669384637468, 0.019411929667099048, 0.019965226955774882, 0.02124573099330781, 
+    0.02079447651772941, 0.02074962533106562, 0.019647615175639, 0.017467284258292703, 0.015130785486550263, 0.012479887553980606, 0.00996562982505371, 0.008309705409940835, 0.006824980471766933, 0.006475822777068562, 
+    0.0063590999999999995, 0.006738323233564861, 0.007493920736170086, 0.00786989536143906, 0.00896423945463306, 0.009902556488099425, 0.011100960544025009, 0.012590562179664576, 0.016180299750004633, 0.017744587907302888, 
+    0.017897558492710672, 0.022757524030526697, 0.029549208111216793, 0.039004641390480696, 0.045396939324143876, 0.057652714784301354, 0.0751115513087035, 0.11254279685968356 };
+  double p8800_d40x1y1_ystatminus[] = { 7.859E-5, 8.669999999999999E-5, 9.641E-5, 1.1424000000000002E-4, 1.3356999999999998E-4, 1.5908E-4, 1.8998E-4, 2.2134E-4, 2.712E-4, 
+    3.2091999999999993E-4, 3.8785999999999996E-4, 4.696999999999999E-4, 5.044E-4, 5.712000000000001E-4, 6.094000000000001E-4, 6.409E-4, 7.02E-4, 8.162E-4, 0.0010508, 
+    0.0013958999999999998, 0.0019500000000000001, 0.002952, 0.002327, 0.0030150000000000003, 0.0036000000000000008, 0.004164999999999999, 0.005520000000000001, 0.008372000000000001, 0.007656, 
+    0.007722, 0.0086, 0.01071, 0.010355, 0.016860000000000003, 0.029841000000000003, 0.052804, 0.094815 };
+  double p8800_d40x1y1_ystatplus[] = { 7.859E-5, 8.669999999999999E-5, 9.641E-5, 1.1424000000000002E-4, 1.3356999999999998E-4, 1.5908E-4, 1.8998E-4, 2.2134E-4, 2.712E-4, 
+    3.2091999999999993E-4, 3.8785999999999996E-4, 4.696999999999999E-4, 5.044E-4, 5.712000000000001E-4, 6.094000000000001E-4, 6.409E-4, 7.02E-4, 8.162E-4, 0.0010508, 
+    0.0013958999999999998, 0.0019500000000000001, 0.002952, 0.002327, 0.0030150000000000003, 0.0036000000000000008, 0.004164999999999999, 0.005520000000000001, 0.008372000000000001, 0.007656, 
+    0.007722, 0.0086, 0.01071, 0.010355, 0.016860000000000003, 0.029841000000000003, 0.052804, 0.094815 };
+  int p8800_d40x1y1_numpoints = 37;
+  //TGraphAsymmErrors p8800_d40x1y1 = TGraphAsymmErrors(p8800_d40x1y1_numpoints, p8800_d40x1y1_xval, p8800_d40x1y1_yval, p8800_d40x1y1_xerrminus, p8800_d40x1y1_xerrplus, p8800_d40x1y1_yerrminus, p8800_d40x1y1_yerrplus);
+  TGraphAsymmErrors p8800_d40x1y1 = TGraphAsymmErrors(p8800_d40x1y1_numpoints, p8800_d40x1y1_xval, p8800_d40x1y1_yval,0,0, p8800_d40x1y1_yerrminus, p8800_d40x1y1_yerrplus);
+  p8800_d40x1y1.SetName("ATLAS_0_5");
+  p8800_d40x1y1.SetTitle("ATLAS_0_5");
+  p8800_d40x1y1.SetMarkerColor(kBlue);
+  p8800_d40x1y1.SetMarkerColor(kBlue);
+  p8800_d40x1y1.SetLineColor(kBlue);
+//end ATLAS data
+
   TH1D * p;
   p = new TH1D("raa276",";p_{T};R_{AA}",27,raaaxis);
   for(int i = 1; i<p->GetSize()-1; i++){
@@ -366,17 +411,35 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin){
     bp[i-1]->SetY2((p->GetBinContent(i)*(1+raavalsyst[tempCentralityBin][i-1])));
     bp[i-1]->Draw("same");
   }
-  TLegend * legRaa276 = new TLegend(0.5,0.75,0.9,0.9);
+  TLegend * legRaa276 = new TLegend(0.53,0.725,0.9,0.91);
+  TH1D * dummy = new TH1D("dummy","dummy",10,0,10);
+  dummy->SetMarkerColor(kBlack); dummy->SetMarkerStyle(8); dummy->SetFillColor(kOrange);
+  legRaa276->AddEntry(dummy,"CMS 5.02 TeV R_{AA}","pf");
   legRaa276->AddEntry(p,"CMS 2.76 TeV R_{AA}","p");
+
+  gStyle->SetErrorX(0.);
+  if(centralityBin==0) legRaa276->AddEntry(&p8800_d40x1y1,"ATLAS 2.76 TeV R_{AA}","p");
+  legRaa276->SetTextFont(62);
   legRaa276->Draw("same");
+  if(centralityBin==0) p8800_d40x1y1.Draw("P same");
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
+ 
+  if(centralityBin==0){
+    TH1D * dummy2 = new TH1D("dummy2","dummy2",10,0,10);
+    dummy2->SetFillStyle(3002);dummy2->SetFillColor(kRed);dummy2->SetLineWidth(0);
+    legRaa276->AddEntry(dummy2,"Y. Chien et al. 0-5%","f");
+    legRaa276->Draw("same");
+    gettheoryRAA(c276,s,centralityBin,"With276");
+    delete dummy2;
+  }
   delete legRaa276;
+  delete dummy;
   for(int i = 0; i<27; i++) delete bp[i];
   return;
 }
 
-void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin){
+void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString = ""){
   float temp_x;
   float temp_y;
   vector<float> x;
@@ -417,10 +480,10 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin){
   vitev->SetLineWidth(0);
   vitev->Draw("same f");
   TLegend * leg_th = new TLegend(0.5,0.75,0.9,0.85);
-  leg_th->AddEntry(vitev,Form("Y. Chien et al. %d-%d%s (arXiv:1509.02936)",theoryCent_Low,theoryCent_High,"%"),"f");
-  leg_th->Draw("same");
-  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
-  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
+  leg_th->AddEntry(vitev,Form("Y. Chien et al. %d-%d%s",theoryCent_Low,theoryCent_High,"%"),"f");
+  if(saveString=="") leg_th->Draw("same");
+  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
+  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   delete leg_th;
   return;
 }
