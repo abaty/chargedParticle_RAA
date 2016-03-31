@@ -56,6 +56,9 @@ void makeCaloMatchingPlotData(bool isPP = false){
   cut3->SetLineWidth(5);
   cut3->Draw("same");
   c1->SaveAs("pdf/PbPb_data_EtOverPtvsHibin.pdf");
+  centralProj = (TH1D*)correlation2->ProjectionY("centralProf_Data",1,1);
+  centralProj->Draw();
+  c1->SaveAs("pdf/PbPb_data_EtOverPtvsHibin_0_5.pdf");
   }
   else{
   TH2D * correlation = new TH2D("corr",";p_{T};E_{T}",50,0,200,50,0,200);

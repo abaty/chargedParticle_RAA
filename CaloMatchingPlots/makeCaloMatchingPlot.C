@@ -50,6 +50,9 @@ void makeCaloMatchingPlot(bool isPP = false){
   cut3->SetLineWidth(5);
   cut3->Draw("same");
   c1->SaveAs("pdf/PbPb_pthat170_EtOverPtvsHibin.pdf");
+  TH1D * centralProj = (TH1D*)correlation2->ProjectionY("centralProf",1,1);
+  centralProj->Draw();
+  c1->SaveAs("pdf/PbPb_pthat170_EtOverPtvsHibin_0_5.pdf");
 
   TH2D * correlation3 = new TH2D("corr3",";centrality;E_{T}/p_{T}",50,0,100,20,0,2);
   trk->Draw("(pfEcal+pfHcal)/TMath::CosH(trkEta)/trkPt:(hiBin/2)>>corr3","((pfEcal+pfHcal)/TMath::CosH(trkEta)/trkPt<2) && highPurity && trkPt>20 && trkStatus==-999 && TMath::Abs(trkEta)<1","colz",nEvents);
@@ -57,6 +60,9 @@ void makeCaloMatchingPlot(bool isPP = false){
   correlation3->Draw("colz");
   cut3->Draw("same");
   c1->SaveAs("pdf/PbPb_pthat170_EtOverPtvsHibin_Fake.pdf");
+  centralProj = (TH1D*)correlation3->ProjectionY("centralProf_Fake",1,1);
+  centralProj->Draw();
+  c1->SaveAs("pdf/PbPb_pthat170_EtOverPtvsHibin_Fake_0_5.pdf");
   
   TH2D * correlation4 = new TH2D("corr4",";centrality;E_{T}/p_{T}",50,0,100,20,0,2);
   trk->Draw("(pfEcal+pfHcal)/TMath::CosH(trkEta)/trkPt:(hiBin/2)>>corr4","((pfEcal+pfHcal)/TMath::CosH(trkEta)/trkPt<2) && highPurity && trkPt>20 && trkStatus>0 && TMath::Abs(trkEta)<1","colz",nEvents);
@@ -64,6 +70,9 @@ void makeCaloMatchingPlot(bool isPP = false){
   correlation4->Draw("colz");
   cut3->Draw("same");
   c1->SaveAs("pdf/PbPb_pthat170_EtOverPtvsHibin_Real.pdf");
+  centralProj = (TH1D*)correlation4->ProjectionY("centralProf_Real",1,1);
+  centralProj->Draw();
+  c1->SaveAs("pdf/PbPb_pthat170_EtOverPtvsHibin_Real_0_5.pdf");
   
   TH1D * numer = new TH1D("numer",";p_{T};Relative Efficiency",40,0,40);
   TH1D * den = new TH1D("den",";p_{T};Relative Efficiency",40,0,40);
