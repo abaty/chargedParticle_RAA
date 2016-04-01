@@ -119,7 +119,8 @@ void makePlotsPbPb(Settings s)
   }
   for(int c = 0; c<s.nCentBins;c++){
     c1->SetLogy(0);
-    for(int i = 0; i<s.HInTriggers-1; i++) s.HIJetsByTrigger[s.HInTriggers-1-i][c]->Divide(s.HIJetsByTrigger[s.HInTriggers-2-i][c]);
+    if(c>5) for(int i = 0; i<s.HInTriggers-1; i++) s.HIJetsByTrigger[s.HInTriggers-1-i][c]->Divide(s.HIJetsByTrigger[s.HInTriggers-2-i][c]);
+    if(c<5) for(int i = 0; i<s.HInTriggers-2; i++){ s.HIJetsByTrigger[s.HInTriggers-1-i][c]->Divide(s.HIJetsByTrigger[s.HInTriggers-(((s.HInTriggers-1-i)==2)?3:2)-i][c]);}
     s.HIJetsByTrigger[1][c]->GetYaxis()->SetRangeUser(0,2);
     s.HIJetsByTrigger[1][c]->GetXaxis()->SetRangeUser(20,140);
     s.HIJetsByTrigger[1][c]->GetXaxis()->SetTitle("Leading jet p_{T}");

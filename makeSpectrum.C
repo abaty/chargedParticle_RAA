@@ -202,7 +202,15 @@ void makeSpectrum()
       tempEvtCount[i][m]->Reset();
       for(int c = combinationCentUpperBoundary[m]; c>=combinationCentLowerBoundary[m]; c--) tempEvtCount[i][m]->Add(s.HIevtCount[i][c]);
       for(int j = 0; j<i; j++){
-        HIscale[i][m] = HIscale[i][m]*tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j][m]->FindBin(s.maxJetBin))/(double)tempEvtCount[j+1][m]->Integral(tempEvtCount[j+1][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j+1][m]->FindBin(s.maxJetBin));
+        //added ternary operators to skip jet 40 in 0-30%
+        if(m==0){
+          if(i==1){HIscale[i][m]=0; continue;}
+          if(j==1) continue;
+          HIscale[i][m] = HIscale[i][m]*tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+((j==0)?2:1)]),tempEvtCount[j][m]->FindBin(s.maxJetBin))/(double)tempEvtCount[j+((j==0)?2:1)][m]->Integral(tempEvtCount[j+((j==0)?2:1)][m]->FindBin(s.HItriggerOverlapBins[j+((j==0)?2:1)]),tempEvtCount[j+((j==0)?2:1)][m]->FindBin(s.maxJetBin));
+        }
+        else     HIscale[i][m] = HIscale[i][m]*tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j][m]->FindBin(s.maxJetBin))/(double)tempEvtCount[j+1][m]->Integral(tempEvtCount[j+1][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j+1][m]->FindBin(s.maxJetBin));
+
+        //FIXME make sure this is calcualted correctly for later
         if(i>0) s.h_HInormErr->SetBinContent(i,m+1,TMath::Power(1.0/tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j][m]->FindBin(s.maxJetBin))+1.0/tempEvtCount[j+1][m]->Integral(tempEvtCount[j+1][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j+1][m]->FindBin(s.maxJetBin)),0.5));
       }
       std::cout <<"PbPb scale: Trigger and cent region "<< i<<" "<<m<<" "<<HIscale[i][m] << std::endl;
@@ -234,7 +242,8 @@ void makeSpectrum()
      
     //total spectrum
     for(int c = 0; c<s.nCentBins; c++){
-      for(int j = s.HIevtCount[i][c]->FindBin(s.HItriggerBins[i]); j<s.HIevtCount[i][c]->FindBin(s.HItriggerBins[i+1]); j++)
+      //added thing to skip jet40
+      for(int j = s.HIevtCount[i][c]->FindBin(s.HItriggerBins[i]); j<s.HIevtCount[i][c]->FindBin(s.HItriggerBins[i+((i==0 && s.highCentBin[c]<7)?2:1)]); j++)
       {
         for(int k = 1; k<s.HI[c]->GetSize()+1; k++)
         {
@@ -243,8 +252,10 @@ void makeSpectrum()
           s.HIUsedByTrigger[i][c]->SetBinContent(k,s.HIUsedByTrigger[i][c]->GetBinContent(k)+s.HIspec[i][c]->GetBinContent(j,k)); 
           s.HIUsedByTrigger[i][c]->SetBinError(k,TMath::Power(TMath::Power(s.HIUsedByTrigger[i][c]->GetBinError(k),2)+TMath::Power(s.HIspec[i][c]->GetBinError(j,k),2),0.5)); 
         }
-        s.HIJets[c]->SetBinContent(j,s.HIevtCount[i][c]->GetBinContent(j));
-        s.HIJets[c]->SetBinError(j,s.HIevtCount[i][c]->GetBinError(j));
+        if(((i==0 && s.highCentBin[c]<7)?2:1)){
+          s.HIJets[c]->SetBinContent(j,s.HIevtCount[i][c]->GetBinContent(j));
+          s.HIJets[c]->SetBinError(j,s.HIevtCount[i][c]->GetBinError(j));
+        }
       }
      
       //spectrum for each trigger
