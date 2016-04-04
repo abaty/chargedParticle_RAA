@@ -155,7 +155,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //Ntuple for looking at specific tracks
   std::string trkSkimVars;
-  trkSkimVars=   "trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34";
+  trkSkimVars=   "isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34";
   TNtuple * trkSkim  = new TNtuple("trkSkim","",trkSkimVars.data()); 
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
@@ -427,9 +427,18 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             }          
             if(!isCompatibleWithVertex) continue;
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
+
+          if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
+          if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))){
+            if(jobNum<10)
+            {  
+              float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
+              trkSkim->Fill(skimEntry);   
+              continue; //Calo Matching
+            }
+          }
     
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
@@ -446,13 +455,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           correction = correction*evtSelCorrection;
 
-          if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)){
-            /*if(!isPP){
-              float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
-              trkSkim->Fill(skimEntry);   
-             }*/ //code for skimming tracks failing jet cut
-            continue;//upper boundary on track pt
-          }
           if(useTrkCorrEverywhere && (trkNHit[j]<11 ||  (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7)){
             /*if(!isPP){
               float skimEntry[] = {trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};

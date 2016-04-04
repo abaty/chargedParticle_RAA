@@ -5,7 +5,7 @@ then
 fi
 
 now="Rpp_$(date +"%Y_%m_%d__%H_%M_%S")"
-njobs=75
+njobs=100
 
 mkdir $now
 cp fileLists/fileList.txt $now 
