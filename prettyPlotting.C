@@ -86,7 +86,7 @@ void prettyPlotting(Settings s){
  
   int W = 800;
   int H = 700;
-  int H_ref = 700; 
+  int H_ref = 700;
   int W_ref = 800;
   float T = 0.08*H_ref;
   float B = 0.12*H_ref; 
