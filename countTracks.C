@@ -430,15 +430,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
           if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;
           
-          float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))){
-            if(jobNum<10)
-            {  
-              float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
-              trkSkim->Fill(skimEntry);   
-              continue; //Calo Matching
-            }
-          }
     
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
@@ -454,6 +445,16 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(!useTrkCorrEverywhere) correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           correction = correction*evtSelCorrection;
+          
+          float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
+          if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))){
+            if(true)
+            {  
+              float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
+              trkSkim->Fill(skimEntry);   
+              continue; //Calo Matching
+            }
+          }
 
           if(useTrkCorrEverywhere && (trkNHit[j]<11 ||  (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7)){
             /*if(!isPP){

@@ -201,6 +201,7 @@ void prettyPlotting(Settings s){
     canv->GetFrame()->Draw();    
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
+    canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
 
     if(c==0 || c==1 || c==23 || c==24 || c==25 || c==30){
       TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
