@@ -24,7 +24,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
   bool doevtSelCorrection = true;
-  bool useTrkCorrEverywhere =false;
+  bool useTrkCorrEverywhere =true;
   float caloMatchValue = 0.5;
   float jetEtaSelection = 2;
  
@@ -448,12 +448,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
           if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))){
-            if(true)
-            {  
-              float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
-              trkSkim->Fill(skimEntry);   
-              continue; //Calo Matching
-            }
+           /*float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
+            trkSkim->Fill(skimEntry);*/
+            continue; //Calo Matching
           }
 
           if(useTrkCorrEverywhere && (trkNHit[j]<11 ||  (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7)){
@@ -574,6 +571,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     }
     s.nVtxMB->Write();
     s.nVtxMB_trk->Write();
+    trkSkim->Write();
   }else{
     for(int i = 0; i<s.HInTriggers; i++)
     {
@@ -594,7 +592,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       s.HInVtxMB[j]->Write();
       s.HInVtxMB_trk[j]->Write();
     }
-    if(!isPP) trkSkim->Write();
+    trkSkim->Write();
     outF->Close(); 
   }
 }

@@ -85,8 +85,8 @@ void prettyPlotting(Settings s){
   
  
   int W = 800;
-  int H = 700;
-  int H_ref = 700;
+  int H = 700;//700
+  int H_ref = 700;//700
   int W_ref = 800;
   float T = 0.08*H_ref;
   float B = 0.12*H_ref; 
@@ -425,6 +425,7 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   if(centralityBin==0) p8800_d40x1y1.Draw("P same");
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
+  c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
  
   if(centralityBin==0){
     TH1D * dummy2 = new TH1D("dummy2","dummy2",10,0,10);
@@ -485,6 +486,7 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
   if(saveString=="") leg_th->Draw("same");
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
+  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   delete leg_th;
   return;
 }
