@@ -26,7 +26,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   bool doevtSelCorrection = true;
   bool useTrkCorrEverywhere =true;
   float caloMatchValue = 0.5;
+  float caloMatchStart = 10;
   float jetEtaSelection = 2;
+  float jetTrackCutThreshhold = 50;
  
   Settings s; 
   if(isPP){
@@ -342,8 +344,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
   
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-        if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
-        if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
+        if(!(trkPt[j]<caloMatchStart || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
+        if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold)) continue;//upper boundary on track pt
         eventMultiplicity++;          
 
         //applying some tighter cuts before doing the maxTrackPt calculaiton
@@ -428,7 +430,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(!isCompatibleWithVertex) continue;
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
 
-          if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;
+          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold)) continue;
           
     
           float rmin=999;
@@ -447,7 +449,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           correction = correction*evtSelCorrection;
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))){
+          if(!(trkPt[j]<caloMatchStart || (Et>caloMatchValue*trkPt[j]))){
            /*float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34};
             trkSkim->Fill(skimEntry);*/
             continue; //Calo Matching
@@ -509,8 +511,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<20 || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
-          if((maxJtPt>50 && trkPt[j]>maxJtPt) || (maxJtPt<=50 && trkPt[j]>50)) continue;//upper boundary on track pt
+          if(!(trkPt[j]<caloMatchStart || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
+          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold)) continue;//upper boundary on track pt
   
           float rmin=999;
           for(int jt=0; jt<nref; jt++)

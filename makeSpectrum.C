@@ -391,6 +391,11 @@ void makeSpectrum()
       s.h_HInormErr->SetBinContent(i,m,TMath::Power(TMath::Power(s.h_HInormErr->GetBinContent(i,m),2)+TMath::Power(s.h_HInormErr->GetBinContent(i-1,m),2),0.5));
       s.h_HInormErr_trk->SetBinContent(i,m,TMath::Power(TMath::Power(s.h_HInormErr_trk->GetBinContent(i,m),2)+TMath::Power(s.h_HInormErr_trk->GetBinContent(i-1,m),2),0.5));
     }
+    //invert pp because lumi normalized
+    for(int i = 0; i<10; i++){
+      s.h_normErr->SetBinContent(i,m,TMath::Power(-TMath::Power(s.h_normErr->GetBinContent(i,m),2)+TMath::Power(s.h_normErr->GetBinContent(s.nTriggers,m),2),0.5));
+      s.h_normErr_trk->SetBinContent(i,m,TMath::Power(-TMath::Power(s.h_normErr_trk->GetBinContent(i,m),2)+TMath::Power(s.h_normErr_trk->GetBinContent(s.nTriggers_trk,m),2),0.5));
+    }
   }
   s.h_normErr->Write();
   s.h_normErr_trk->Write();
@@ -416,6 +421,7 @@ void makeSpectrum()
   s.h_normSyst_trk->Write();
   s.h_normSyst->SetDirectory(0);
   s.h_normSyst_trk->SetDirectory(0);
+ 
   for(int c = 0; c<s.nCentBins; c++){ 
     for(int cc = s.lowCentBin[c]; cc<s.highCentBin[c]; cc++){ 
       for(int j = 1; j<s.h_HInormSyst[c]->GetSize()-1; j++){

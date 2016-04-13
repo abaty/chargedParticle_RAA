@@ -194,6 +194,7 @@ void prettyPlotting(Settings s){
     lumi_sqrtS = "25.8 pb^{-1} (5.02 TeV pp) + 404 #mub^{-1} (5.02 TeV PbPb)";
     writeExtraText = true;  
     extraText  = "Preliminary";
+    //extraText  = "Unpublished";
     CMS_lumi( canv, iPeriod, 11 );
  
     canv->Update();
@@ -204,12 +205,14 @@ void prettyPlotting(Settings s){
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
 
     if(c==0 || c==1 || c==23 || c==24 || c==25 || c==30){
-      TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
-      get276RAA(canv_276,s,c);
+      //TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
+      //get276RAA(canv_276,s,c);
+      get276RAA(canv,s,c);
     }
-    if(c==0 || c==1  || c==24){
+    if(c==0 || c==1  || c==24 || c==31){
       TCanvas * canv_th = (TCanvas*)canv->Clone("canv_th");
       gettheoryRAA(canv_th,s,c,"");
+      //gettheoryRAA(canv,s,c,"");
     }
     delete line1;
   }
@@ -423,14 +426,14 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   legRaa276->SetTextFont(62);
   legRaa276->Draw("same");
   if(centralityBin==0) p8800_d40x1y1.Draw("P same");
+  c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
-  c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
  
   if(centralityBin==0){
     TH1D * dummy2 = new TH1D("dummy2","dummy2",10,0,10);
     dummy2->SetFillStyle(3002);dummy2->SetFillColor(kRed);dummy2->SetLineWidth(0);
-    legRaa276->AddEntry(dummy2,"Y. Chien et al. 0-5%","f");
+    legRaa276->AddEntry(dummy2,"Y. Chien et al. 0-10%","f");
     legRaa276->Draw("same");
     gettheoryRAA(c276,s,centralityBin,"With276");
     delete dummy2;
@@ -442,13 +445,14 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
 }
 
 void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString = ""){
+  //Vitev**********************************************************************************************************
   float temp_x;
   float temp_y;
   vector<float> x;
   vector<float> y_d;
   vector<float> y_u;
   int theoryCent_Low, theoryCent_High;
-  if(centralityBin==0 || centralityBin==1){theoryCent_Low=0; theoryCent_High=10;}
+  if(centralityBin==0 || centralityBin==1 || centralityBin==31){theoryCent_Low=0; theoryCent_High=10;}
   if(centralityBin==24){theoryCent_Low=30; theoryCent_High=50;}
   ifstream input_file_d(Form("theoryPredictions/IvanVitev/R-%d%d.5100GeVch.dn",theoryCent_Low,theoryCent_High));
   ifstream input_file_u(Form("theoryPredictions/IvanVitev/R-%d%d.5100GeVch.up",theoryCent_Low,theoryCent_High));
@@ -481,12 +485,41 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
   vitev->SetFillColor(kRed);
   vitev->SetLineWidth(0);
   vitev->Draw("same f");
+
+  //Jiechen Xu ************************************************************************************************
+  vector<float> x2;
+  vector<float> y2;
+  int theoryCent_Low2, theoryCent_High2;
+  if(centralityBin==0 || centralityBin==1 || centralityBin==31){theoryCent_Low2=0; theoryCent_High2=20;}
+  if(centralityBin==24){theoryCent_Low2=30; theoryCent_High2=50;}
+  std::cout << "Reading Jiechen Xu points" << std::endl;
+  ifstream input_file_JX(Form("theoryPredictions/JiechenXu/CUJET3_RAA-pT_%d-%d.dat",theoryCent_Low2,theoryCent_High2)); 
+  while(!input_file_JX.eof()){
+      input_file_JX>>temp_x;
+      input_file_JX>>temp_y;
+      x2.push_back(temp_x);
+      y2.push_back(temp_y);
+      for(int i = 0; i<5; i++) input_file_JX>>temp_y;//skip to next line
+    }         
+  std::cout << "Done reading" << std::endl;
+  //put data in histograms
+  const int graphPts2 = 371;
+  TGraph * JiechenXu = new TGraph(graphPts2); 
+  for (int i=0;i<graphPts2;i++) {
+    //std::cout << x2[i] << " " << y2[i]  << std::endl;
+    JiechenXu->SetPoint(i,x2[i],y2[i]);
+  }
+  JiechenXu->SetLineWidth(3);
+  JiechenXu->SetLineColor(kBlue+1);
+  JiechenXu->Draw("same C");
+
   TLegend * leg_th = new TLegend(0.5,0.75,0.9,0.85);
   leg_th->AddEntry(vitev,Form("Y. Chien et al. %d-%d%s",theoryCent_Low,theoryCent_High,"%"),"f");
+  leg_th->AddEntry(JiechenXu,Form("J. Xu et al. %d-%d%s, h^{+pm}+#pi^{0}",theoryCent_Low2,theoryCent_High2,"%"),"l");
   if(saveString=="") leg_th->Draw("same");
+  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
-  c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   delete leg_th;
   return;
 }
