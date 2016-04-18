@@ -490,7 +490,7 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
   vector<float> x2;
   vector<float> y2;
   int theoryCent_Low2, theoryCent_High2;
-  if(centralityBin==0 || centralityBin==1 || centralityBin==31){theoryCent_Low2=0; theoryCent_High2=20;}
+  if(centralityBin==0 || centralityBin==1 || centralityBin==31){theoryCent_Low2=0; theoryCent_High2=10;}
   if(centralityBin==24){theoryCent_Low2=30; theoryCent_High2=50;}
   std::cout << "Reading Jiechen Xu points" << std::endl;
   ifstream input_file_JX(Form("theoryPredictions/JiechenXu/CUJET3_RAA-pT_%d-%d.dat",theoryCent_Low2,theoryCent_High2)); 

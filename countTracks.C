@@ -29,6 +29,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   float caloMatchStart = 20;
   float jetEtaSelection = 2;
   float jetTrackCutThreshhold = 50;
+  bool removePbPbPU = false;
 
   TH1D * hiHFDist = new TH1D("hiHFDist",";hiHF;Counts",200,0,10000);
  
@@ -295,6 +296,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(!isPP && (!pclusterCompatibilityFilter || !pprimaryVertexFilter || !phfCoincFilter3 || !isInGoldenJSON(run,lumi))) continue;
 
       trkCh->GetEntry(i);
+      if(!isPP && removePbPbPU==true && hiHF>5400) continue;
       if(doOnly1Vertex && nVtx!=1) continue;
       
       bool hasGoodVtx = 0; 
