@@ -24,11 +24,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
   bool doevtSelCorrection = true;
-  bool useTrkCorrEverywhere =true;
+  bool useTrkCorrEverywhere =false;
   float caloMatchValue = 0.5;
-  float caloMatchStart = 10;
+  float caloMatchStart = 20;
   float jetEtaSelection = 2;
   float jetTrackCutThreshhold = 50;
+
+  TH1D * hiHFDist = new TH1D("hiHFDist",";hiHF;Counts",200,0,10000);
  
   Settings s; 
   if(isPP){
@@ -377,6 +379,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           s.HInVtxMB[hiBin/10]->Fill(nVtx);
           s.HIevtCount_trk[0][hiBin/10]->Fill(maxTrackPt);
           s.HInVtxMB_trk[hiBin/10]->Fill(nVtx);
+          hiHFDist->Fill(hiHF);
         }
       }
       if(j40 && PD==1){s.evtCount_JetVars[1]->Fill(maxJtEta,maxJtPt); s.evtCount[1]->Fill(maxJtPt);}  
@@ -575,6 +578,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     s.nVtxMB_trk->Write();
     trkSkim->Write();
   }else{
+    hiHFDist->Write();
+
     for(int i = 0; i<s.HInTriggers; i++)
     {
       for(int j = 0; j<20; j++){

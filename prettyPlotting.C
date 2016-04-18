@@ -205,9 +205,9 @@ void prettyPlotting(Settings s){
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
 
     if(c==0 || c==1 || c==23 || c==24 || c==25 || c==30){
-      //TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
-      //get276RAA(canv_276,s,c);
-      get276RAA(canv,s,c);
+      TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
+      get276RAA(canv_276,s,c);
+      //get276RAA(canv,s,c);
     }
     if(c==0 || c==1  || c==24 || c==31){
       TCanvas * canv_th = (TCanvas*)canv->Clone("canv_th");
@@ -515,7 +515,7 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
 
   TLegend * leg_th = new TLegend(0.5,0.75,0.9,0.85);
   leg_th->AddEntry(vitev,Form("Y. Chien et al. %d-%d%s",theoryCent_Low,theoryCent_High,"%"),"f");
-  leg_th->AddEntry(JiechenXu,Form("J. Xu et al. %d-%d%s, h^{+pm}+#pi^{0}",theoryCent_Low2,theoryCent_High2,"%"),"l");
+  leg_th->AddEntry(JiechenXu,Form("J. Xu et al. %d-%d%s (h^{#pm}+#pi^{0})",theoryCent_Low2,theoryCent_High2,"%"),"l");
   if(saveString=="") leg_th->Draw("same");
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
