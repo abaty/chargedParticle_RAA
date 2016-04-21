@@ -29,6 +29,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   float caloMatchStart = 20;
   float jetEtaSelection = 2;
   float jetTrackCutThreshhold = 50;
+  float trkBufferSize = 10.0;
   bool removePbPbPU = false;
 
   TH1D * hiHFDist = new TH1D("hiHFDist",";hiHF;Counts",200,0,10000);
@@ -142,12 +143,15 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   TrkCorr* trkCorr;
   TrkCorr* trkCorr_trk;
+  TrkCorr* trkCorr_loosepp;
   if(isPP){  
     trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_pp/");
     trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_pp_TrkTrig/");
+    trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
   }else{  
     trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_PbPb/");
     trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
+    trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_PbPb/");
   }
   EventSelectionCorrector corrEvSel;
 
@@ -332,6 +336,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         if(TMath::Abs(trkEta[j])>2.4) continue;
         if(!highPurity[j]) continue;
         if(trkPt[j]<0.5 || trkPt[j]>400) continue;
+      
         if(trkPtError[j]/trkPt[j]>0.1) continue; 
         if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;      
         if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
@@ -349,7 +354,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
         if(!(trkPt[j]<caloMatchStart || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
-        if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold)) continue;//upper boundary on track pt
+        if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)) continue;//upper boundary on track pt
         eventMultiplicity++;          
 
         //applying some tighter cuts before doing the maxTrackPt calculaiton
@@ -420,6 +425,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
           if(TMath::Abs(trkEta[j])>1) continue;
           if(highPurity[j]!=1) continue;
+
+          //if( trkPtError[j]/trkPt[j]>0.3) continue;       
+          
           if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; 
           if( trkPtError[j]/trkPt[j]>0.1) continue;       
           if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
@@ -435,7 +443,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(!isCompatibleWithVertex) continue;
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
 
-          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold)) continue;
+          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)) continue;//upper boundary on track pt
           
     
           float rmin=999;
@@ -450,6 +458,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   
           float correction;
           if(!useTrkCorrEverywhere) correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+                                    //correction = trkCorr_loosepp->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           correction = correction*evtSelCorrection;
           
@@ -517,7 +526,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
           if(!(trkPt[j]<caloMatchStart || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
-          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold)) continue;//upper boundary on track pt
+          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)) continue;//upper boundary on track pt
   
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
