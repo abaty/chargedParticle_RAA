@@ -1,3 +1,4 @@
+#include "TF1.h"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TChain.h"
@@ -29,8 +30,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   float caloMatchStart = 20;
   float jetEtaSelection = 2;
   float jetTrackCutThreshhold = 50;
-  float trkBufferSize = 10.0;
+  float trkBufferSize = 0.0;
   bool removePbPbPU = false;
+  bool doChi2Shift = true;
+  TF1 * chiF = new TF1("chiF","(x<=20)*(0.976-0.159*TMath::Log10(x))+(x>20)*0.768",0.1,500); 
+  std::cout << chiF->Eval(1) << " " << chiF->Eval(18) << " " << chiF->Eval(21) << " " << chiF->Eval(40)  << std::endl;
 
   TH1D * hiHFDist = new TH1D("hiHFDist",";hiHF;Counts",200,0,10000);
  
@@ -310,8 +314,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(hasGoodVtx==false) continue;
 
       bool MinBias = 0;
-      for(int j = 0; j<21; j++) MinBias = MinBias || ((isPP)?(bool)MB[j]:(bool)HIMB[j]);
-      HIj40 = HIj40_v1 || HIj40_v2;
+      for(int j = 0; j<21; j++) MinBias = MinBias || ((isPP)?(MB[j]==1):(HIMB[j]==1));
+      HIj40 = (HIj40_v1==1) || (HIj40_v2==1);
       if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
       if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30) continue;
   
@@ -338,7 +342,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         if(trkPt[j]<0.5 || trkPt[j]>400) continue;
       
         if(trkPtError[j]/trkPt[j]>0.1) continue; 
-        if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;      
+        if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>((doChi2Shift)?chiF->Eval(trkPt[j]):1)*0.15) continue;      
         if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
         if(isPP){
           bool isCompatibleWithVertex = false;
@@ -428,7 +432,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
           //if( trkPtError[j]/trkPt[j]>0.3) continue;       
           
-          if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; 
+          if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>((doChi2Shift)?chiF->Eval(trkPt[j]):1)*0.15) continue; 
           if( trkPtError[j]/trkPt[j]>0.1) continue;       
           if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
           if(isPP){
@@ -511,7 +515,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
           if(TMath::Abs(trkEta[j])>1) continue;
           if(highPurity[j]!=1) continue;
-          if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue; //track trigger cuts
+          if(trkNHit[j]<11 || trkPtError[j]/trkPt[j]>0.1 || (int)trkOriginalAlgo[j]<4 || (int)trkOriginalAlgo[j]>7 || trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>((doChi2Shift)?chiF->Eval(trkPt[j]):1)*0.15) continue; //track trigger cuts
           if(isPP){
             bool isCompatibleWithVertex = false;
             for(int v = 0; v<nVtx; v++){

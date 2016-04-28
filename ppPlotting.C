@@ -139,6 +139,24 @@ void makePlotsPP(Settings s)
   c1->SaveAs("plots/png/ppTrack_FullSpectrum.png");
   c1->SaveAs("plots/pdf/ppTrack_FullSpectrum.pdf");
   TH1D * jtVsTrk = (TH1D*)s.pp->Clone("jtVsTrkRatio");
+  
+  //xt plot
+  TFile * outF = TFile::Open("Spectra.root","UPDATE");
+  TH1D * pp_perMBTrigger_xt = (TH1D*)s.pp_perMBTrigger->Clone("pp_perMBTrigger_xt");
+  pp_perMBTrigger_xt->Scale(TMath::Power(5020,4.9));
+  TH1D * pp_xt = new TH1D("ppTrackSpectrum_xt",";x_{T};#sqrt{s}^{4.9}E#frac{d^{3}#sigma}{d^{3}p} (mb/GeV^{2})",s.ntrkBins,s.xt_xtrkbins);
+  for(int i = 1; i< pp_xt->GetSize()-1; i++){
+    pp_xt->SetBinContent(i,s.pp_perMBTrigger->GetBinContent(i));
+    pp_xt->SetBinError(i,s.pp_perMBTrigger->GetBinError(i));
+  }
+  pp_xt->Draw();
+  pp_xt->Print("All");
+  pp_xt->Write();
+  c1->SaveAs("plots/png/ppTrack_xt_FullSpectrum.png");
+  c1->SaveAs("plots/pdf/ppTrack_xt_FullSpectrum.pdf");
+  outF->Close();
+
+
   //RpPb bin shift correction
   
   //interpolation points
