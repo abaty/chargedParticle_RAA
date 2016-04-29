@@ -146,8 +146,8 @@ void makePlotsPP(Settings s)
   pp_perMBTrigger_xt->Scale(TMath::Power(5020,4.9));
   TH1D * pp_xt = new TH1D("ppTrackSpectrum_xt",";x_{T};#sqrt{s}^{4.9}E#frac{d^{3}#sigma}{d^{3}p} (mb/GeV^{2})",s.ntrkBins,s.xt_xtrkbins);
   for(int i = 1; i< pp_xt->GetSize()-1; i++){
-    pp_xt->SetBinContent(i,s.pp_perMBTrigger->GetBinContent(i));
-    pp_xt->SetBinError(i,s.pp_perMBTrigger->GetBinError(i));
+    pp_xt->SetBinContent(i,pp_perMBTrigger_xt->GetBinContent(i));
+    pp_xt->SetBinError(i,pp_perMBTrigger_xt->GetBinError(i));
   }
   pp_xt->Draw();
   pp_xt->Print("All");

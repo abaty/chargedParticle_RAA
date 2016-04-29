@@ -32,7 +32,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   float jetTrackCutThreshhold = 50;
   float trkBufferSize = 0.0;
   bool removePbPbPU = false;
-  bool doChi2Shift = true;
+  bool doChi2Shift = false;
   TF1 * chiF = new TF1("chiF","(x<=20)*(0.976-0.159*TMath::Log10(x))+(x>20)*0.768",0.1,500); 
   std::cout << chiF->Eval(1) << " " << chiF->Eval(18) << " " << chiF->Eval(21) << " " << chiF->Eval(40)  << std::endl;
 
@@ -144,7 +144,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   int HIt18=0,              HIt18_c30=0;
   int HIt24=0,              HIt24_c30=0;
   int HIt34=0,              HIt34_c30=0;
-
+  int HI_Muon_L2Mu20=0;
+ 
   TrkCorr* trkCorr;
   TrkCorr* trkCorr_trk;
   TrkCorr* trkCorr_loosepp;
@@ -168,7 +169,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //Ntuple for looking at specific tracks
   std::string trkSkimVars;
-  trkSkimVars=   "isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34";
+  trkSkimVars=   "isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxjteta:maxjtphi:inConeJetPt:inConeJetEta:inConeJetPhi:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34:isMu20";
   TNtuple * trkSkim  = new TNtuple("trkSkim","",trkSkimVars.data()); 
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
@@ -289,6 +290,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       //hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality30100_v1",&HIt18_c30);
       hltCh->SetBranchAddress("HLT_HIFullTrack24_L1Centrality30100_v1",&HIt24_c30);
       hltCh->SetBranchAddress("HLT_HIFullTrack34_L1Centrality30100_v1",&HIt34_c30);
+      hltCh->SetBranchAddress("HI_Muon_L2Mu20",&HI_Muon_L2Mu20);
     }
     trkCh->AddFriend(hltCh);
   //***********************************************************************************
@@ -297,6 +299,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     std::cout << trkCh->GetEntries() << std::endl;
     for(int i = 0; i<trkCh->GetEntries(); i++)
     {
+      HIj40_v1=0; HIj40_v2=0; //zeroing these triggers as precaution against a rare bug seen in 7 TeV pp versioned triggers, will be reset on next GetEntry
+      for(int trig = 0; trig<21; trig++) HIMB[trig]=0;//same as above
+
       //if(i%1000==0) std::cout << i<<"/"<<trkCh->GetEntries()<<" "<<std::endl;
       evtCh->GetEntry(i);
       //if(!NoiseFilter) continue;
@@ -323,6 +328,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       //for trigger combination with jet triggers
       float maxJtPt = 0;
       float maxJtEta = -99;
+      float maxJtPhi = -99;
       for(int j=0; j<nref; j++)
       {
         if(isPP && (chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>jetEtaSelection)) continue;
@@ -330,6 +336,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
         if(jtpt[j]>maxJtPt){
           maxJtPt = jtpt[j];
           maxJtEta = jteta[j];
+          maxJtPhi = jtphi[j];
         }
       }//end maxJt
   
@@ -446,9 +453,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             }          
             if(!isCompatibleWithVertex) continue;
           }else if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-
-          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)) continue;//upper boundary on track pt
-          
     
           float rmin=999;
           for(int jt=0; jt<nref; jt++)
@@ -480,6 +484,26 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
              }*///code for skimming tracks failing track cuts
             continue;
           }  
+
+          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)){
+            if(!isPP){
+               float inConeJetPt = 0;
+               float inConeJetEta = 0;
+               float inConeJetPhi = 0;
+               for(int jt = 0; jt<nref; jt++)
+               {
+                 if((ecalSum[jt]/(ecalSum[jt]+hcalSum[j])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1|| TMath::Abs(jteta[jt])>jetEtaSelection)) continue;
+                 if(jtpt[jt]>inConeJetPt && TMath::Power(TMath::Power(trkEta[j]-jteta[jt],0.5)+TMath::Power(TMath::ACos(TMath::Cos(trkPhi[j]-jtphi[jt])),0.5),2)<0.4){
+                   inConeJetPt =  jtpt[jt];
+                   inConeJetEta = jteta[jt];
+                   inConeJetPhi = jtphi[jt];
+                 }
+               }
+             float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
+              trkSkim->Fill(skimEntry);
+            }
+            continue;//upper boundary on track pt
+          }
 
           //dividing by pt at bin center instead of track by track pt (just a convention)
           float binCenter;
@@ -545,6 +569,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           float binCenter;
           if(isPP) binCenter = s.spec_trk[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
           else     binCenter = s.HIspec_trk[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
+         
+          /*//FIXME
+          binCenter = trkPt[j];
+          //FIXME*/          
+
           float correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           correction = correction*evtSelCorrection;
           //dividing by pt at bin center instead of track by track pt (just a convention)
