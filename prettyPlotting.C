@@ -79,7 +79,8 @@ void prettyPlotting(Settings s){
   TLine * line1;
   TLatex * tex = new TLatex(0.1,0.1,"cent");
   TLatex * tex2 = new TLatex(0.1,0.1,"cent");
-  TBox* bLumi = new TBox(0.1,0.1,0.2,0.2); 
+  TBox* bLumi = new TBox(0.1,0.1,0.15,0.2); 
+  TBox* bTAA = new TBox(0.15,0.1,0.2,0.2); 
   TBox* b[s.ntrkBins];
   for(int i = 0; i<s.ntrkBins; i++) b[i] = new TBox(0.1,0.1,0.2,0.2); 
   
@@ -150,7 +151,7 @@ void prettyPlotting(Settings s){
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//pp hyperon study
       if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.03));//pp uncertainty for pileup
       
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.05));//pplumi uncertainty for spectrum
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.12));//pplumi uncertainty for spectrum
     }
     s.RAA_totSyst[c]->Write();
     s.PbPb_totSyst[c]->Write();
@@ -162,11 +163,15 @@ void prettyPlotting(Settings s){
     h[c]->GetXaxis()->SetLabelOffset(-0.005);
     h[c]->GetYaxis()->SetRangeUser(0,1.45);
     h[c]->Draw();
-  
-    float lumiUncert = Quad(0.12,s.TAAuncert[c]/100.0);//10% for pp lumi, added in quad with TAA
+ 
+    float TAAUncert = s.TAAuncert[c]/100.0;
+    float lumiUncert = 0.12;//12% for pp lumi
     bLumi->SetFillColor(kGray);
+    bTAA->SetFillColor(kBlue-9);
     bLumi->SetLineWidth(0);
-    bLumi->DrawBox(0.9,1-lumiUncert,1.5,1+lumiUncert);
+    bTAA->SetLineWidth(0);
+    bTAA->DrawBox(0.9,1-TAAUncert,TMath::Power(10,TMath::Log10(0.9)+(TMath::Log10(1.5)-TMath::Log10(0.9))/2.0),1+TAAUncert);
+    bLumi->DrawBox(TMath::Power(10,TMath::Log10(0.9)+(TMath::Log10(1.5)-TMath::Log10(0.9))/2.0),1-lumiUncert,1.5,1+lumiUncert);
   
     line1 = new TLine(h[c]->GetXaxis()->GetBinLowEdge(3),1,h[c]->GetXaxis()->GetBinUpEdge(h[c]->GetSize()-2),1);
     line1->SetLineWidth(2);

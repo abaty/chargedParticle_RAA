@@ -14,6 +14,7 @@
 #include "goldenJSON.h"
 #include "EventSelectionCorrector.C"
 #include "Settings.h"
+#include "chi2Corrector/PlotPlotChi2Scaling.C"
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -26,7 +27,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   bool doOnly1Vertex = false;
   bool doevtSelCorrection = true;
   bool useTrkCorrEverywhere =false;
-  float caloMatchValue = 0.2;
+  float caloMatchValue = 0.5;
   float caloMatchStart = 20;
   float jetEtaSelection = 2;
   float jetTrackCutThreshhold = 50;
@@ -151,8 +152,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   TrkCorr* trkCorr_trk;
   TrkCorr* trkCorr_loosepp;
   if(isPP){  
-    trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_pp/");
+    //trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_pp/");
     trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_pp_TrkTrig/");
+    trkCorr = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
     trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
   }else{  
     trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_PbPb/");
@@ -160,6 +162,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_PbPb/");
   }
   EventSelectionCorrector corrEvSel;
+  Chi2Corrector_PbPb * corr = new Chi2Corrector_PbPb();
 
   TFile * inputFile;
   TTree * trkCh;
@@ -312,6 +315,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
       trkCh->GetEntry(i);
       if(!isPP && removePbPbPU==true && hiHF>5400) continue;
+      //FIXME
+      //if(!isPP && hiBin<2) continue;
+      //FIXME
+
+
       if(doOnly1Vertex && nVtx!=1) continue;
       
       bool hasGoodVtx = 0; 
@@ -333,9 +341,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       float maxJtPhi = -99;
       for(int j=0; j<nref; j++)
       {
-        if(isPP && (chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>jetEtaSelection)) continue;
+        if((chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>jetEtaSelection)) continue;
         //if(!isPP &&  ((ecalSum[j]/(ecalSum[j]+hcalSum[j])<0.05) || (hcalSum[j]/(ecalSum[j]+hcalSum[j])<0.1)|| TMath::Abs(jteta[j])>jetEtaSelection)) continue;
-        if(!isPP && (chargedSum[j]/rawpt[j]<0.01 || TMath::Abs(jteta[j])>jetEtaSelection)) continue;
         if(jtpt[j]>maxJtPt){
           maxJtPt = jtpt[j];
           maxJtEta = jteta[j];
@@ -368,7 +375,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   
         float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
         if(!(trkPt[j]<caloMatchStart || (Et>caloMatchValue*trkPt[j]))) continue; //Calo Matching
-        if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)) continue;//upper boundary on track pt
+        //if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)) continue;//upper boundary on track pt
         eventMultiplicity++;          
 
         //applying some tighter cuts before doing the maxTrackPt calculaiton
@@ -470,8 +477,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           }
   
           float correction;
-          if(!useTrkCorrEverywhere) //correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
-                                    correction = trkCorr_loosepp->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+          if(!useTrkCorrEverywhere) correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
+                                    //correction = trkCorr_loosepp->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           correction = correction*evtSelCorrection;
           
@@ -619,7 +626,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   //for pp
   TFile * outF;
   if(!isPP) outF = TFile::Open(Form("PbPb_output_%d.root",jobNum),"recreate");
-  else     outF = TFile::Open(Form("ppFineLoose_output_%d.root",jobNum),"recreate");
+  else     outF = TFile::Open(Form("pp_output_%d.root",jobNum),"recreate");
   outF->cd();
   if(isPP){
     for(int i = 0; i<s.nTriggers; i++)
