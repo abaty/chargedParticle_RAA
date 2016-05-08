@@ -165,9 +165,20 @@ void makePlotsPbPb(Settings s)
     leg->AddEntry(s.HIUsedByTrigger[4][c],"Jet100 trigger","f");
     leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
-     
     c1->SaveAs(Form("plots/png/HITrack_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c1->SaveAs(Form("plots/pdf/HITrack_FullSpectrum_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+   
+    c1->SetLogy(0);
+    for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Divide(s.HI[c]);
+    s.HIUsedByTrigger[0][c]->GetYaxis()->SetRangeUser(0,2);
+    s.HIUsedByTrigger[0][c]->GetYaxis()->SetTitle("Relative Contribution to Bin");
+    s.HIUsedByTrigger[0][c]->Draw("HIST");
+    for(int i = 1; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Draw("HIST same");
+    s.HIUsedByTrigger[0][c]->Draw("sameaxis");
+    leg->Draw("same");
+    c1->SaveAs(Form("plots/png/HITrack_FullSpectrum_%d_%d_relativeContribution.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c1->SaveAs(Form("plots/pdf/HITrack_FullSpectrum_%d_%d_relativeContribution.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c1->SetLogy();
     delete leg;
   }
 
@@ -337,6 +348,17 @@ void makePlotsPbPb(Settings s)
      
     c2->SaveAs(Form("plots/png/HITrack_FullSpectrum_trk_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c2->SaveAs(Form("plots/pdf/HITrack_FullSpectrum_trk_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c2->SetLogy(0);
+    for(int i = 0; i<s.HInTriggers_trk; i++) s.HIUsedByTrigger_trk[i][c]->Divide(s.HI_trk[c]);
+    s.HIUsedByTrigger_trk[0][c]->GetYaxis()->SetRangeUser(0,2);
+    s.HIUsedByTrigger_trk[0][c]->GetYaxis()->SetTitle("Relative Contribution to Bin");
+    s.HIUsedByTrigger_trk[0][c]->Draw("HIST");
+    for(int i = 1; i<s.HInTriggers_trk; i++) s.HIUsedByTrigger_trk[i][c]->Draw("HIST same");
+    s.HIUsedByTrigger_trk[0][c]->Draw("sameaxis");
+    leg->Draw("same");
+    c2->SaveAs(Form("plots/png/HITrack_FullSpectrum_trk_%d_%d_relativeContribution.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c2->SaveAs(Form("plots/pdf/HITrack_FullSpectrum_trk_%d_%d_relativeContribution.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    c2->SetLogy();
     delete leg;
   }
   

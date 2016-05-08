@@ -1,3 +1,4 @@
+#include "TBox.h"
 #include "Settings.h"
 #include "TH1D.h"
 #include "TH2D.h"
@@ -138,6 +139,19 @@ void makePlotsPP(Settings s)
    
   c1->SaveAs("plots/png/ppTrack_FullSpectrum.png");
   c1->SaveAs("plots/pdf/ppTrack_FullSpectrum.pdf");
+  c1->SetLogy(0);
+  for(int i = 0; i<s.nTriggers; i++) s.ppUsedByTrigger[i]->Divide(s.pp);
+  s.ppUsedByTrigger[0]->GetYaxis()->SetRangeUser(0,2);
+  s.ppUsedByTrigger[0]->GetYaxis()->SetTitle("Relative Contribution to Bin");
+  s.ppUsedByTrigger[0]->Draw("HIST");
+  for(int i = 1; i<s.nTriggers; i++) s.ppUsedByTrigger[i]->Draw("HIST same");
+  s.ppUsedByTrigger[0]->Draw("sameaxis");
+  leg->Draw("same");
+  c1->SaveAs("plots/png/ppTrack_FullSpectrum_relativeContribution.png");
+  c1->SaveAs("plots/pdf/ppTrack_FullSpectrum_relativeContribution.pdf");
+  c1->SetLogy();
+
+
   TH1D * jtVsTrk = (TH1D*)s.pp->Clone("jtVsTrkRatio");
   
   //xt plot
@@ -210,7 +224,10 @@ void makePlotsPP(Settings s)
   pPbSpectrum->GetYaxis()->SetRangeUser(0.5,1.5);
   pPbSpectrum->Draw();
   pPbSpectrum->Write("RpPb");
+
   c1->SaveAs("plots/png/pp_RpPb.png");
+  c1->SaveAs("plots/png/pp_RpPb.pdf");
+  c1->SaveAs("plots/png/pp_RpPb.C");
   
   /*s.pp->Divide(RpPb);
   s.pp->GetYaxis()->SetTitle("data/interp");
@@ -221,7 +238,17 @@ void makePlotsPP(Settings s)
   pp_BinShift->Scale(0.098);
   pp_BinShift->Draw();
   pp_BinShift->Write("RpPb_ppVsInterpolation");
+  
+  float TAAUncert = 0.177;
+  TBox* bTAA = new TBox(0.15,0.1,0.2,0.2); 
+  bTAA->SetFillColor(kBlue-9);
+  bTAA->SetFillStyle(1001);
+  bTAA->SetLineWidth(0);
+  bTAA->DrawBox(200,1-TAAUncert,300,1+TAAUncert); 
+ 
   c1->SaveAs("plots/png/pp_dataVsInterp.png");
+  c1->SaveAs("plots/png/pp_dataVsInterp.pdf");
+  c1->SaveAs("plots/png/pp_dataVsInterp.C");
   outBinF->Close();
   
 //************************************************************************************************************
@@ -325,6 +352,17 @@ void makePlotsPP(Settings s)
    
   c2->SaveAs("plots/png/ppTrack_FullSpectrum_trk.png");
   c2->SaveAs("plots/pdf/ppTrack_FullSpectrum_trk.pdf");
+  c2->SetLogy(0);
+  for(int i = 0; i<s.nTriggers_trk; i++) s.ppUsedByTrigger_trk[i]->Divide(s.pp_trk);
+  s.ppUsedByTrigger_trk[0]->GetYaxis()->SetRangeUser(0,2);
+  s.ppUsedByTrigger_trk[0]->GetYaxis()->SetTitle("Relative Contribution to Bin");
+  s.ppUsedByTrigger_trk[0]->Draw("HIST");
+  for(int i = 1; i<s.nTriggers_trk; i++) s.ppUsedByTrigger_trk[i]->Draw("HIST same");
+  s.ppUsedByTrigger_trk[0]->Draw("sameaxis");
+  leg_trk->Draw("same");
+  c2->SaveAs("plots/png/ppTrack_FullSpectrum_trk_relativeContribution.png");
+  c2->SaveAs("plots/pdf/ppTrack_FullSpectrum_trk_relativeContribution.pdf");
+  c2->SetLogy();
 
   c2->SetLogy(0);
   jtVsTrk->Divide(s.pp_trk);
