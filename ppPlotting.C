@@ -206,13 +206,17 @@ void makePlotsPP(Settings s)
   TFile * outBinF = TFile::Open("Spectra.root","update");
   hBinningAndResol_extendedPt->Write("RpPb_binShift_Correction");
   TH1D *pp_BinShift = (TH1D*)s.pp_perMBTrigger->Clone("pp_BinShift");
+  TH1D *pp_BinShift_MB = (TH1D*)s.ppByTrigger[0]->Clone("pp_BinShift_MB");
   for(int i = 2; i<hBinningAndResol_extendedPt->GetSize()+1; i++)
   {
     pp_BinShift->SetBinContent(i-1,pp_BinShift->GetBinContent(i-1)/hBinningAndResol_extendedPt->GetBinContent(i));
     pp_BinShift->SetBinError(i-1,pp_BinShift->GetBinError(i-1)/hBinningAndResol_extendedPt->GetBinContent(i));
+    pp_BinShift_MB->SetBinContent(i-1,pp_BinShift_MB->GetBinContent(i-1)/hBinningAndResol_extendedPt->GetBinContent(i));
+    pp_BinShift_MB->SetBinError(i-1,pp_BinShift_MB->GetBinError(i-1)/hBinningAndResol_extendedPt->GetBinContent(i));
   }
 
   pp_BinShift->Write();
+  pp_BinShift_MB->Write();
   RpPbSpectrum->Write("RpPb_Published");
   
   c1->SetLogy(0);
@@ -234,8 +238,8 @@ void makePlotsPP(Settings s)
   s.pp->Draw(); */
   pp_BinShift->Divide(RpPb);
   pp_BinShift->GetYaxis()->SetTitle("data/interp");
-  pp_BinShift->GetYaxis()->SetRangeUser(0.5,1.5);
   pp_BinShift->Scale(0.098);
+  pp_BinShift->GetYaxis()->SetRangeUser(0.5,1.5);
   pp_BinShift->Draw();
   pp_BinShift->Write("RpPb_ppVsInterpolation");
   
@@ -247,8 +251,33 @@ void makePlotsPP(Settings s)
   bTAA->DrawBox(200,1-TAAUncert,300,1+TAAUncert); 
  
   c1->SaveAs("plots/png/pp_dataVsInterp.png");
-  c1->SaveAs("plots/png/pp_dataVsInterp.pdf");
+  c1->SaveAs("plots/pdf/pp_dataVsInterp.pdf");
   c1->SaveAs("plots/png/pp_dataVsInterp.C");
+  
+  pp_BinShift_MB->Divide(RpPb);
+  pp_BinShift_MB->GetYaxis()->SetTitle("MB data/interp");
+  //take lumi normalization from the previous made plot (should be same at low pt)
+  float MBScale = pp_BinShift_MB->GetBinContent(5)/pp_BinShift->GetBinContent(5);
+  pp_BinShift_MB->Scale(1/MBScale);
+  pp_BinShift_MB->GetYaxis()->SetRangeUser(0.5,1.5);
+  pp_BinShift_MB->SetMarkerColor(kRed);
+  pp_BinShift_MB->SetLineColor(kRed);
+  pp_BinShift_MB->Draw("same");
+  TLegend * ppCompareLeg = new TLegend(0.2,0.2,0.5,0.5);
+  ppCompareLeg->AddEntry(pp_BinShift,"Trigger Combined","p");
+  ppCompareLeg->AddEntry(pp_BinShift_MB,"Only MB","p");
+  ppCompareLeg->Draw("same");
+  c1->SaveAs("plots/png/pp_dataVsInterp_MBData_PlusTrigger.png");
+  c1->SaveAs("plots/pdf/pp_dataVsInterp_MBData_PlusTrigger.pdf");
+  c1->SaveAs("plots/png/pp_dataVsInterp_MBData_PlusTrigger.C");
+  delete ppCompareLeg;
+  pp_BinShift_MB->SetMarkerColor(kBlack);
+  pp_BinShift_MB->SetLineColor(kBlack);
+  pp_BinShift_MB->Draw();
+  pp_BinShift_MB->Write("RpPb_ppVsInterpolation_MBData");
+  c1->SaveAs("plots/png/pp_dataVsInterp_MBData.png");
+  c1->SaveAs("plots/pdf/pp_dataVsInterp_MBData.pdf");
+  c1->SaveAs("plots/png/pp_dataVsInterp_MBData.C");
   outBinF->Close();
   
 //************************************************************************************************************
