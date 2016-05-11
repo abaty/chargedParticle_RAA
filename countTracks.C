@@ -33,7 +33,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   float jetTrackCutThreshhold = 50;
   float trkBufferSize = 0.0;
   bool removePbPbPU = false;
-  bool doChi2Shift = false;
+  bool doChi2Shift = true;
   //TF1 * chiF = new TF1("chiF","(x<=20)*(0.976-0.159*TMath::Log10(x))+(x>20)*0.768",0.1,500); 
   //std::cout << chiF->Eval(1) << " " << chiF->Eval(18) << " " << chiF->Eval(21) << " " << chiF->Eval(40)  << std::endl;
 
@@ -160,9 +160,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_pp/");
     //trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
   }else{
-    //trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_PbPb/");
-    trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
-    trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
+    trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_PbPb/");
+    //trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
+    trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
+    //trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
     //trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_PbPb/");
   }
   EventSelectionCorrector corrEvSel;
