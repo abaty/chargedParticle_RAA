@@ -156,14 +156,15 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     //trkCorr = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
     //trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_pp_TrkTrig/");
     trkCorr = new TrkCorr("TrkCorr_May6_Iterative_pp/");
+    //trkCorr = new TrkCorr("TrkCorr_May12_Iterative_RpPbCuts/");
     trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_pp_TrkTrig/");
     //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_pp/");
     //trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
   }else{
     trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_PbPb/");
     //trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
-    trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
-    //trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
+    //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
     //trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_PbPb/");
   }
   EventSelectionCorrector corrEvSel;
@@ -178,7 +179,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //Ntuple for looking at specific tracks
   std::string trkSkimVars;
-  trkSkimVars=   "isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxjteta:maxjtphi:inConeJetPt:inConeJetEta:inConeJetPhi:passesJetID:ecalSum:hcalSum:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34:isMu20";
+  trkSkimVars=   "run:lumi:isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxjteta:maxjtphi:inConeJetPt:inConeJetEta:inConeJetPhi:passesJetID:ecalSum:hcalSum:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34:isMu20";
   TNtuple * trkSkim  = new TNtuple("trkSkim","",trkSkimVars.data()); 
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
@@ -320,10 +321,6 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
       trkCh->GetEntry(i);
       if(!isPP && removePbPbPU==true && hiHF>5400) continue;
-      //FIXME
-      //if(!isPP && hiBin<2) continue;
-      //FIXME
-
 
       if(doOnly1Vertex && nVtx!=1) continue;
       
@@ -428,11 +425,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(HIj60 && PD==1){ s.HIevtCount_JetVars[2][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);} 
       if(HIj80 && PD==1){ s.HIevtCount_JetVars[3][hiBin/10]->Fill(maxJtEta,maxJtPt);  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);} 
       if(HIj100 && PD==1){ s.HIevtCount_JetVars[4][hiBin/10]->Fill(maxJtEta,maxJtPt); s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);} 
-      if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
+      if(HIj40_c30  && HIj40!=1 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
       if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
       if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
       if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
-      if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
+      if(HIj40_c50  && !HIj40!=1 && !HIj40_c30 && PD==2 && hiBin>=100)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
       if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
       if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
       if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
@@ -518,7 +515,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
                                     //correction = trkCorr_loosepp->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           correction = correction*evtSelCorrection;
-          
+ 
           float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
           if(!(trkPt[j]<caloMatchStart || (Et>caloMatchValue*trkPt[j]))){
             /*if(!isPP){
@@ -544,6 +541,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
              float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,passesJetID,ecSum,hcSum,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
               trkSkim->Fill(skimEntry);
             }*/
+
             continue; //Calo Matching
           }
 
@@ -555,7 +553,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             continue;
           }  
 
-/*          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)){
+          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)){
             if(!isPP){
                float inConeJetPt = 0;
                float inConeJetEta = 0;
@@ -576,12 +574,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
                    passesJetID = !((ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05) || (hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1));
                  }
                }
-             float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,passesJetID,ecSum,hcSum,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
+             float skimEntry[] = {(float)run,(float)lumi,(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,passesJetID,ecSum,hcSum,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
               trkSkim->Fill(skimEntry);
               //if(inConeJetPt==0) continue;//upper boundary on track pt
             }
           }
-*/
+
           //dividing by pt at bin center instead of track by track pt (just a convention)
           float binCenter;
           if(isPP) binCenter = s.spec[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
@@ -598,11 +596,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(HIj60 && PD==1)     s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
             if(HIj80 && PD==1)     s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
             if(HIj100 && PD==1)    s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
-            if(HIj40_c30  && !HIj40 && PD==2 && hiBin>=60)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj40_c30  && HIj40!=1 && PD==2 && hiBin>=60)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-            if(HIj40_c50  && !HIj40 && !HIj40_c30 && PD==2 && hiBin>=100)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj40_c50  && HIj40!=1 && !HIj40_c30 && PD==2 && hiBin>=100)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
