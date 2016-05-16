@@ -1,6 +1,6 @@
 #ifndef PRETTYPLOT
 #define PRETTYPLOT
-
+#include "TGraphErrors.h"
 #include "TGraphAsymmErrors.h"
 #include "TPad.h"
 #include "TAttPad.h"
@@ -28,7 +28,11 @@
 #include <string>
 #include <fstream>
 
-void get276RAA(TCanvas * c276, Settings s, int centralityBin);
+void getSPS(TGraphErrors * SPS);
+void getPHENIX(TGraphErrors * PHENIX);
+void getSTAR(TGraphErrors * gSTAR);
+void getAlice276(TGraphErrors * Alice276);
+void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=false, bool doWithSystBoxes=true);
 void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString);
 
 double Quad(double a, double b)
@@ -110,6 +114,8 @@ void prettyPlotting(Settings s){
   gStyle->SetErrorX(0);
   
 
+  float TAAUncert;
+  float lumiUncert;//12% for pp lumi
   for(int c = 0; c<s.nCentBins; c++){
     //adding up uncertainties
     for(int i = 1; i<s.RAA_totSyst[c]->GetSize()-1; i++){
@@ -167,8 +173,8 @@ void prettyPlotting(Settings s){
     h[c]->GetYaxis()->SetRangeUser(0,1.45);
     h[c]->Draw();
  
-    float TAAUncert = s.TAAuncert[c]/100.0;
-    float lumiUncert = 0.12;//12% for pp lumi
+    TAAUncert = s.TAAuncert[c]/100.0;
+    lumiUncert = 0.12;//12% for pp lumi
     bLumi->SetFillColor(kGray);
     bTAA->SetFillColor(kBlue-9);
     bLumi->SetLineWidth(0);
@@ -214,7 +220,7 @@ void prettyPlotting(Settings s){
 
     if(c==0 || c==1 || c==23 || c==24 || c==25 || c==30){
       TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
-      get276RAA(canv_276,s,c);
+      get276RAA(canv_276,s,c,true);
       //get276RAA(canv,s,c);
     }
     if(c==0 || c==1  || c==24 || c==31){
@@ -316,7 +322,7 @@ void prettyPlotting(Settings s){
   systLeg->AddEntry(s.pp_totSyst,"pp","f");
   systLeg->Draw("same");
 
-  CMS_lumi( canv2, 0, 33 );
+  CMS_lumi( canv2, 0,33);
   canv2->Update();
   canv2->RedrawAxis();
   //canv2->GetFrame()->Draw();    
@@ -324,17 +330,128 @@ void prettyPlotting(Settings s){
   canv2->SaveAs("plots/prettyPlots/Spectra_perEventYield.pdf");
   canv2->SaveAs("plots/prettyPlots/Spectra_perEventYield.C");
 
-  s.PbPb_totSyst[0]->Print("All");
-  s.pp_totSyst->Print("All");
-  s.RAA_totSyst[30]->Print("All");
+  //Huge results compilation plot
+  TCanvas * canv3 = new TCanvas("canv3","canv3",1200,1200);
+  canv3->SetBorderSize(0);
+  canv3->SetLineWidth(0);
+  canv3->SetLogx();
+  TH1D * axisDummy = new TH1D("axisD","axisD",1,0.3,400);
+  axisDummy->GetYaxis()->CenterTitle(true);
+  axisDummy->GetYaxis()->SetTitle("R_{AA}");
+  axisDummy->GetXaxis()->SetTitle("p_{T} (GeV)");
+  axisDummy->GetXaxis()->CenterTitle(true);
+  axisDummy->GetXaxis()->SetRangeUser(0.3,350);
+  axisDummy->GetXaxis()->SetLabelOffset(-0.01);
+  axisDummy->GetYaxis()->SetRangeUser(0,2);
+  axisDummy->Draw();
+  h[0]->SetBinContent(1,0); h[0]->SetBinContent(2,0);
+  h[0]->SetBinError(1,0); h[0]->SetBinError(2,0);
+  h[0]->Draw("same");
+ 
+  
+  for(int i = 1; i<h[0]->GetSize()-1; i++){
+    if(i<3) continue;
+    b[i-1]->SetFillColor(kOrange);
+    b[i-1]->SetX1(h[0]->GetXaxis()->GetBinLowEdge(i));
+    b[i-1]->SetX2(h[0]->GetXaxis()->GetBinUpEdge(i));
+    b[i-1]->SetY1(h[0]->GetBinContent(i)*(1-TMath::Power(TMath::Power(s.RAA_totSyst[0]->GetBinContent(i),2)+TAAUncert*TAAUncert+lumiUncert*lumiUncert,0.5)));
+    b[i-1]->SetY2(h[0]->GetBinContent(i)*(1+TMath::Power(TMath::Power(s.RAA_totSyst[0]->GetBinContent(i),2)+TAAUncert*TAAUncert+lumiUncert*lumiUncert,0.5)));
+    b[i-1]->Draw("same");
+  }
+  gStyle->SetErrorX(0.);
+  h[0]->Draw("same");
+  
+  TGraphErrors * SPS = new TGraphErrors("SPS","SPS");
+  getSPS(SPS);
+  SPS->Draw("same p");
+  TGraphErrors * PHENIX = new TGraphErrors("PHENIX","PHENIX");
+  getPHENIX(PHENIX);
+  PHENIX->Draw("same p");
+  TGraphErrors * STAR = new TGraphErrors("STAR","STAR");
+  getSTAR(STAR);
+  STAR->Draw("same p");
 
+  get276RAA(canv3,s,0,false,false);
+
+  //legend
+  gStyle->SetLegendBorderSize(0); 
+  TLegend * bigLegc1 = new TLegend(0.47,0.55,0.68,0.93);
+  TLegend * bigLegc1x = new TLegend(0.42,0.55,0.63,0.93);
+ //divide by number of entries on right/left
+  TLegend * bigLegc2 = new TLegend(0.7,0.93-(0.93-0.55)/(9.0/2.0),0.91,0.93);
+  TLegend * bigLegc2x = new TLegend(0.65,0.93-(0.93-0.55)/(9.0/2.0),0.86,0.93);
+  bigLegc1->SetFillStyle(0); bigLegc1x->SetFillStyle(0);
+  bigLegc2->SetFillStyle(0); bigLegc2x->SetFillStyle(0);
+  bigLegc1->SetTextSize(0.4/20.0); bigLegc1x->SetTextSize(0.4/20.0);
+  bigLegc2->SetTextSize(0.4/20.0); bigLegc2x->SetTextSize(0.4/20.0);
+  //col1
+  TH1D * dummyATLAS = new TH1D("dummyATLAS","dummyATLAS",10,0,10);
+  dummyATLAS->SetMarkerColor(kBlue);
+  dummyATLAS->SetLineColor(kBlue); 
+  dummyATLAS->SetMarkerSize(1);
+  TH1D * dummyCMS = new TH1D("dummyCMS","dummyCMS",10,0,10);
+  dummyCMS->SetMarkerColor(kRed); 
+  dummyCMS->SetLineColor(kRed); 
+  dummyCMS->SetMarkerSize(1);
+  TH1D * dummyALICE = new TH1D("dummyALICE","dummyALICE",10,0,10);
+  dummyALICE->SetMarkerStyle(27);
+  dummyALICE->SetMarkerColor(kGreen+1);
+  dummyALICE->SetLineColor(kGreen+1); 
+  dummyALICE->SetSetMarkerSize(1.2); 
+  bigLegc1->AddEntry((TObject*)0,"","");  bigLegc1x->AddEntry((TObject*)0,"SPS 17.3 GeV (PbPb)","");
+  bigLegc1->AddEntry(SPS,"#pi^{0} WA98 (0-7%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
+  bigLegc1->AddEntry((TObject*)0,"","");  bigLegc1x->AddEntry((TObject*)0,"RHIC 200 GeV (AuAu)","");
+  bigLegc1->AddEntry(PHENIX,"#pi^{0} PHENIX (0-10%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
+  bigLegc1->AddEntry(STAR,"h^{#pm} STAR (0-5%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
+  bigLegc1->AddEntry((TObject*)0,"","");  bigLegc1x->AddEntry((TObject*)0,"LHC 2.76 TeV (PbPb)","");
+  bigLegc1->AddEntry(dummyALICE,"ALICE (0-5%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
+  bigLegc1->AddEntry(dummyATLAS,"ATLAS (0-5%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
+  bigLegc1->AddEntry(dummyCMS,"CMS (0-5%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
+  bigLegc1->Draw("same");bigLegc1x->Draw("same");
+  //col 2
+  TH1D * dummyCMS5 = new TH1D("dummyCMS5","dummyCMS5",10,0,10);
+  dummyCMS5->SetMarkerColor(kBlack); dummyCMS5->SetMarkerStyle(8); dummyCMS5->SetFillColor(kOrange);
+  TH1D * dummyVitev = new TH1D("dummyVitev","dummyVitev",10,0,10);
+  dummyVitev->SetFillStyle(3002);dummyVitev->SetFillColor(kRed);dummyVitev->SetLineWidth(0);
+  TH1D * dummyCUTEP = new TH1D("dummyCUTEP","dummyCUTEP",10,0,10);
+  dummyCUTEP->SetLineColor(kBlue+1);dummyCUTEP->SetLineWidth(3);
+  bigLegc2->AddEntry((TObject*)0,"","");  bigLegc2x->AddEntry((TObject*)0,"LHC 5.02 TeV (PbPb)","");
+  bigLegc2->AddEntry(dummyCMS5,"CMS (0-5%)","pf");  bigLegc2x->AddEntry((TObject*)0,"","");
+  bigLegc2->Draw("same");bigLegc2x->Draw("same");
+  
+
+  
+  TLine * line3 = new TLine(0.3,1,h[0]->GetXaxis()->GetBinUpEdge(h[0]->GetSize()-2),1);
+  line3->SetLineWidth(2);
+  line3->SetLineStyle(2);
+  line3->Draw("same");
+
+  CMS_lumi( canv3,0, 11 );
+  canv3->Update();
+  canv3->RedrawAxis();
+  canv3->SaveAs("plots/prettyPlots/RAA_Compilation_noTheory.png");
+  canv3->SaveAs("plots/prettyPlots/RAA_Compilation_noTheory.pdf");
+  canv3->SaveAs("plots/prettyPlots/RAA_Compilation_noTheory.C");
+
+  gettheoryRAA(canv3,s,0,"noSave");
+  bigLegc2->SetY1NDC(0.93-(0.93-0.55)/(9.0/5.0));
+  bigLegc2x->SetY1NDC(0.93-(0.93-0.55)/(9.0/5.0));
+  bigLegc2->AddEntry((TObject*)0,"","");  bigLegc2x->AddEntry((TObject*)0,"Models 5.02 TeV (PbPb)","");
+  bigLegc2->AddEntry(dummyVitev,"Y. Chien et al. (0-10%)","f");  bigLegc2x->AddEntry((TObject*)0,"","");
+  bigLegc2->AddEntry(dummyCUTEP,"J. Xu et al. (h^{#pm}+#pi^{0}, 0-10%)","l");  bigLegc2x->AddEntry((TObject*)0,"","");
+  bigLegc2->Draw("same");bigLegc2x->Draw("same");
+  canv3->Update();
+  canv3->RedrawAxis();
+  canv3->SaveAs("plots/prettyPlots/RAA_Compilation.png");
+  canv3->SaveAs("plots/prettyPlots/RAA_Compilation.pdf");
+  canv3->SaveAs("plots/prettyPlots/RAA_Compilation.C");
   inputPlots->Close();
   
   return;
 }
 
 
-void get276RAA(TCanvas * c276, Settings s, int centralityBin){
+void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory,bool doWithSystBoxes){
   float raaaxis[28] = {1,1.1,1.2,1.4,1.6,1.8,2,2.2,2.4,3.2,4,4.8,5.6,6.4,7.2,9.6,12,14.4,19.2,24,28.8,35.2,41.6,48,60.8,73.6,86.4,103.6};
     int tempCentralityBin = centralityBin;
     if(centralityBin==23) tempCentralityBin=2;
@@ -394,12 +511,12 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
     0.007722, 0.0086, 0.01071, 0.010355, 0.016860000000000003, 0.029841000000000003, 0.052804, 0.094815 };
   int p8800_d40x1y1_numpoints = 37;
   //TGraphAsymmErrors p8800_d40x1y1 = TGraphAsymmErrors(p8800_d40x1y1_numpoints, p8800_d40x1y1_xval, p8800_d40x1y1_yval, p8800_d40x1y1_xerrminus, p8800_d40x1y1_xerrplus, p8800_d40x1y1_yerrminus, p8800_d40x1y1_yerrplus);
-  TGraphAsymmErrors p8800_d40x1y1 = TGraphAsymmErrors(p8800_d40x1y1_numpoints, p8800_d40x1y1_xval, p8800_d40x1y1_yval,0,0, p8800_d40x1y1_yerrminus, p8800_d40x1y1_yerrplus);
-  p8800_d40x1y1.SetName("ATLAS_0_5");
-  p8800_d40x1y1.SetTitle("ATLAS_0_5");
-  p8800_d40x1y1.SetMarkerColor(kBlue);
-  p8800_d40x1y1.SetMarkerColor(kBlue);
-  p8800_d40x1y1.SetLineColor(kBlue);
+  TGraphAsymmErrors * p8800_d40x1y1 =new  TGraphAsymmErrors(p8800_d40x1y1_numpoints, p8800_d40x1y1_xval, p8800_d40x1y1_yval,0,0, p8800_d40x1y1_yerrminus, p8800_d40x1y1_yerrplus);
+  p8800_d40x1y1->SetName("ATLAS_0_5");
+  p8800_d40x1y1->SetTitle("ATLAS_0_5");
+  p8800_d40x1y1->SetMarkerColor(kBlue);
+  p8800_d40x1y1->SetMarkerColor(kBlue);
+  p8800_d40x1y1->SetLineColor(kBlue);
 //end ATLAS data
 
   TH1D * p;
@@ -409,31 +526,50 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
     p->SetBinError(i,raavalstat[tempCentralityBin][i-1]); 
   }
   p->SetMarkerColor(kRed);
+  p->SetMarkerSize(1);
   p->SetLineColor(kRed);
   p->Draw("same");
+ 
   TBox *bp[27];
-  for(int i = 0; i<27; i++) bp[i] = new TBox(0.1,0.1,0.2,0.2);
-  for(int i = 1; i<p->GetSize()-1; i++){
-    bp[i-1]->SetFillStyle(0);
-    bp[i-1]->SetLineColor(kRed);
-    bp[i-1]->SetLineWidth(1);
-    bp[i-1]->SetX1(p->GetXaxis()->GetBinLowEdge(i));
-    bp[i-1]->SetX2(p->GetXaxis()->GetBinUpEdge(i));
-    bp[i-1]->SetY1((p->GetBinContent(i))*(1-raavalsyst[tempCentralityBin][i-1]));
-    bp[i-1]->SetY2((p->GetBinContent(i)*(1+raavalsyst[tempCentralityBin][i-1])));
-    bp[i-1]->Draw("same");
+  if(doWithSystBoxes){
+    for(int i = 0; i<27; i++) bp[i] = new TBox(0.1,0.1,0.2,0.2);
+    for(int i = 1; i<p->GetSize()-1; i++){
+      bp[i-1]->SetFillStyle(0);
+      bp[i-1]->SetLineColor(kRed);
+      bp[i-1]->SetLineWidth(1);
+      bp[i-1]->SetX1(p->GetXaxis()->GetBinLowEdge(i));
+      bp[i-1]->SetX2(p->GetXaxis()->GetBinUpEdge(i));
+      bp[i-1]->SetY1((p->GetBinContent(i))*(1-raavalsyst[tempCentralityBin][i-1]));
+      bp[i-1]->SetY2((p->GetBinContent(i)*(1+raavalsyst[tempCentralityBin][i-1])));
+      bp[i-1]->Draw("same");
+    }
+  }else{
+    for(int i = 1; i<p->GetSize()-1; i++){
+      p->SetBinError(i,TMath::Power(raavalstat[tempCentralityBin][i-1]*raavalstat[tempCentralityBin][i-1]+raavalsyst[tempCentralityBin][i-1]*raavalsyst[tempCentralityBin][i-1],0.5));
+    }
   }
+
+  TGraphErrors * alice276 = new TGraphErrors("alice276","alice276");
+  getAlice276(alice276);
+
   TLegend * legRaa276 = new TLegend(0.53,0.725,0.9,0.91);
   TH1D * dummy = new TH1D("dummy","dummy",10,0,10);
   dummy->SetMarkerColor(kBlack); dummy->SetMarkerStyle(8); dummy->SetFillColor(kOrange);
-  legRaa276->AddEntry(dummy,"CMS 5.02 TeV R_{AA}","pf");
-  legRaa276->AddEntry(p,"CMS 2.76 TeV R_{AA}","p");
+  legRaa276->AddEntry(dummy,"CMS 5.02 TeV","pf");
+  legRaa276->AddEntry(p,"CMS 2.76 TeV","p");
 
   gStyle->SetErrorX(0.);
-  if(centralityBin==0) legRaa276->AddEntry(&p8800_d40x1y1,"ATLAS 2.76 TeV R_{AA}","p");
-  legRaa276->SetTextFont(62);
-  legRaa276->Draw("same");
-  if(centralityBin==0) p8800_d40x1y1.Draw("P same");
+  if(centralityBin==0){
+    legRaa276->AddEntry(p8800_d40x1y1,"ATLAS 2.76 TeV","p");
+    p8800_d40x1y1->SetMarkerSize(1);
+    p8800_d40x1y1->Draw("P same");
+
+    legRaa276->AddEntry(alice276,"ALICE 2.76 TeV","p");
+    alice276->Draw("P same");
+    legRaa276->SetTextFont(62);
+    legRaa276->Draw("same");
+  }
+  else legRaa276->Draw("same");
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
   c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
@@ -441,14 +577,16 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   if(centralityBin==0){
     TH1D * dummy2 = new TH1D("dummy2","dummy2",10,0,10);
     dummy2->SetFillStyle(3002);dummy2->SetFillColor(kRed);dummy2->SetLineWidth(0);
+    TH1D * dummy3 = new TH1D("dummy3","dummy3",10,0,10);
+    dummy3->SetLineColor(kBlue+1);dummy3->SetLineWidth(3);
     legRaa276->AddEntry(dummy2,"Y. Chien et al. 0-10%","f");
+    legRaa276->AddEntry(dummy3,"J. Xu et al. 0-10% (h^{#pm}+#pi^{0})","l");
     legRaa276->Draw("same");
-    gettheoryRAA(c276,s,centralityBin,"With276");
-    delete dummy2;
+    if(doAddTheory)gettheoryRAA(c276,s,centralityBin,"With276");
   }
   delete legRaa276;
   delete dummy;
-  for(int i = 0; i<27; i++) delete bp[i];
+  if(doWithSystBoxes){for(int i = 0; i<27; i++) delete bp[i];}
   return;
 }
 
@@ -529,6 +667,310 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   delete leg_th;
+  return;
+}
+
+void getAlice276(TGraphErrors * Alice276){
+        Alice276->SetMarkerStyle(27);
+        Alice276->SetMarkerColor(kGreen+1);
+        Alice276->SetMarkerSize(1.2);
+        Alice276->SetLineColor(kGreen+1);
+        Alice276->SetPoint(0,0.325,0.1995853);
+	Alice276->SetPointError(0,0,0.000213951);
+	Alice276->SetPoint(1,0.375,0.2054084);
+	Alice276->SetPointError(1,0,0.0002229942);
+	Alice276->SetPoint(2,0.425,0.2247697);
+	Alice276->SetPointError(2,0,0.0002513873);
+	Alice276->SetPoint(3,0.475,0.2285087);
+	Alice276->SetPointError(3,0,0.0002655913);
+	Alice276->SetPoint(4,0.525,0.2397367);
+	Alice276->SetPointError(4,0,0.000291365);
+	Alice276->SetPoint(5,0.575,0.2514136);
+	Alice276->SetPointError(5,0,0.0003230532);
+	Alice276->SetPoint(6,0.625,0.2635921);
+	Alice276->SetPointError(6,0,0.0003621994);
+	Alice276->SetPoint(7,0.675,0.2757732);
+	Alice276->SetPointError(7,0,0.0004052376);
+	Alice276->SetPoint(8,0.725,0.2872272);
+	Alice276->SetPointError(8,0,0.0004525025);
+	Alice276->SetPoint(9,0.775,0.2991865);
+	Alice276->SetPointError(9,0,0.0005060741);
+	Alice276->SetPoint(10,0.825,0.3093057);
+	Alice276->SetPointError(10,0,0.0005628576);
+	Alice276->SetPoint(11,0.875,0.3200087);
+	Alice276->SetPointError(11,0,0.0006241739);
+	Alice276->SetPoint(12,0.925,0.3305192);
+	Alice276->SetPointError(12,0,0.0006891561);
+	Alice276->SetPoint(13,0.975,0.3411622);
+	Alice276->SetPointError(13,0,0.0007649434);
+	Alice276->SetPoint(14,1.05,0.3528538);
+	Alice276->SetPointError(14,0,0.0006164945);
+	Alice276->SetPoint(15,1.15,0.3697178);
+	Alice276->SetPointError(15,0,0.0007302993);
+	Alice276->SetPoint(16,1.25,0.3860994);
+	Alice276->SetPointError(16,0,0.0008529521);
+	Alice276->SetPoint(17,1.35,0.3978953);
+	Alice276->SetPointError(17,0,0.0009855861);
+	Alice276->SetPoint(18,1.45,0.4125533);
+	Alice276->SetPointError(18,0,0.001137342);
+	Alice276->SetPoint(19,1.55,0.4191852);
+	Alice276->SetPointError(19,0,0.00126671);
+	Alice276->SetPoint(20,1.65,0.4228657);
+	Alice276->SetPointError(20,0,0.001402924);
+	Alice276->SetPoint(21,1.75,0.4272201);
+	Alice276->SetPointError(21,0,0.001540179);
+	Alice276->SetPoint(22,1.85,0.4343877);
+	Alice276->SetPointError(22,0,0.001733043);
+	Alice276->SetPoint(23,1.95,0.4344471);
+	Alice276->SetPointError(23,0,0.00186586);
+	Alice276->SetPoint(24,2.1,0.4268035);
+	Alice276->SetPointError(24,0,0.001463217);
+	Alice276->SetPoint(25,2.3,0.4174346);
+	Alice276->SetPointError(25,0,0.001665204);
+	Alice276->SetPoint(26,2.5,0.3982964);
+	Alice276->SetPointError(26,0,0.00183462);
+	Alice276->SetPoint(27,2.7,0.3798009);
+	Alice276->SetPointError(27,0,0.001553817);
+	Alice276->SetPoint(28,2.9,0.3565323);
+	Alice276->SetPointError(28,0,0.001501816);
+	Alice276->SetPoint(29,3.1,0.3301255);
+	Alice276->SetPointError(29,0,0.001373992);
+	Alice276->SetPoint(30,3.3,0.304144);
+	Alice276->SetPointError(30,0,0.001341491);
+	Alice276->SetPoint(31,3.5,0.2816622);
+	Alice276->SetPointError(31,0,0.001333401);
+	Alice276->SetPoint(32,3.7,0.2597327);
+	Alice276->SetPointError(32,0,0.001338903);
+	Alice276->SetPoint(33,3.9,0.2382727);
+	Alice276->SetPointError(33,0,0.001356675);
+	Alice276->SetPoint(34,4.25,0.2143155);
+	Alice276->SetPointError(34,0,0.001239179);
+	Alice276->SetPoint(35,4.75,0.180762);
+	Alice276->SetPointError(35,0,0.00126185);
+	Alice276->SetPoint(36,5.25,0.1603479);
+	Alice276->SetPointError(36,0,0.001389204);
+	Alice276->SetPoint(37,5.75,0.1476227);
+	Alice276->SetPointError(37,0,0.001598977);
+	Alice276->SetPoint(38,6.25,0.1449974);
+	Alice276->SetPointError(38,0,0.00192055);
+	Alice276->SetPoint(39,6.75,0.1388667);
+	Alice276->SetPointError(39,0,0.002267876);
+	Alice276->SetPoint(40,7.5,0.1510411);
+	Alice276->SetPointError(40,0,0.002248717);
+	Alice276->SetPoint(41,8.5,0.1629754);
+	Alice276->SetPointError(41,0,0.003223174);
+	Alice276->SetPoint(42,9.5,0.1750594);
+	Alice276->SetPointError(42,0,0.00448209);
+	Alice276->SetPoint(43,10.5,0.1932029);
+	Alice276->SetPointError(43,0,0.006157734);
+	Alice276->SetPoint(44,11.5,0.2106893);
+	Alice276->SetPointError(44,0,0.008217693);
+	Alice276->SetPoint(45,12.5,0.2114083);
+	Alice276->SetPointError(45,0,0.0103099);
+	Alice276->SetPoint(46,13.5,0.242657);
+	Alice276->SetPointError(46,0,0.01360784);
+	Alice276->SetPoint(47,14.5,0.2113921);
+	Alice276->SetPointError(47,0,0.01540525);
+	Alice276->SetPoint(48,15.5,0.2650634);
+	Alice276->SetPointError(48,0,0.02066883);
+	Alice276->SetPoint(49,17,0.3086412);
+	Alice276->SetPointError(49,0,0.02026634);
+	Alice276->SetPoint(50,19,0.3476079);
+	Alice276->SetPointError(50,0,0.02900859);
+        return;
+}
+
+void getPHENIX(TGraphErrors * PHENIX){
+  PHENIX->SetMarkerStyle(kOpenSquare);
+  PHENIX->SetMarkerColor(kOrange+3);
+  PHENIX->SetLineColor(kOrange+3);
+  PHENIX->SetMarkerSize(1.1);
+  PHENIX->SetPoint(0,1.25,0.4196505);
+  PHENIX->SetPointError(0,0,0.05241844);
+  PHENIX->SetPoint(1,1.75,0.3864639);
+  PHENIX->SetPointError(1,0,0.04731976);
+  PHENIX->SetPoint(2,2.25,0.3482422);
+  PHENIX->SetPointError(2,0,0.04258362);
+  PHENIX->SetPoint(3,2.75,0.3006047);
+  PHENIX->SetPointError(3,0,0.03682275);
+  PHENIX->SetPoint(4,3.25,0.2521416);
+  PHENIX->SetPointError(4,0,0.03093063);
+  PHENIX->SetPoint(5,3.75,0.2297605);
+  PHENIX->SetPointError(5,0,0.02824086);
+  PHENIX->SetPoint(6,4.25,0.2128839);
+  PHENIX->SetPointError(6,0,0.02625722);
+  PHENIX->SetPoint(7,4.75,0.1896125);
+  PHENIX->SetPointError(7,0,0.02358282);
+  PHENIX->SetPoint(8,5.25,0.2002735);
+  PHENIX->SetPointError(8,0,0.0249926);
+  PHENIX->SetPoint(9,5.75,0.1921036);
+  PHENIX->SetPointError(9,0,0.02427864);
+  PHENIX->SetPoint(10,6.25,0.1798495);
+  PHENIX->SetPointError(10,0,0.02223636);
+  PHENIX->SetPoint(11,6.75,0.1869397);
+  PHENIX->SetPointError(11,0,0.0232378);
+  PHENIX->SetPoint(12,7.25,0.1958242);
+  PHENIX->SetPointError(12,0,0.02450462);
+  PHENIX->SetPoint(13,7.75,0.1938247);
+  PHENIX->SetPointError(13,0,0.02467216);
+  PHENIX->SetPoint(14,8.25,0.197385);
+  PHENIX->SetPointError(14,0,0.02560671);
+  PHENIX->SetPoint(15,8.75,0.1864654);
+  PHENIX->SetPointError(15,0,0.02479187);
+  PHENIX->SetPoint(16,9.25,0.1939556);
+  PHENIX->SetPointError(16,0,0.02649129);
+  PHENIX->SetPoint(17,9.75,0.2370864);
+  PHENIX->SetPointError(17,0,0.03262089);
+  PHENIX->SetPoint(18,10.25,0.2195571);
+  PHENIX->SetPointError(18,0,0.03202508);
+  PHENIX->SetPoint(19,10.75,0.2184199);
+  PHENIX->SetPointError(19,0,0.03442116);
+  PHENIX->SetPoint(20,11.25,0.2240902);
+  PHENIX->SetPointError(20,0,0.03619774);
+  PHENIX->SetPoint(21,11.75,0.2251997);
+  PHENIX->SetPointError(21,0,0.03924508);
+  PHENIX->SetPoint(22,12.25,0.1915103);
+  PHENIX->SetPointError(22,0,0.03807128);
+  PHENIX->SetPoint(23,12.75,0.2486298);
+  PHENIX->SetPointError(23,0,0.05040476);
+  PHENIX->SetPoint(24,13.25,0.1368522);
+  PHENIX->SetPointError(24,0,0.03803081);
+  PHENIX->SetPoint(25,13.75,0.1263376);
+  PHENIX->SetPointError(25,0,0.04106358);
+  PHENIX->SetPoint(26,14.25,0.257112);
+  PHENIX->SetPointError(26,0,0.07146291);
+  PHENIX->SetPoint(27,14.75,0.3245706);
+  PHENIX->SetPointError(27,0,0.0926213);
+  PHENIX->SetPoint(28,15.5,0.1241035);
+  PHENIX->SetPointError(28,0,0.05436226);
+  PHENIX->SetPoint(29,16.5,0.1304623);
+  PHENIX->SetPointError(29,0,0.06721352);
+  PHENIX->SetPoint(30,17.5,0.2490225);
+  PHENIX->SetPointError(30,0,0.1282222);
+  PHENIX->SetPoint(31,19,0.3525731);
+  PHENIX->SetPointError(31,0,0.2065357);
+  return;
+}
+
+void getSTAR(TGraphErrors * gSTAR){
+	gSTAR->SetMarkerStyle(kOpenStar);
+	gSTAR->SetMarkerColor(kOrange+3);
+	gSTAR->SetLineColor(kOrange+3);
+	gSTAR->SetMarkerSize(1.1);
+	gSTAR->SetPoint(0,0.45,0.29);
+	gSTAR->SetPointError(0,0.0,0.03);
+	gSTAR->SetPoint(1,0.55,0.32);
+	gSTAR->SetPointError(1,0.0,0.03);
+	gSTAR->SetPoint(2,0.65,0.36);
+	gSTAR->SetPointError(2,0.0,0.03);
+	gSTAR->SetPoint(3,0.75,0.39);
+	gSTAR->SetPointError(3,0.0,0.03);
+	gSTAR->SetPoint(4,0.85,0.43);
+	gSTAR->SetPointError(4,0.0,0.03);
+	gSTAR->SetPoint(5,0.95,0.46);
+	gSTAR->SetPointError(5,0.0,0.04);
+	gSTAR->SetPoint(6,1.05,0.49);
+	gSTAR->SetPointError(6,0.0,0.04);
+	gSTAR->SetPoint(7,1.15,0.53);
+	gSTAR->SetPointError(7,0.0,0.04);
+	gSTAR->SetPoint(8,1.25,0.56);
+	gSTAR->SetPointError(8,0.0,0.04);
+	gSTAR->SetPoint(9,1.35,0.58);
+	gSTAR->SetPointError(9,0.0,0.04);
+	gSTAR->SetPoint(10,1.45,0.6);
+	gSTAR->SetPointError(10,0.0,0.05);
+	gSTAR->SetPoint(11,1.55,0.62);
+	gSTAR->SetPointError(11,0.0,0.05);
+	gSTAR->SetPoint(12,1.65,0.64);
+	gSTAR->SetPointError(12,0.0,0.06);
+	gSTAR->SetPoint(13,1.75,0.66);
+	gSTAR->SetPointError(13,0.0,0.06);
+	gSTAR->SetPoint(14,1.85,0.67);
+	gSTAR->SetPointError(14,0.0,0.06);
+	gSTAR->SetPoint(15,1.95,0.67);
+	gSTAR->SetPointError(15,0.0,0.07);
+	gSTAR->SetPoint(16,2.05,0.69);
+	gSTAR->SetPointError(16,0.0,0.08);
+	gSTAR->SetPoint(17,2.15,0.68);
+	gSTAR->SetPointError(17,0.0,0.08);
+	gSTAR->SetPoint(18,2.25,0.7);
+	gSTAR->SetPointError(18,0.0,0.08);
+	gSTAR->SetPoint(19,2.35,0.69);
+	gSTAR->SetPointError(19,0.0,0.09);
+	gSTAR->SetPoint(20,2.49,0.7);
+	gSTAR->SetPointError(20,0.0,0.1);
+	gSTAR->SetPoint(21,2.7,0.65);
+	gSTAR->SetPointError(21,0.0,0.09);
+	gSTAR->SetPoint(22,2.9,0.56);
+	gSTAR->SetPointError(22,0.0,0.06);
+	gSTAR->SetPoint(23,3.16,0.49);
+	gSTAR->SetPointError(23,0.0,0.05);
+	gSTAR->SetPoint(24,3.55,0.44);
+	gSTAR->SetPointError(24,0.0,0.04);
+	gSTAR->SetPoint(25,4.06,0.38);
+	gSTAR->SetPointError(25,0.0,0.04);
+	gSTAR->SetPoint(26,4.7,0.32);
+	gSTAR->SetPointError(26,0.0,0.04);
+	gSTAR->SetPoint(27,5.48,0.27);
+	gSTAR->SetPointError(27,0.0,0.03);
+	gSTAR->SetPoint(28,6.42,0.26);
+	gSTAR->SetPointError(28,0.0,0.04);
+	gSTAR->SetPoint(29,7.43,0.18);
+	gSTAR->SetPointError(29,0.0,0.03);
+	gSTAR->SetPoint(30,8.43,0.22);
+	gSTAR->SetPointError(30,0.0,0.06);
+	gSTAR->SetPoint(31,9.44,0.19);
+	gSTAR->SetPointError(31,0.0,0.06);
+ 	return;
+}
+
+void getSPS(TGraphErrors * SPS){
+  SPS->SetMarkerColor(51);
+  SPS->SetLineColor(51);
+  SPS->SetMarkerStyle(20);
+  SPS->SetMarkerSize(1.1);
+  SPS->SetPoint(0,0.55,0.331252);
+  SPS->SetPointError(0,0.05,0.0122185);
+  SPS->SetPoint(1,0.75,0.379706);
+  SPS->SetPointError(1,0.05,0.0104571);
+  SPS->SetPoint(2,0.95,0.491605);
+  SPS->SetPointError(2,0.05,0.0113137);
+  SPS->SetPoint(3,1.15,0.521915);
+  SPS->SetPointError(3,0.05,0.0121859);
+  SPS->SetPoint(4,1.35,0.598246);
+  SPS->SetPointError(4,0.05,0.0151033);
+  SPS->SetPoint(5,1.55,0.615134);
+  SPS->SetPointError(5,0.05,0.0185095);
+  SPS->SetPoint(6,1.75,0.655134);
+  SPS->SetPointError(6,0.05,0.0244785);
+  SPS->SetPoint(7,1.95,0.761032);
+  SPS->SetPointError(7,0.05,0.0331196);
+  SPS->SetPoint(8,2.15,0.856371);
+  SPS->SetPointError(8,0.05,0.0478939);
+  SPS->SetPoint(9,2.35,0.939447);
+  SPS->SetPointError(9,0.05,0.0667294);
+  SPS->SetPoint(10,2.5,0.95945);
+  SPS->SetPointError(10,0.1,0.0656273);
+  SPS->SetPoint(11,2.7,0.903809);
+  SPS->SetPointError(11,0.1,0.097383);
+  SPS->SetPoint(12,2.9,1.11914);
+  SPS->SetPointError(12,0.1,0.152564);
+  SPS->SetPoint(13,3.1,0.812892);
+  SPS->SetPointError(13,0.1,0.233356);
+  SPS->SetPoint(14,3.3,0.897236);
+  SPS->SetPointError(14,0.1,0.369097);
+  SPS->SetPoint(15,3.5,1.43641);
+  SPS->SetPointError(15,0.1,0.578);
+  SPS->SetPoint(16,3.7,1.45242);
+  SPS->SetPointError(16,0.1,0.947213);
+  SPS->SetPoint(17,3.9,2.70719);
+  SPS->SetPointError(17,0.1,1.48834);
+  SPS->SetPoint(18,4.1,3.58396);
+  SPS->SetPointError(18,0.1,2.4366);
+  SPS->SetPoint(19,4.3,3.79202);
+  SPS->SetPointError(19,0.1,3.87485);
+  SPS->SetPoint(20,4.5,12.645);
+  SPS->SetPointError(20,0.1,6.06642);
   return;
 }
 #endif
