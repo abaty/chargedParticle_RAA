@@ -16,7 +16,7 @@ double Quad(double a, double b)
   return TMath::Power(TMath::Power(a,2) + TMath::Power(b,2),0.5);
 }
 
-void hyperonFractions(int isPP = 0){
+void hyperonFractions(int isPP = 0, int hLow = 0, int hHigh = 100){
   TH1::SetDefaultSumw2();
   /*int nEvts = 5000;
   int PHEvts = 10000;
@@ -30,24 +30,51 @@ void hyperonFractions(int isPP = 0){
     EPOSEvts = 300000;
   }
 
+  //hiBin actually hiHF
+  float hiBinLow=0, hiBinHigh=0;
+  if(hHigh>70)      hiBinLow=15;
+  else if(hHigh>50) hiBinLow=123; 
+  else if(hHigh>30) hiBinLow=477; 
+  else if(hHigh>10) hiBinLow=1287; 
+  else if(hHigh>5)  hiBinLow=3237; 
+  else if(hHigh>0)  hiBinLow=4077; 
+  else hiBinLow=10000; 
+  
+  hiBinHigh=15; 
+  if(hLow<90)      hiBinHigh=123;
+  if(hLow<70) hiBinHigh=477; 
+  if(hLow<50) hiBinHigh=1287; 
+  if(hLow<30) hiBinHigh=3237; 
+  if(hLow<10)  hiBinHigh=4077; 
+  if(hLow<5)  hiBinHigh=10000; 
+  std::cout << hLow << " " << hHigh << " " << hiBinHigh << " " << hiBinLow << std::endl;
+
+  TCut centCut, centCutEPOS;
+  if(isPP){ centCut = "1"; centCutEPOS = "1";}
+  if(!isPP){  centCutEPOS = Form("hiHF>=%f && hiHF<%f",hiBinLow,hiBinHigh); centCut = Form("hiBin>=%d*2 && hiBin<%d*2",hLow,hHigh);}
   const int nBins = 14;
   float ptBins[nBins+1] = {0.5,0.8,1.2,1.6,2,2.4,3.2,4,4.8,5.6,6.4,7.2,9.6,12,14.4};
 
   TFile *fP, *fEPOS, *f2, *f3, *fPH;
-  TTree *PythiatrackTree, *EPOS, *PHtrackTree;
-  TChain * trackTree;
+  TTree *PythiatrackTree, *EPOS, *PHtrackTree, *EPOShiBin, *PHtrackTreehiBin;
+  TChain * trackTree, *trackTreehiBin;
   if(!isPP){ 
     fP =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet30_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
     PythiatrackTree = (TTree*)fP->Get("ppTrack/trackTree");
 
     fEPOS =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/transferTargetDirectories/PbPb_60kEPOS_v1/HiForest_Epos_merged_60k_v1.root","read");
     EPOS = (TTree*)fEPOS->Get("HiGenParticleAna/hi");
+    EPOShiBin = (TTree*)fEPOS->Get("hiEvtAnalyzer/HiTree");
+    EPOS->AddFriend(EPOShiBin);
 
     trackTree = new TChain("anaTrack/trackTree");
+    trackTreehiBin = new TChain("hiEvtAnalyzer/HiTree");
   for(int i = 0; i<1; i++)
     {
     trackTree->Add(Form("/mnt/hadoop/cms/store/user/dgulhan/mergedForest/HiForest_Centrality_Unpacker_Hydjet_Quenched_MinBias_5020GeV_750_RECODEBUG_v0_TAGHiForestPbPbJECv9/HiForest_Centrality_Unpacker_Hydjet_Quenched_MinBias_5020GeV_750_RECODEBUG_v0_TAGHiForestPbPbJECv9_merged_forest_%d.root",i));
+    trackTreehiBin->Add(Form("/mnt/hadoop/cms/store/user/dgulhan/mergedForest/HiForest_Centrality_Unpacker_Hydjet_Quenched_MinBias_5020GeV_750_RECODEBUG_v0_TAGHiForestPbPbJECv9/HiForest_Centrality_Unpacker_Hydjet_Quenched_MinBias_5020GeV_750_RECODEBUG_v0_TAGHiForestPbPbJECv9_merged_forest_%d.root",i));
     }
+    trackTree->AddFriend(trackTreehiBin);
   }
   else{
     fP =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet30_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
@@ -96,15 +123,15 @@ void hyperonFractions(int isPP = 0){
 
   if(!isPP){
     std::cout << "Hydjet" << std::endl; 
-    trackTree->Draw("pPt>>ch","pPt>0.5 && TMath::Abs(pEta)<1","",nEvts);
-    trackTree->Draw("pPt>>pi","pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==211 || TMath::Abs(pPId)==213)","",nEvts);
-    trackTree->Draw("pPt>>k","pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==321 || TMath::Abs(pPId)==323)","",nEvts);
-    trackTree->Draw("pPt>>sig","pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==3222)","",nEvts);
-    trackTree->Draw("pPt>>sigm","pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==3112)","",nEvts);
-    trackTree->Draw("pPt>>xi","pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(TMath::Abs(pPId)-3312)<=2","",nEvts);
-    trackTree->Draw("pPt>>omega","pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",nEvts);
-    trackTree->Draw("pPt>>p","pPt>0.5 && TMath::Abs(pEta)<1 && pPId==2212","",nEvts);
-    trackTree->Draw("pPt>>pbar","pPt>0.5 && TMath::Abs(pEta)<1 && pPId==-2212","",nEvts);
+    trackTree->Draw("pPt>>ch",centCut && "pPt>0.5 && TMath::Abs(pEta)<1","",nEvts);
+    trackTree->Draw("pPt>>pi",centCut &&"pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==211 || TMath::Abs(pPId)==213)","",nEvts);
+    trackTree->Draw("pPt>>k",centCut &&"pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==321 || TMath::Abs(pPId)==323)","",nEvts);
+    trackTree->Draw("pPt>>sig",centCut &&"pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==3222)","",nEvts);
+    trackTree->Draw("pPt>>sigm",centCut &&"pPt>0.5 && TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==3112)","",nEvts);
+    trackTree->Draw("pPt>>xi",centCut &&"pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(TMath::Abs(pPId)-3312)<=2","",nEvts);
+    trackTree->Draw("pPt>>omega",centCut &&"pPt>0.5 && TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",nEvts);
+    trackTree->Draw("pPt>>p",centCut &&"pPt>0.5 && TMath::Abs(pEta)<1 && pPId==2212","",nEvts);
+    trackTree->Draw("pPt>>pbar",centCut &&"pPt>0.5 && TMath::Abs(pEta)<1 && pPId==-2212","",nEvts);
 
     std::cout << "Pythia" << std::endl;
     PythiatrackTree->Draw("pPt>>ppch","pPt>0.5 && TMath::Abs(pEta)<1","",10*nEvts);
@@ -118,15 +145,15 @@ void hyperonFractions(int isPP = 0){
     PythiatrackTree->Draw("pPt>>pppbar","pPt>0.5 && TMath::Abs(pEta)<1 && (pPId)==-2212","",10*nEvts);
 
     std::cout << "EPOS" << std::endl;
-    EPOS->Draw("pt>>EPOSch","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(chg)>0","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSpi","pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==211 || TMath::Abs(pdg)==213)","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSk","pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==321 || TMath::Abs(pdg)==323)","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSsig","pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==3222)","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSsigm","pt>0.5 && TMath::Abs(eta)<1 && ( TMath::Abs(pdg)==3112)","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSxi","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(TMath::Abs(pdg)-3312)<=2","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSomega","pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(pdg)==3334","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSp","pt>0.5 && TMath::Abs(eta)<1 && (pdg)==2212","",EPOSEvts);
-    EPOS->Draw("pt>>EPOSpbar","pt>0.5 && TMath::Abs(eta)<1 && (pdg)==-2212","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSch",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(chg)>0","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSpi",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==211 || TMath::Abs(pdg)==213)","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSk",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==321 || TMath::Abs(pdg)==323)","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSsig",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && (TMath::Abs(pdg)==3222)","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSsigm",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && ( TMath::Abs(pdg)==3112)","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSxi",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(TMath::Abs(pdg)-3312)<=2","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSomega",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && TMath::Abs(pdg)==3334","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSp",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && (pdg)==2212","",EPOSEvts);
+    EPOS->Draw("pt>>EPOSpbar",centCutEPOS &&"pt>0.5 && TMath::Abs(eta)<1 && (pdg)==-2212","",EPOSEvts);
   }else{
     std::cout << "Pythia" << std::endl;
     PythiatrackTree->Draw("pPt>>ppch","pPt>0.5 && TMath::Abs(pEta)<1","",10*nEvts);
@@ -183,8 +210,9 @@ void hyperonFractions(int isPP = 0){
   leg->AddEntry(EPOSpi,Form("MB %s EPOS",isPP?"pp":"PbPb"),"p");
   leg->AddEntry((TObject*)0,"#pi^{+/-},#rho^{+/-}, |#eta|<1","");
   leg->Draw("same");
-  c2->SaveAs(Form("%shyperonFrac_pi.png",isPP?"pp":""));
-  c2->SaveAs(Form("%shyperonFrac_pi.pdf",isPP?"pp":""));
+  c2->SaveAs(Form("%shyperonFrac_pi_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_pi_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_pi_%d_%d.C",isPP?"pp":"",hLow,hHigh));
   delete leg;
 
   ppk->Divide(ppch);
@@ -207,8 +235,9 @@ void hyperonFractions(int isPP = 0){
   leg->AddEntry(EPOSk,Form("MB %s EPOS",isPP?"pp":"PbPb"),"p");
   leg->AddEntry((TObject*)0,"K^{+/-}, K*^{+/-} |#eta|<1","");
   leg->Draw("same");
-  c2->SaveAs(Form("%shyperonFrac_k.png",isPP?"pp":""));
-  c2->SaveAs(Form("%shyperonFrac_k.pdf",isPP?"pp":""));
+  c2->SaveAs(Form("%shyperonFrac_k_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_k_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_k_%d_%d.C",isPP?"pp":"",hLow,hHigh));
   delete leg;
 
   ppsig->GetYaxis()->SetTitle("Ch. Particle Fraction");
@@ -231,8 +260,9 @@ void hyperonFractions(int isPP = 0){
   leg->AddEntry(EPOSsig,Form("MB %s EPOS",isPP?"pp":"PbPb"),"p");
   leg->AddEntry((TObject*)0,"#Sigma^{+}, |#eta|<1","");
   leg->Draw("same");
-  c2->SaveAs(Form("%shyperonFrac_sig.png",isPP?"pp":""));
-  c2->SaveAs(Form("%shyperonFrac_sig.pdf",isPP?"pp":""));
+  c2->SaveAs(Form("%shyperonFrac_sig_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_sig_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_sig_%d_%d.C",isPP?"pp":"",hLow,hHigh));
   delete leg;
   
   ppsigm->GetYaxis()->SetTitle("Ch. Particle Fraction");
@@ -255,8 +285,9 @@ void hyperonFractions(int isPP = 0){
   leg->AddEntry(EPOSsigm,Form("MB %s EPOS",isPP?"pp":"PbPb"),"p");
   leg->AddEntry((TObject*)0,"#Sigma^{-}, |#eta|<1","");
   leg->Draw("same");
-  c2->SaveAs(Form("%shyperonFrac_sigm.png",isPP?"pp":""));
-  c2->SaveAs(Form("%shyperonFrac_sigm.pdf",isPP?"pp":""));
+  c2->SaveAs(Form("%shyperonFrac_sigm_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_sigm_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_sigm_%d_%d.C",isPP?"pp":"",hLow,hHigh));
   delete leg;
 
   ppxi->GetYaxis()->SetTitle("Ch. Particle Fraction");
@@ -288,8 +319,9 @@ void hyperonFractions(int isPP = 0){
   leg->AddEntry(EPOSxi,Form("MB %s EPOS",isPP?"pp":"PbPb"),"p");
   leg->AddEntry((TObject*)0,"#Xi^{-}, #Xi*^{-}, |#eta|<1","");
   leg->Draw("same");
-  c2->SaveAs(Form("%shyperonFrac_xi.png",isPP?"pp":""));
-  c2->SaveAs(Form("%shyperonFrac_xi.pdf",isPP?"pp":""));
+  c2->SaveAs(Form("%shyperonFrac_xi_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_xi_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_xi_%d_%d.C",isPP?"pp":"",hLow,hHigh));
   delete leg;
 
   ppomega->GetYaxis()->SetTitle("Ch. Particle Fraction");
@@ -321,8 +353,9 @@ void hyperonFractions(int isPP = 0){
   leg->AddEntry(EPOSomega,Form("MB %s EPOS",isPP?"pp":"PbPb"),"p");
   leg->AddEntry((TObject*)0,"#Omega^{-}, |#eta|<1","");
   leg->Draw("same");
-  c2->SaveAs(Form("%shyperonFrac_omega.png",isPP?"pp":""));
-  c2->SaveAs(Form("%shyperonFrac_omega.pdf",isPP?"pp":""));
+  c2->SaveAs(Form("%shyperonFrac_omega_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_omega_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_omega_%d_%d.C",isPP?"pp":"",hLow,hHigh));
   delete leg;
   
   ppp->GetYaxis()->SetTitle("Ch. Particle Fraction");
@@ -345,8 +378,9 @@ void hyperonFractions(int isPP = 0){
   leg->AddEntry(EPOSp,Form("MB %s EPOS",isPP?"pp":"PbPb"),"p");
   leg->AddEntry((TObject*)0,"p, |#eta|<1","");
   leg->Draw("same");
-  c2->SaveAs(Form("%shyperonFrac_p.png",isPP?"pp":""));
-  c2->SaveAs(Form("%shyperonFrac_p.pdf",isPP?"pp":""));
+  c2->SaveAs(Form("%shyperonFrac_p_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_p_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_p_%d_%d.V",isPP?"pp":"",hLow,hHigh));
   delete leg;
   
   pppbar->GetYaxis()->SetTitle("Ch. Particle Fraction");
@@ -369,8 +403,9 @@ void hyperonFractions(int isPP = 0){
   leg->AddEntry(EPOSpbar,Form("MB %s EPOS",isPP?"pp":"PbPb"),"p");
   leg->AddEntry((TObject*)0,"#bar{p}, |#eta|<1","");
   leg->Draw("same");
-  c2->SaveAs(Form("%shyperonFrac_pbar.png",isPP?"pp":""));
-  c2->SaveAs(Form("%shyperonFrac_pbar.pdf",isPP?"pp":""));
+  c2->SaveAs(Form("%shyperonFrac_pbar_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_pbar_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  c2->SaveAs(Form("%shyperonFrac_pbar_%d_%d.C",isPP?"pp":"",hLow,hHigh));
   delete leg;
 
 
@@ -453,7 +488,7 @@ void hyperonFractions(int isPP = 0){
     maxDiffpbar->SetBinContent(i,diff2);
   }
  
-  if(!isPP) f2 = TFile::Open("HyperonFractions.root","recreate");
+  if(!isPP) f2 = TFile::Open(Form("HyperonFractions_%d_%d.root",hLow,hHigh),"recreate");
   else f2 = TFile::Open("HyperonFractions_pp.root","recreate");
   pi->Write();
   k->Write();
@@ -493,36 +528,39 @@ void hyperonFractions(int isPP = 0){
   if(!isPP){
     fPH =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/Pythia8_Dijet15_pp_TuneCUETP8M1_Hydjet_MinBias_5020GeV_FOREST_758_PrivMC/HiForest_PYTHIA_QCD80_TuneCUETP8M1_cfi_5020GeV_tag_PPForestJECv6_merged/0.root","read");
     PHtrackTree = (TTree*)fPH->Get("anaTrack/trackTree");
+    PHtrackTreehiBin = (TTree*)fPH->Get("hiEvtAnalyzer/HiTree");
+    PHtrackTree->AddFriend(PHtrackTreehiBin);
   }else{
     fPH =  TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/PYTHIA_QCD_TuneCUETP8M1_cfi_GEN_SIM_5020GeV_ppSignal/Pythia8_Dijet80_pp_TuneCUETP8M1_5020GeV_FOREST_758_PrivMC/0.root","read");
     PHtrackTree = (TTree*)fPH->Get("ppTrack/trackTree");
   }
 
  
-  TCut ts = "!(mtrkPtError/mtrkPt>0.1 || TMath::Abs(mtrkDz1/mtrkDzError1)>3 || TMath::Abs(mtrkDxy1/mtrkDxyError1)>3 || mhighPurity==0 || (mtrkNHit<11 && mtrkPt>0.7) || mtrkChi2/mtrkNdof/mtrkNlayer>0.15)";
+  //TCut ts = "!(mtrkPtError/mtrkPt>0.1 || TMath::Abs(mtrkDz1/mtrkDzError1)>3 || TMath::Abs(mtrkDxy1/mtrkDxyError1)>3 || mhighPurity==0 || (mtrkNHit<11 && mtrkPt>0.7) || mtrkChi2/mtrkNdof/mtrkNlayer>0.15)";
+  TCut ts = "!(mtrkPtError/mtrkPt>0.3 || TMath::Abs(mtrkDz1/mtrkDzError1)>3 || TMath::Abs(mtrkDxy1/mtrkDxyError1)>3 || mhighPurity==0";
  
   TH1D *gen[9];
   TH1D *mgen[9];
   for(int i = 0; i<9; i++) gen[i] = new TH1D(Form("gen%d",i),Form("gen%d",i),nBins,ptBins);
   for(int i = 0; i<9; i++) mgen[i] = new TH1D(Form("mgen%d",i),Form("gen%d",i),nBins,ptBins);
-  PHtrackTree->Draw("pPt>>gen0","TMath::Abs(pEta)<1","",PHEvts);
-  PHtrackTree->Draw("pPt>>gen1","TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==211 || TMath::Abs(pPId)==213)","",PHEvts);
-  PHtrackTree->Draw("pPt>>gen2","TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==321 || TMath::Abs(pPId)==323)","",PHEvts);
-  PHtrackTree->Draw("pPt>>gen3","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3222","",PHEvts);
-  PHtrackTree->Draw("pPt>>gen4","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3112","",PHEvts);
-  PHtrackTree->Draw("pPt>>gen5","TMath::Abs(pEta)<1 && TMath::Abs(TMath::Abs(pPId)-3312)<=2","",PHEvts);
-  PHtrackTree->Draw("pPt>>gen6","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",PHEvts);
-  PHtrackTree->Draw("pPt>>gen7","TMath::Abs(pEta)<1 && TMath::Abs(pPId)==2212","",PHEvts);
-  PHtrackTree->Draw("pPt>>gen8","TMath::Abs(pEta)<1 && (pPId)==2212","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen0",ts && "TMath::Abs(pEta)<1 ","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen1",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==211","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen2",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==321","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen3",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3222","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen4",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3112","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen5",ts && "TMath::Abs(pEta)<1 && TMath::Abs(TMath::Abs(pPId)-3312)<=2","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen6",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen7",ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==2212","",PHEvts);
-  PHtrackTree->Draw("pPt>>mgen8",ts && "TMath::Abs(pEta)<1 && (pPId)==-2212","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen0",centCut &&"TMath::Abs(pEta)<1","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen1",centCut &&"TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==211 || TMath::Abs(pPId)==213)","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen2",centCut &&"TMath::Abs(pEta)<1 && (TMath::Abs(pPId)==321 || TMath::Abs(pPId)==323)","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen3",centCut &&"TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3222","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen4",centCut &&"TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3112","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen5",centCut &&"TMath::Abs(pEta)<1 && TMath::Abs(TMath::Abs(pPId)-3312)<=2","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen6",centCut &&"TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen7",centCut &&"TMath::Abs(pEta)<1 && TMath::Abs(pPId)==2212","",PHEvts);
+  PHtrackTree->Draw("pPt>>gen8",centCut &&"TMath::Abs(pEta)<1 && (pPId)==2212","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen0",centCut &&ts && "TMath::Abs(pEta)<1 ","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen1",centCut &&ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==211","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen2",centCut &&ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==321","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen3",centCut &&ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3222","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen4",centCut &&ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3112","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen5",centCut &&ts && "TMath::Abs(pEta)<1 && TMath::Abs(TMath::Abs(pPId)-3312)<=2","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen6",centCut &&ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==3334","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen7",centCut &&ts && "TMath::Abs(pEta)<1 && TMath::Abs(pPId)==2212","",PHEvts);
+  PHtrackTree->Draw("pPt>>mgen8",centCut &&ts && "TMath::Abs(pEta)<1 && (pPId)==-2212","",PHEvts);
 
   TH1D * eff[9];
   for(int i = 0; i<9; i++){
@@ -547,13 +585,14 @@ void hyperonFractions(int isPP = 0){
     colorCount++;
   }
   eCleg->AddEntry(eff[0],"inclusive","p");
-  eCleg->AddEntry(eff[1],"#pi^{+/-}, #rho^{+/-}","p");
-  eCleg->AddEntry(eff[2],"K^{+/-}, K*^{+/-}","p");
+  eCleg->AddEntry(eff[1],"#pi^{+/-}","p");
+  eCleg->AddEntry(eff[2],"K^{+/-}","p");
   eCleg->AddEntry(eff[7],"p","p");
   eCleg->AddEntry(eff[8],"#bar{p}","p");
   eCleg->Draw("same");
-  eC->SaveAs(Form("%sefficiencyBySpecies1.png",isPP?"pp":""));
-  eC->SaveAs(Form("%sefficiencyBySpecies1.pdf",isPP?"pp":""));
+  eC->SaveAs(Form("%sefficiencyBySpecies1_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  eC->SaveAs(Form("%sefficiencyBySpecies1_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  eC->SaveAs(Form("%sefficiencyBySpecies1_%d_%d.C",isPP?"pp":"",hLow,hHigh));
 
   eCleg->Clear();
   eff[0]->Draw();
@@ -568,11 +607,12 @@ void hyperonFractions(int isPP = 0){
   eCleg->AddEntry(eff[0],"inclusive","p");
   eCleg->AddEntry(eff[3],"#Sigma^{+}","p");
   eCleg->AddEntry(eff[4],"#Sigma^{-}","p");
-  eCleg->AddEntry(eff[5],"#Xi^{-}, #Xi*^{-}","p");
+  eCleg->AddEntry(eff[5],"#Xi^{-}","p");
   eCleg->AddEntry(eff[6],"#Omega^{-}","p");
   eCleg->Draw("same");
-  eC->SaveAs(Form("%sefficiencyBySpecies2.png",isPP?"pp":""));
-  eC->SaveAs(Form("%sefficiencyBySpecies2.pdf",isPP?"pp":""));
+  eC->SaveAs(Form("%sefficiencyBySpecies2_%d_%d.png",isPP?"pp":"",hLow,hHigh));
+  eC->SaveAs(Form("%sefficiencyBySpecies2_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));
+  eC->SaveAs(Form("%sefficiencyBySpecies2_%d_%d.C",isPP?"pp":"",hLow,hHigh));
 
 
   TH1D * netSyst = (TH1D*)eff[1]->Clone("netSyst");
@@ -602,10 +642,11 @@ void hyperonFractions(int isPP = 0){
   netSyst->GetXaxis()->SetTitle("p_{T}");
   c2->cd(0);
   netSyst->Draw();
-  c2->SaveAs(Form("%sspeciesUncertaintyCorrection.png",isPP?"pp":""));   
-  c2->SaveAs(Form("%sspeciesUncertaintyCorrection.pdf",isPP?"pp":""));   
+  c2->SaveAs(Form("%sspeciesUncertaintyCorrection_%d_%d.png",isPP?"pp":"",hLow,hHigh));   
+  c2->SaveAs(Form("%sspeciesUncertaintyCorrection_%d_%d.pdf",isPP?"pp":"",hLow,hHigh));   
+  c2->SaveAs(Form("%sspeciesUncertaintyCorrection_%d_%d.C",isPP?"pp":"",hLow,hHigh));   
 
-  if(!isPP) f3 = TFile::Open("HyperonFractions.root","update");
+  if(!isPP) f3 = TFile::Open(Form("HyperonFractions_%d_%d.root",hLow,hHigh),"update");
   else      f3 = TFile::Open("HyperonFractions_pp.root","update");
   for(int i = 0; i<9; i++)
   {

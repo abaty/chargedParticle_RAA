@@ -22,10 +22,20 @@
 
 void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool isTest = false)
 {
+  //TODO
+  //better corrections
+  //better trig combo (replace triggers)
+  //more MB
+  //fix 19 tracks?
+  //figure out pp EPOS difference
+  //pp alignement
+  //cancelations?
+
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
   bool doOnly1Vertex = false;
   bool doevtSelCorrection = true;
+  bool dotrkcorr = true;
   bool useTrkCorrEverywhere =false;
   float caloMatchValue = 0.5;
   float caloMatchStart = 20;
@@ -584,7 +594,8 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           float binCenter;
           if(isPP) binCenter = s.spec[0]->GetYaxis()->GetBinCenter(s.spec[0]->GetYaxis()->FindBin(trkPt[j]));
           else     binCenter = s.HIspec[0][0]->GetYaxis()->GetBinCenter(s.HIspec[0][0]->GetYaxis()->FindBin(trkPt[j]));
-
+          
+          if(!dotrkcorr) correction=1;
           if(isPP){
             if(MinBias==1 && PD==0) s.spec[0]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
             if(j40 && PD==1)     s.spec[1]->Fill(maxJtPt,trkPt[j],correction/binCenter); 
@@ -651,6 +662,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           correction = correction*evtSelCorrection;
      
           //dividing by pt at bin center instead of track by track pt (just a convention)
+          if(!dotrkcorr) correction=1;
           if(isPP){
             if(MinBias==1 && PD==0) s.spec_trk[0]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 
             if(t18 && PD==3)     s.spec_trk[1]->Fill(maxTrackPt,trkPt[j],correction/binCenter); 

@@ -1,3 +1,5 @@
+#ifndef CMS_LUMI
+#define CMS_LUMI
 #include "TPad.h"
 #include "TLatex.h"
 #include "TLine.h"
@@ -37,3 +39,4 @@ TString lumi_sqrtS = "";
 bool drawLogo      = false;
 
 void CMS_lumi( TPad* pad, int iPeriod=3, int iPosX=10 );
+#endif

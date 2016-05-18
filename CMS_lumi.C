@@ -1,3 +1,5 @@
+#ifndef CMSLUMIC
+#define CMSLUMIC
 #include "CMS_lumi.h"
 #include <iostream>
 
@@ -161,3 +163,4 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
     }
   return;
 }
+#endif

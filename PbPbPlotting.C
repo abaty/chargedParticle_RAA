@@ -1,4 +1,7 @@
 #include "Settings.h"
+#include "TFrame.h"
+#include "tdrstyle.C"
+#include "CMS_lumi.C"
 #include "TH1D.h"
 #include "TH2D.h"
 #include "TFile.h"
@@ -66,6 +69,7 @@ void makePlotsPbPb(Settings s)
   TLegend * leg;
   c1->SetLogy();
   for(int c = 0; c<s.nCentBins; c++){ 
+    gStyle->SetLegendBorderSize(0); 
     leg = new TLegend(0.5,0.6,0.9,0.9);
     s.HIJets[c]->Scale(100);
     s.HIJets[c]->SetMarkerSize(0);
@@ -127,8 +131,10 @@ void makePlotsPbPb(Settings s)
     s.HIJetsByTrigger[2][c]->Draw("same");
     s.HIJetsByTrigger[3][c]->Draw("same");
     s.HIJetsByTrigger[4][c]->Draw("same");
-    leg = new TLegend(0.2,0.6,0.5,0.9);
-    leg->AddEntry(s.HIJetsByTrigger[1][c],"Jet40/MB","p");
+    gStyle->SetLegendBorderSize(0); 
+    leg = new TLegend(0.1779449,0.652819,0.6077694,0.8916914);
+    leg->AddEntry((TObject*)0,"akPU4Calo Jets, |#eta|<2","");
+    leg->AddEntry(s.HIJetsByTrigger[1][c],"Jet40/Minimum Bias","p");
     leg->AddEntry(s.HIJetsByTrigger[2][c],"Jet60/Jet40","p");
     leg->AddEntry(s.HIJetsByTrigger[3][c],"Jet80/Jet60","p");
     leg->AddEntry(s.HIJetsByTrigger[4][c],"Jet100/Jet80","p");
@@ -137,14 +143,75 @@ void makePlotsPbPb(Settings s)
     c1->SaveAs(Form("plots/png/HI_JetRelativeTurnOnes_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c1->SaveAs(Form("plots/pdf/HI_JetRelativeTurnOnes_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c1->Clear();
+    //start pretty plot
+    setTDRStyle();
+    int W = 800;
+    int H = 700;//700
+    int H_ref = 700;//700
+    int W_ref = 800;
+    float T = 0.08*H_ref;
+    float B = 0.12*H_ref; 
+    float L = 0.15*W_ref;
+    float R = 0.04*W_ref;
+    
+    TCanvas* canv = new TCanvas("RAA","RAA",50,50,W,H);
+    canv->SetFillColor(0);
+    canv->SetBorderMode(0);
+    canv->SetFrameFillStyle(0);
+    canv->SetFrameBorderMode(0);
+    canv->SetLeftMargin( L/W );
+    canv->SetRightMargin( R/W );
+    canv->SetTopMargin( T/H );
+    canv->SetBottomMargin( B/H );
+    canv->SetTickx(0);
+    canv->SetTicky(0);
+    for(int i=1; i<5; i++) s.HIJetsByTrigger[i][c]->SetMarkerSize(1);
+    s.HIJetsByTrigger[1][c]->GetXaxis()->CenterTitle();
+    s.HIJetsByTrigger[1][c]->GetXaxis()->SetTitle("Offline Leading Jet p_{T} (GeV)");
+    s.HIJetsByTrigger[1][c]->GetXaxis()->SetLabelSize(0.04);
+    s.HIJetsByTrigger[1][c]->GetXaxis()->SetTitleSize(0.05);
+    s.HIJetsByTrigger[1][c]->GetYaxis()->CenterTitle();
+    s.HIJetsByTrigger[1][c]->GetYaxis()->SetLabelSize(0.04);
+    s.HIJetsByTrigger[1][c]->GetYaxis()->SetTitleSize(0.05);
+    s.HIJetsByTrigger[1][c]->GetYaxis()->SetTitleOffset(1.3);
+    s.HIJetsByTrigger[1][c]->GetYaxis()->SetTitle("Triggered Spectrum Ratio");
+    gStyle->SetErrorX(0.);
+    s.HIJetsByTrigger[1][c]->Draw("p");
+    TLine * line1 = new TLine(20,1,140,1);
+    line1->SetLineWidth(2);
+    line1->SetLineStyle(2);
+    line1->Draw("same");
+    s.HIJetsByTrigger[1][c]->Draw("same p");
+    s.HIJetsByTrigger[2][c]->Draw("same p");
+    s.HIJetsByTrigger[3][c]->Draw("same p");
+    s.HIJetsByTrigger[4][c]->Draw("same p");
+    s.HIJetsByTrigger[1][c]->Draw("sameaxis");
+    s.HIJetsByTrigger[1][c]->Draw("same");
+    leg->Draw("same");
+    
+    int iPeriod = 0;
+    lumi_sqrtS = "404 #mub^{-1} (5.02 TeV PbPb)";
+    writeExtraText = true;  
+    extraText  = "Preliminary";
+    //extraText  = "Unpublished";
+    CMS_lumi( canv, iPeriod, 33 );
+    canv->Update();
+    canv->RedrawAxis();
+    canv->GetFrame()->Draw();   
+    canv->SaveAs(Form("plots/png/HI_PrettyJetRelativeTurnOnes_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    canv->SaveAs(Form("plots/pdf/HI_PrettyJetRelativeTurnOnes_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    canv->SaveAs(Form("plots/png/HI_PrettyJetRelativeTurnOnes_%d_%d.C",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+    delete canv;
+    //end pretty plot
     delete leg;
+    delete line1;
   }
   
   c1->SetLogy();
   c1->SetLogx();
   for(int c = 0; c<s.nCentBins;c++){
     s.HI[c]->SetMarkerSize(0.8);
-    s.HI[c]->GetYaxis()->SetRangeUser(TMath::Max(s.HI[20]->GetMinimum()/200.0,1e-15),s.HI[20]->GetMaximum()*10);
+    s.HI[c]->GetYaxis()->SetRangeUser(TMath::Max(s.HI[20]->GetMinimum()/200.0,1e-15),s.HI[20]->GetMaximum()*1000);
     s.HI[c]->GetXaxis()->SetRangeUser(0.7,400);
     s.HI[c]->Draw();
     s.HIUsedByTrigger[0][c]->SetFillColor(kGray);
@@ -156,9 +223,9 @@ void makePlotsPbPb(Settings s)
     for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Draw("HIST same");
     s.HI[c]->Draw("sameaxis");
     s.HI[c]->Draw("same");
-    leg = new TLegend(0.47,0.62,0.87,0.92);
-    leg->AddEntry(s.HI[c],"PbPb track Spectrum","p");
-    leg->AddEntry(s.HIUsedByTrigger[0][c],"MB trigger","f");
+    leg = new TLegend(0.5639098,0.541543,0.9323308,0.7626113);
+    leg->AddEntry(s.HI[c],"PbPb Uncorrected Spectrum","p");
+    leg->AddEntry(s.HIUsedByTrigger[0][c],"Minimum Bias","f");
     leg->AddEntry(s.HIUsedByTrigger[1][c],"Jet40 trigger","f");
     leg->AddEntry(s.HIUsedByTrigger[2][c],"Jet60 trigger","f");
     leg->AddEntry(s.HIUsedByTrigger[3][c],"Jet80 trigger","f");
@@ -167,6 +234,60 @@ void makePlotsPbPb(Settings s)
     leg->Draw("same");
     c1->SaveAs(Form("plots/png/HITrack_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c1->SaveAs(Form("plots/pdf/HITrack_FullSpectrum_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+
+    //start pretty plot
+    setTDRStyle();
+    int W = 800;
+    int H = 700;//700
+    int H_ref = 700;//700
+    int W_ref = 800;
+    float T = 0.08*H_ref;
+    float B = 0.12*H_ref; 
+    float L = 0.15*W_ref;
+    float R = 0.04*W_ref;
+    
+    TCanvas* canv = new TCanvas("RAA","RAA",50,50,W,H);
+    canv->SetLogx();
+    canv->SetFillColor(0);
+    canv->SetBorderMode(0);
+    canv->SetFrameFillStyle(0);
+    canv->SetFrameBorderMode(0);
+    canv->SetLeftMargin( L/W );
+    canv->SetRightMargin( R/W );
+    canv->SetTopMargin( T/H );
+    canv->SetBottomMargin( B/H );
+    canv->SetTickx(0);
+    canv->SetTicky(0);
+    s.HI[c]->GetXaxis()->SetRangeUser(0.7,350);
+    s.HI[c]->GetXaxis()->CenterTitle();
+    s.HI[c]->GetXaxis()->SetTitle("p_{T} (GeV)");
+    s.HI[c]->GetXaxis()->SetLabelSize(0.04);
+    s.HI[c]->GetYaxis()->CenterTitle();
+    s.HI[c]->GetYaxis()->SetLabelSize(0.04);
+    s.HI[c]->GetYaxis()->SetTitleSize(0.04);
+    s.HI[c]->GetYaxis()->SetTitleOffset(1.6);
+    s.HI[c]->GetYaxis()->SetTitle("#frac{1}{N_{evt}} E#frac{d^{3}N_{trk}}{dp^{3}} (GeV)^{-2}");
+    s.HI[c]->Draw();
+    for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Draw("HIST same");
+    s.HI[c]->Draw("sameaxis");
+    s.HI[c]->Draw("same");
+    leg->Draw("same");
+    
+    int iPeriod = 0;
+    lumi_sqrtS = "404 #mub^{-1} (5.02 TeV PbPb)";
+    writeExtraText = true;  
+    extraText  = "Preliminary";
+    //extraText  = "Unpublished";
+    CMS_lumi( canv, iPeriod, 33 );
+    canv->SetLogy();
+    canv->Update();
+    canv->RedrawAxis();
+    canv->GetFrame()->Draw();   
+    canv->SaveAs(Form("plots/png/HITrack_PrettyFullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    canv->SaveAs(Form("plots/pdf/HITrack_PrettyFullSpectrum_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    canv->SaveAs(Form("plots/png/HITrack_PrettyFullSpectrum_%d_%d.C",s.lowCentBin[c]*5,s.highCentBin[c]*5)); 
+    delete canv;
+    //end pretty plot
    
     c1->SetLogy(0);
     for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Divide(s.HI[c]);

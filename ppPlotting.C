@@ -136,7 +136,9 @@ void makePlotsPP(Settings s)
   leg->AddEntry(s.ppUsedByTrigger[3],"Jet80 trigger","f");
   leg->AddEntry((TObject*)0,"|#eta|<1","");
   leg->Draw("same");
-   
+  
+  
+ 
   c1->SaveAs("plots/png/ppTrack_FullSpectrum.png");
   c1->SaveAs("plots/pdf/ppTrack_FullSpectrum.pdf");
   c1->SetLogy(0);
