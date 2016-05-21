@@ -28,201 +28,272 @@
 #include <string>
 #include <fstream>
 
+
+inline int getHypInd(int c){
+  int hyperonIndex = 7;
+  if(c==0) hyperonIndex=6;
+  if(c==1) hyperonIndex=6;
+  if(c==20) hyperonIndex=7;
+  if(c==23) hyperonIndex=2;
+  if(c==24) hyperonIndex=3;
+  if(c==25 || c==30) hyperonIndex=4;
+  //if(c==30) hyperonIndex=5;
+  if(c==31) hyperonIndex=6;
+  return hyperonIndex;
+}
 void getSPS(TGraphErrors * SPS);
+void getNA49(TGraphErrors * NA49);
 void getPHENIX(TGraphErrors * PHENIX);
 void getSTAR(TGraphErrors * gSTAR);
-void getAlice276(TGraphErrors * Alice276);
+void getAlice276(TGraphErrors * Alice276, int centBin = 0);
 void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=false, bool doWithSystBoxes=true);
-void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString);
+	void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString);
 
-double Quad(double a, double b)
-{
-  return TMath::Power(TMath::Power(a,2) + TMath::Power(b,2),0.5);
-}
+	double Quad(double a, double b)
+	{
+	  return TMath::Power(TMath::Power(a,2) + TMath::Power(b,2),0.5);
+	}
 
-void prettyPlotting(Settings s){
-  TFile * inputPlots = TFile::Open("Spectra.root","Update");
-  TH1D * h[s.nCentBins];
-  TH1D * pbpbSpec[s.nCentBins];
-  TH1D * ppSpec;
+	void prettyPlotting(Settings s){
+	  TFile * inputPlots = TFile::Open("Spectra.root","Update");
+	  TH1D * h[s.nCentBins];
+	  TH1D * RCP[s.nCentBins];
+	  TH1D * pbpbSpec[s.nCentBins];
+	  TH1D * ppSpec;
 
-  for(int c = 0; c<s.nCentBins; c++) h[c] = (TH1D*)inputPlots->Get(Form("RAA_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
-  for(int c = 0; c<s.nCentBins; c++) pbpbSpec[c] = (TH1D*)inputPlots->Get(Form("PbPbTrackSpectrum_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
-  ppSpec = (TH1D*)inputPlots->Get(Form("pp_NotperMBTrigger"));
-  for(int c = 0; c<s.nCentBins; c++){
-     h[c]->SetDirectory(0);
-     h[c]->GetYaxis()->CenterTitle(true);
-     h[c]->GetYaxis()->SetTitle("R_{AA}");
-     h[c]->GetXaxis()->SetTitle("p_{T} (GeV)");
-     h[c]->GetXaxis()->CenterTitle(true);
-     s.RAA_totSyst[c] = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
-     s.RAA_totSyst[c]->Reset();
-     s.RAA_totSyst[c]->SetDirectory(inputPlots);
-     s.PbPb_totSyst[c] = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
-     s.PbPb_totSyst[c]->Reset();
-     s.PbPb_totSyst[c]->SetDirectory(inputPlots);
-     if(c==0){
-       s.pp_totSyst = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
-       s.pp_totSyst->Reset();
-       s.pp_totSyst->SetDirectory(inputPlots);
-     }
-  }
-  TH1D * hyperonPbPb = (TH1D*)h[0]->Clone("hyperonPbPb");
-  TH1D * hyperonpp = (TH1D*)h[0]->Clone("hyperonpp");
-  returnHyperonCorrection(0,hyperonPbPb,"hyperon_check/");
-  returnHyperonCorrection(1,hyperonpp,"hyperon_check/");//need to change to pp
-  hyperonPbPb->Print("All");
-  hyperonpp->Print("All");
-  for(int c = 0; c<s.nCentBins; c++){
-    h[c]->Multiply(hyperonPbPb);
-    h[c]->Divide(hyperonpp);
-  }
+	  for(int c = 0; c<s.nCentBins; c++) h[c] = (TH1D*)inputPlots->Get(Form("RAA_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+	  for(int c = 0; c<s.nCentBins; c++) pbpbSpec[c] = (TH1D*)inputPlots->Get(Form("PbPbTrackSpectrum_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+	  for(int c = 0; c<s.nCentBins; c++) RCP[c] = (TH1D*)inputPlots->Get(Form("PbPbTrackSpectrum_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+	  ppSpec = (TH1D*)inputPlots->Get(Form("pp_NotperMBTrigger"));
+	  for(int c = 0; c<s.nCentBins; c++){
+	     h[c]->SetDirectory(0);
+	     h[c]->GetYaxis()->CenterTitle(true);
+	     h[c]->GetYaxis()->SetTitle("R_{AA}");
+	     h[c]->GetXaxis()->SetTitle("p_{T} (GeV)");
+	     h[c]->GetXaxis()->CenterTitle(true);
+	     s.RAA_totSyst[c] = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+	     s.RAA_totSyst[c]->Reset();
+	     s.RAA_totSyst[c]->SetDirectory(inputPlots);
+	     s.RCP_totSyst[c] = (TH1D*)RCP[c]->Clone(Form("RCP_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+	     s.RCP_totSyst[c]->Reset();
+	     s.RCP_totSyst[c]->SetDirectory(inputPlots);
+	     s.PbPb_totSyst[c] = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+	     s.PbPb_totSyst[c]->Reset();
+	     s.PbPb_totSyst[c]->SetDirectory(inputPlots);
+	     if(c==0){
+	       s.pp_totSyst = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+	       s.pp_totSyst->Reset();
+	       s.pp_totSyst->SetDirectory(inputPlots);
+	     }
+	  }
+          //accounting for the 99% event selection efficiency by scaling by 1.01 in 0-100%
+          h[20]->Scale(0.99);
+
+	  //which hyperon correction to pick up (cent dependent) (inclusive is the default)
+	  TH1D * hyperonPbPb[8];
+	  for(int i = 0; i<8; i++){
+	    std::cout << i << std::endl;
+	    hyperonPbPb[i] = (TH1D*)h[0]->Clone("hyperonPbPb");
+	    returnHyperonCorrection(0,hyperonPbPb[i],i,"hyperon_check/CurrentHyperonFractions_PASResult/");
+	    hyperonPbPb[i]->Print("All");
+	  }
+	  TH1D * hyperonpp = (TH1D*)h[0]->Clone("hyperonpp");
+	  returnHyperonCorrection(1,hyperonpp,0,"hyperon_check/CurrentHyperonFractions_PASResult/");//need to change to pp
+	  hyperonpp->Print("All");
+	  for(int c = 0; c<s.nCentBins; c++){
+	    h[c]->Multiply(hyperonPbPb[getHypInd(c)]);
+	    h[c]->Divide(hyperonpp);
+	  }
+
+	  //hyperon correctoin plot
+	  TCanvas * c = new TCanvas("c","c",600,600);
+	  c->SetLogx();
+	  hyperonPbPb[7]->GetYaxis()->SetRangeUser(0.95,1.2);
+	  hyperonPbPb[7]->GetYaxis()->SetTitle("1+(Species Correction)");
+	  hyperonPbPb[7]->GetXaxis()->SetRangeUser(0.7,14);
+	  hyperonPbPb[7]->GetXaxis()->SetTitle("p_{T} (GeV)");
+	  hyperonPbPb[7]->Draw("p");
+	  for(int i = 2; i<7; i++){
+	    if(i==5) continue; 
+	    hyperonPbPb[i]->SetLineColor(i+1); 
+	    if(i==4) hyperonPbPb[i]->SetLineColor(6); 
+	    hyperonPbPb[i]->Draw("same h");
+	  }
+	  TLegend * hypleg = new TLegend(0.2,0.65,0.45,0.9);
+	  hypleg->AddEntry(hyperonPbPb[7],"0-100% (From Approval)","p"); 
+	  //hypleg->AddEntry(hyperonPbPb[0],"0-5%","l"); 
+	  //hypleg->AddEntry(hyperonPbPb[1],"5-10%","l"); 
+	  hypleg->AddEntry(hyperonPbPb[6],"0-10%","l");
+	  hypleg->AddEntry(hyperonPbPb[2],"10-30%","l"); 
+	  hypleg->AddEntry(hyperonPbPb[3],"30-50%","l"); 
+	  hypleg->AddEntry(hyperonPbPb[4],"50-100%","l"); 
+	  //hypleg->AddEntry(hyperonPbPb[6],"0-10%","l");
+	  hypleg->Draw("same"); 
+
+	  c->SaveAs("plots/png/HyperonCorrections.png");
+	  c->SaveAs("plots/pdf/HyperonCorrections.pdf");
+	  c->SaveAs("plots/png/HyperonCorrections.C");
 
 
-  setTDRStyle();
-  TLine * line1;
-  TLatex * tex = new TLatex(0.1,0.1,"cent");
-  TLatex * tex2 = new TLatex(0.1,0.1,"cent");
-  TBox* bLumi = new TBox(0.1,0.1,0.15,0.2); 
-  TBox* bTAA = new TBox(0.15,0.1,0.2,0.2); 
-  TBox* b[s.ntrkBins];
-  for(int i = 0; i<s.ntrkBins; i++) b[i] = new TBox(0.1,0.1,0.2,0.2); 
-  
- 
-  int W = 800;
-  int H = 700;//700
-  int H_ref = 700;//700
-  int W_ref = 800;
-  float T = 0.08*H_ref;
-  float B = 0.12*H_ref; 
-  float L = 0.15*W_ref;
-  float R = 0.04*W_ref;
-    
-  TCanvas* canv = new TCanvas("RAA","RAA",50,50,W,H);
-  canv->SetLogx();
-  canv->SetFillColor(0);
-  canv->SetBorderMode(0);
-  canv->SetFrameFillStyle(0);
-  canv->SetFrameBorderMode(0);
-  canv->SetLeftMargin( L/W );
-  canv->SetRightMargin( R/W );
-  canv->SetTopMargin( T/H );
-  canv->SetBottomMargin( B/H );
-  canv->SetTickx(0);
-  canv->SetTicky(0);
- 
-  gStyle->SetErrorX(0);
-  
+	  setTDRStyle();
+	  TLine * line1;
+	  TLatex * tex = new TLatex(0.1,0.1,"cent");
+	  TLatex * tex2 = new TLatex(0.1,0.1,"cent");
+	  TBox* bLumi = new TBox(0.1,0.1,0.15,0.2); 
+	  TBox* bTAA = new TBox(0.15,0.1,0.2,0.2); 
+	  TBox* b[s.ntrkBins];
+	  for(int i = 0; i<s.ntrkBins; i++) b[i] = new TBox(0.1,0.1,0.2,0.2); 
+	  
+	 
+	  int W = 800;
+	  int H = 700;//700
+	  int H_ref = 700;//700
+	  int W_ref = 800;
+	  float T = 0.08*H_ref;
+	  float B = 0.12*H_ref; 
+	  float L = 0.15*W_ref;
+	  float R = 0.04*W_ref;
+	    
+	  TCanvas* canv = new TCanvas("RAA","RAA",50,50,W,H);
+	  canv->SetLogx();
+	  canv->SetFillColor(0);
+	  canv->SetBorderMode(0);
+	  canv->SetFrameFillStyle(0);
+	  canv->SetFrameBorderMode(0);
+	  canv->SetLeftMargin( L/W );
+	  canv->SetRightMargin( R/W );
+	  canv->SetTopMargin( T/H );
+	  canv->SetBottomMargin( B/H );
+	  canv->SetTickx(0);
+	  canv->SetTicky(0);
+	 
+	  gStyle->SetErrorX(0);
+	  
 
-  float TAAUncert;
-  float lumiUncert;//12% for pp lumi
-  for(int c = 0; c<s.nCentBins; c++){
-    //adding up uncertainties
-    for(int i = 1; i<s.RAA_totSyst[c]->GetSize()-1; i++){
-      s.RAA_totSyst[c]->SetBinContent(i,0);
-      s.PbPb_totSyst[c]->SetBinContent(i,0);
-      if(c==0) s.pp_totSyst->SetBinContent(i,0);
-    
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//4% difference in data/MC (PbPb)
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//4% difference in data/MC (PbPb)
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//4% difference in data/MC (pp)
-      
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure PbPb
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure (PbPb)
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% for nonclosure pp 
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% for nonclosure in pp
-      
-      //!this sytematic is largely bullshit since we don't know the data fake rate!
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//3% for MC-based fake rate PbPb
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.03));//3% difference in data/MC (PbPb)
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//for MC-based fake rate pp 
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//for MC-based faked rate pp
-      
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% resolution for not unfolding
-      
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
-      
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb->GetBinContent(i)-1,0.015)));//PbPb hyperon study
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb->GetBinContent(i)-1,0.015)));//PbPb hyperon study
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
-      
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//pp uncertainty for pileup
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.03));//pp uncertainty for pileup
-      
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
-      
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.12));//pplumi uncertainty for spectrum
-      if(c==21)s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% event selection uncertainty for 0-100% RAA
-    }
-    s.RAA_totSyst[c]->Write();
-    s.PbPb_totSyst[c]->Write();
-    if(c==0) s.pp_totSyst->Write();
+	  float TAAUncert;
+	  float lumiUncert;//12% for pp lumi
+	  for(int c = 0; c<s.nCentBins; c++){
+	    //adding up uncertainties
+	    for(int i = 1; i<s.RAA_totSyst[c]->GetSize()-1; i++){
+	      s.RAA_totSyst[c]->SetBinContent(i,0);
+	      s.PbPb_totSyst[c]->SetBinContent(i,0);
+	      if(c==0) s.pp_totSyst->SetBinContent(i,0);
+	    
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//4% difference in data/MC (PbPb)
+	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//4% difference in data/MC (PbPb)
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
+	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//4% difference in data/MC (pp)
+	      
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure PbPb
+	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure (PbPb)
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% for nonclosure pp 
+	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% for nonclosure in pp
+	      
+	      //!this sytematic is largely bullshit since we don't know the data fake rate!
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//3% for MC-based fake rate PbPb
+	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.03));//3% difference in data/MC (PbPb)
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//for MC-based fake rate pp 
+	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//for MC-based faked rate pp
+	      
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
+	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
+	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% resolution for not unfolding
+	      
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
+	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
+	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
+	      
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
+	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
+	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
+	      
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//pp uncertainty for pileup
+	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.03));//pp uncertainty for pileup
+	      
+	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
+	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
+	      
+	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.12));//pplumi uncertainty for spectrum
+	      if(c==21)s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% event selection uncertainty for 0-100% RAA
+	    }
+	    s.RAA_totSyst[c]->Write();
+	    s.PbPb_totSyst[c]->Write();
+	    if(c==0) s.pp_totSyst->Write();
 
-    //plotting
-    canv->Clear();
-    h[c]->GetXaxis()->SetRangeUser(0.7,350);
-    h[c]->GetXaxis()->SetLabelOffset(-0.005);
-    h[c]->GetYaxis()->SetRangeUser(0,1.45);
-    h[c]->Draw();
- 
-    TAAUncert = s.TAAuncert[c]/100.0;
-    lumiUncert = 0.12;//12% for pp lumi
-    bLumi->SetFillColor(kGray);
-    bTAA->SetFillColor(kBlue-9);
-    bLumi->SetLineWidth(0);
-    bTAA->SetLineWidth(0);
-    bTAA->DrawBox(0.9,1-TAAUncert,TMath::Power(10,TMath::Log10(0.9)+(TMath::Log10(1.5)-TMath::Log10(0.9))/2.0),1+TAAUncert);
-    bLumi->DrawBox(TMath::Power(10,TMath::Log10(0.9)+(TMath::Log10(1.5)-TMath::Log10(0.9))/2.0),1-lumiUncert,1.5,1+lumiUncert);
-  
-    line1 = new TLine(h[c]->GetXaxis()->GetBinLowEdge(3),1,h[c]->GetXaxis()->GetBinUpEdge(h[c]->GetSize()-2),1);
-    line1->SetLineWidth(2);
-    line1->SetLineStyle(2);
-    line1->Draw("same");
-  
-    tex2->DrawLatex(0.9,0.1,Form("%d-%d%s",5*s.lowCentBin[c],5*s.highCentBin[c],"%"));
-    tex->SetTextFont(42);
-    tex->SetTextSize(lumiTextSize*0.08);
-    tex->DrawLatex(1.8,1.03,"T_{AA} and lumi. uncertainty");
-    tex->DrawLatex(1.8,0.93,"|#eta|<1");
-  
-    for(int i = 1; i<h[c]->GetSize()-1; i++){
-      if(i<3) continue;
-      b[i-1]->SetFillColor(kOrange);
-      b[i-1]->SetX1(h[c]->GetXaxis()->GetBinLowEdge(i));
-      b[i-1]->SetX2(h[c]->GetXaxis()->GetBinUpEdge(i));
-      b[i-1]->SetY1((h[c]->GetBinContent(i))*(1-s.RAA_totSyst[c]->GetBinContent(i)));
-      b[i-1]->SetY2(h[c]->GetBinContent(i)*(1+s.RAA_totSyst[c]->GetBinContent(i)));
-      b[i-1]->Draw("same");
-    }
-    h[c]->Draw("same");
-  
-    int iPeriod = 0;
-    lumi_sqrtS = "25.8 pb^{-1} (5.02 TeV pp) + 404 #mub^{-1} (5.02 TeV PbPb)";
-    writeExtraText = true;  
-    extraText  = "Preliminary";
-    //extraText  = "Unpublished";
-    CMS_lumi( canv, iPeriod, 11 );
- 
-    canv->Update();
-    canv->RedrawAxis();
-    canv->GetFrame()->Draw();    
-    canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
-    canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
-    canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
+	    //plotting
+	    canv->Clear();
+	    h[c]->GetXaxis()->SetRangeUser(0.7,350);
+	    h[c]->GetXaxis()->SetLabelOffset(-0.005);
+	    h[c]->GetYaxis()->SetRangeUser(0,1.6);
+	    h[c]->SetMarkerSize(1.3);
+	    h[c]->Draw();
+	 
+	    TAAUncert = s.TAAuncert[c]/100.0;
+	    lumiUncert = 0.12;//12% for pp lumi
+	    bLumi->SetFillColor(kGray);
+	    bTAA->SetFillColor(kBlue-9);
+	    bLumi->SetLineWidth(0);
+	    bTAA->SetLineWidth(0);
+	    bTAA->DrawBox(0.9,1-TAAUncert,TMath::Power(10,TMath::Log10(0.9)+(TMath::Log10(1.5)-TMath::Log10(0.9))/2.0),1+TAAUncert);
+	    bLumi->DrawBox(TMath::Power(10,TMath::Log10(0.9)+(TMath::Log10(1.5)-TMath::Log10(0.9))/2.0),1-lumiUncert,1.5,1+lumiUncert);
+	  
+	    line1 = new TLine(h[c]->GetXaxis()->GetBinLowEdge(3),1,h[c]->GetXaxis()->GetBinUpEdge(h[c]->GetSize()-2),1);
+	    line1->SetLineWidth(2);
+	    line1->SetLineStyle(2);
+	    line1->Draw("same");
+	  
+	    tex2->DrawLatex(0.9,0.1,Form("%d-%d%s",5*s.lowCentBin[c],5*s.highCentBin[c],"%"));
+	    tex->SetTextFont(42);
+	    tex->SetTextSize(lumiTextSize*0.08);
+	    tex->DrawLatex(1.8,1.03,"T_{AA} and lumi. uncertainty");
+	    tex->DrawLatex(1.8,0.93,"|#eta|<1");
+	  
+	    for(int i = 1; i<h[c]->GetSize()-1; i++){
+	      if(i<3) continue;
+	      b[i-1]->SetFillColor(kOrange);
+	      b[i-1]->SetX1(h[c]->GetXaxis()->GetBinLowEdge(i));
+	      b[i-1]->SetX2(h[c]->GetXaxis()->GetBinUpEdge(i));
+	      b[i-1]->SetY1((h[c]->GetBinContent(i))*(1-s.RAA_totSyst[c]->GetBinContent(i)));
+	      b[i-1]->SetY2(h[c]->GetBinContent(i)*(1+s.RAA_totSyst[c]->GetBinContent(i)));
+	      b[i-1]->Draw("same");
+	    }
+	    h[c]->SetMarkerSize(1.3);
+	    h[c]->Draw("same");
+	  
+	    int iPeriod = 0;
+	    lumi_sqrtS = "25.8 pb^{-1} (5.02 TeV pp) + 404 #mub^{-1} (5.02 TeV PbPb)";
+	    writeExtraText = true;  
+	    extraText  = "Preliminary";
+	    //extraText  = "Unpublished";
+	    CMS_lumi( canv, iPeriod, 11 );
+	 
+	    canv->Update();
+	    canv->RedrawAxis();
+	    canv->GetFrame()->Draw();    
+	    canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
+	    canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
+	    canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
 
-    if(c==0 || c==1 || c==23 || c==24 || c==25 || c==30){
-      TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
-      get276RAA(canv_276,s,c,true);
-      //get276RAA(canv,s,c);
+	    if(c==0 || c==1 || c==23 || c==24 || c==25 || c==30){
+	      TCanvas * canv_276 = (TCanvas*)canv->Clone("canv_276");
+	      get276RAA(canv_276,s,c,false);
+              //get276RAA(canv,s,c);
+      h[c]->Draw("same");
+      canv_276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
+      canv_276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
+      canv_276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
+      if(c==0){
+        TCanvas * canv_276x2 = (TCanvas*)canv->Clone("canv_276x2");
+        get276RAA(canv_276x2,s,c,true);
+        //get276RAA(canv,s,c);
+        h[c]->Draw("same");
+        canv_276x2->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheoryWith276.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
+        canv_276x2->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheoryWith276.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
+        canv_276x2->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheoryWith276.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
+      }
     }
     if(c==0 || c==1  || c==24 || c==31){
       TCanvas * canv_th = (TCanvas*)canv->Clone("canv_th");
@@ -283,6 +354,7 @@ void prettyPlotting(Settings s){
   ppSpec->Print("All");
   ppSpec->Draw("same");
   TLegend * specLeg = new TLegend(0.25,0.1,0.45,0.5);
+  //specLeg->SetFillStyle(0);
   specLeg->AddEntry((TObject*)0,"|#eta|<1",""); 
   specLeg->AddEntry(pbpbSpec[0],Form("0-5%s (x10)","%"),"p");  
   specLeg->AddEntry(pbpbSpec[1],Form("5-10%s (x3)","%"),"p");  
@@ -318,6 +390,7 @@ void prettyPlotting(Settings s){
   s.pp_totSyst->Scale(100);
   s.pp_totSyst->Draw("same");
   TLegend * systLeg = new TLegend(0.6,0.6,0.9,0.98);
+  //systLeg->SetFillStyle(0);
   systLeg->AddEntry(s.PbPb_totSyst[0],Form("0-5%s","%"),"f");
   systLeg->AddEntry(s.PbPb_totSyst[30],Form("70-90%s","%"),"f");
   systLeg->AddEntry(s.pp_totSyst,"pp","f");
@@ -332,26 +405,28 @@ void prettyPlotting(Settings s){
   canv2->SaveAs("plots/prettyPlots/Spectra_perEventYield.C");
 
   //Huge results compilation plot
-  TCanvas * canv3 = new TCanvas("canv3","canv3",1200,1200);
+  TCanvas * canv3 = new TCanvas("canv3","canv3",1300,1300);
   canv3->SetBorderSize(0);
   canv3->SetLineWidth(0);
   canv3->SetLogx();
-  TH1D * axisDummy = new TH1D("axisD","axisD",1,0.3,500);
+  TH1D * axisDummy = new TH1D("axisD","axisD",1,0.16,500);
   axisDummy->GetYaxis()->CenterTitle(true);
   axisDummy->GetYaxis()->SetTitle("R_{AA}");
   axisDummy->GetXaxis()->SetTitle("p_{T} (GeV)");
   axisDummy->GetXaxis()->CenterTitle(true);
-  axisDummy->GetXaxis()->SetRangeUser(0.3,490);
+  axisDummy->GetXaxis()->SetRangeUser(0.16,490);
   axisDummy->GetXaxis()->SetLabelOffset(99);
   axisDummy->GetYaxis()->SetRangeUser(0,2);
   axisDummy->Draw();
   tex->SetTextFont(42);
   tex->SetTextSize(0.05);
+  //tex->DrawLatex(0.9082802,-0.09099604,"0.1");
   tex->DrawLatex(0.9082802,-0.09099604,"1");
   tex->DrawLatex(7.914521,-0.09969131,"10");
   tex->DrawLatex(72.06083,-0.09969131,"100");
   h[0]->SetBinContent(1,0); h[0]->SetBinContent(2,0);
   h[0]->SetBinError(1,0); h[0]->SetBinError(2,0);
+  h[0]->SetMarkerSize(1.3);
   h[0]->Draw("same");
  
   
@@ -370,6 +445,9 @@ void prettyPlotting(Settings s){
   TGraphErrors * SPS = new TGraphErrors("SPS","SPS");
   getSPS(SPS);
   SPS->Draw("same p");
+  TGraphErrors * NA49 = new TGraphErrors("SPS","SPS");
+  getNA49(NA49);
+  NA49->Draw("same p");
   TGraphErrors * PHENIX = new TGraphErrors("PHENIX","PHENIX");
   getPHENIX(PHENIX);
   PHENIX->Draw("same p");
@@ -379,16 +457,16 @@ void prettyPlotting(Settings s){
 
   gStyle->SetErrorX(0);
   get276RAA(canv3,s,0,false,false);
-  h[0]->SetMarkerSize(1.2);
+  h[0]->SetMarkerSize(1.3);
   h[0]->Draw("same");
 
   //legend
   gStyle->SetLegendBorderSize(0); 
-  TLegend * bigLegc1 = new TLegend(0.47,0.55,0.68,0.93);
-  TLegend * bigLegc1x = new TLegend(0.42,0.55,0.63,0.93);
+  TLegend * bigLegc1 = new TLegend(0.49,0.55,0.69,0.93);
+  TLegend * bigLegc1x = new TLegend(0.44,0.55,0.64,0.93);
  //divide by number of entries on right/left
-  TLegend * bigLegc2 = new TLegend(0.7,0.93-(0.93-0.55)/(9.0/2.0),0.91,0.93);
-  TLegend * bigLegc2x = new TLegend(0.65,0.93-(0.93-0.55)/(9.0/2.0),0.86,0.93);
+  TLegend * bigLegc2 = new TLegend(0.7,0.93-(0.93-0.55)/(10.0/2.0),0.9,0.93);
+  TLegend * bigLegc2x = new TLegend(0.65,0.93-(0.93-0.55)/(10.0/2.0),0.85,0.93);
   bigLegc1->SetFillStyle(0); bigLegc1x->SetFillStyle(0);
   bigLegc2->SetFillStyle(0); bigLegc2x->SetFillStyle(0);
   bigLegc1->SetTextSize(0.4/20.0); bigLegc1x->SetTextSize(0.4/20.0);
@@ -397,18 +475,21 @@ void prettyPlotting(Settings s){
   TH1D * dummyATLAS = new TH1D("dummyATLAS","dummyATLAS",10,0,10);
   dummyATLAS->SetMarkerColor(kBlue);
   dummyATLAS->SetLineColor(kBlue); 
-  dummyATLAS->SetMarkerSize(1.2);
+  dummyATLAS->SetMarkerSize(1.4);
+  dummyATLAS->SetMarkerStyle(32);
   TH1D * dummyCMS = new TH1D("dummyCMS","dummyCMS",10,0,10);
   dummyCMS->SetMarkerColor(kRed); 
   dummyCMS->SetLineColor(kRed); 
-  dummyCMS->SetMarkerSize(1.2);
+  dummyCMS->SetMarkerSize(1.4);
+  dummyCMS->SetMarkerStyle(24);
   TH1D * dummyALICE = new TH1D("dummyALICE","dummyALICE",10,0,10);
-  dummyALICE->SetMarkerStyle(33);
+  dummyALICE->SetMarkerStyle(27);
   dummyALICE->SetMarkerColor(kGreen+1);
   dummyALICE->SetLineColor(kGreen+1); 
-  dummyALICE->SetMarkerSize(1.5); 
+  dummyALICE->SetMarkerSize(1.7); 
   bigLegc1->AddEntry((TObject*)0,"","");  bigLegc1x->AddEntry((TObject*)0,"SPS 17.3 GeV (PbPb)","");
   bigLegc1->AddEntry(SPS,"#pi^{0} WA98 (0-7%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
+  bigLegc1->AddEntry(NA49,"#pi^{#pm} NA49 (0-5%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
   bigLegc1->AddEntry((TObject*)0,"","");  bigLegc1x->AddEntry((TObject*)0,"RHIC 200 GeV (AuAu)","");
   bigLegc1->AddEntry(PHENIX,"#pi^{0} PHENIX (0-5%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
   bigLegc1->AddEntry(STAR,"h^{#pm} STAR (0-5%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
@@ -419,7 +500,7 @@ void prettyPlotting(Settings s){
   bigLegc1->Draw("same");bigLegc1x->Draw("same");
   //col 2
   TH1D * dummyCMS5 = new TH1D("dummyCMS5","dummyCMS5",10,0,10);
-  dummyCMS5->SetMarkerColor(kBlack); dummyCMS5->SetMarkerStyle(8); dummyCMS5->SetFillColor(kOrange);
+  dummyCMS5->SetMarkerColor(kBlack); dummyCMS5->SetMarkerStyle(8); dummyCMS5->SetFillColor(kOrange);dummyCMS5->SetMarkerSize(1.3);
   TH1D * dummyVitev = new TH1D("dummyVitev","dummyVitev",10,0,10);
   dummyVitev->SetFillStyle(3002);dummyVitev->SetFillColor(kRed);dummyVitev->SetLineWidth(0);
   TH1D * dummyCUTEP = new TH1D("dummyCUTEP","dummyCUTEP",10,0,10);
@@ -428,10 +509,16 @@ void prettyPlotting(Settings s){
   bigLegc2->AddEntry(dummyCMS5,"CMS (0-5%)","pf");  bigLegc2x->AddEntry((TObject*)0,"","");
   bigLegc2->Draw("same");bigLegc2x->Draw("same");
   
-  TLine * line3 = new TLine(0.3,1,h[0]->GetXaxis()->GetBinUpEdge(h[0]->GetSize()-2),1);
+  TLine * line3 = new TLine(0.16,1,h[0]->GetXaxis()->GetBinUpEdge(h[0]->GetSize()-2),1);
   line3->SetLineWidth(2);
   line3->SetLineStyle(2);
   line3->Draw("same");
+  
+  tex->SetTextFont(42);
+  tex->SetTextSize(0.05);
+  tex->DrawLatex(0.6071639,0.7285335,"SPS");
+  tex->DrawLatex(4.099646,0.4698491,"RHIC");
+  tex->DrawLatex(49.60057,0.1850789,"LHC");
 
   CMS_lumi( canv3,0, 11 );
   canv3->Update();
@@ -441,11 +528,11 @@ void prettyPlotting(Settings s){
   canv3->SaveAs("plots/prettyPlots/RAA_Compilation_noTheory.C");
 
   gettheoryRAA(canv3,s,0,"noSave");
-  bigLegc2->SetY1NDC(0.93-(0.93-0.55)/(9.0/5.0));
-  bigLegc2x->SetY1NDC(0.93-(0.93-0.55)/(9.0/5.0));
+  bigLegc2->SetY1NDC(0.93-(0.93-0.55)/(10.0/5.0));
+  bigLegc2x->SetY1NDC(0.93-(0.93-0.55)/(10.0/5.0));
   bigLegc2->AddEntry((TObject*)0,"","");  bigLegc2x->AddEntry((TObject*)0,"Models 5.02 TeV (PbPb)","");
-  bigLegc2->AddEntry(dummyVitev,"Y. Chien et al. (0-10%)","f");  bigLegc2x->AddEntry((TObject*)0,"","");
-  bigLegc2->AddEntry(dummyCUTEP,"J. Xu et al. (h^{#pm}+#pi^{0}, 0-10%)","l");  bigLegc2x->AddEntry((TObject*)0,"","");
+  bigLegc2->AddEntry(dummyVitev,"SCET_{G} (0-10%)","f");  bigLegc2x->AddEntry((TObject*)0,"","");
+  bigLegc2->AddEntry(dummyCUTEP,"CUJET 3.0 (h^{#pm}+#pi^{0}, 0-10%)","l");  bigLegc2x->AddEntry((TObject*)0,"","");
   bigLegc2->Draw("same");bigLegc2x->Draw("same");
   canv3->Update();
   canv3->RedrawAxis();
@@ -483,6 +570,10 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory,b
     {3.34e-02,  3.44e-02, 3.60e-02, 3.73e-02, 3.83e-02, 3.86e-02, 3.89e-02, 3.85e-02, 3.67e-02, 3.10e-02, 2.68e-02, 2.45e-02, 2.43e-02, 2.47e-02, 2.58e-02, 3.00e-02, 3.34e-02, 4.04e-02, 4.81e-02 , 4.76e-02, 5.76e-02 , 6.9e-02, 8.9e-02, 1.19e-01, 1.01e-01 , 1.9e-01, 8.6e-02},
     {3.95e-02, 4.03e-02, 4.15e-02, 4.26e-02, 4.31e-02 , 4.36e-02 , 4.38e-02, 4.39e-02,  4.33e-02, 3.94e-02, 3.72e-02, 3.63e-02, 3.67e-02, 3.65e-02, 3.87e-02 , 4.20e-02, 4.65e-02, 5.04e-02, 5.77e-02, 4.7e-02,  7.5e-02, 5.8e-02, 2.15e-01, 7.89e-02, 1.11e-01, 7.9e-02, 9.8e-02},
     {4.30e-02, 4.33e-02, 4.37e-02, 4.44e-02, 4.47e-02, 4.50e-02, 4.55e-02, 4.59e-02, 4.61e-02, 4.54e-02, 4.45e-02, 4.31e-02, 4.35e-02, 4.41e-02, 4.59e-02, 4.69e-02, 5.47e-02 , 5.35e-02, 5.0e-02, 5.6e-02, 3.6e-02, 9.4e-02, 4.78e-02, 7.67e-02, 8.8e-02, 8.5e-02,  7.3e-02 }};
+    
+    //turning off some points that are outliars
+    raaval[4][22]=0; raavalstat[4][22]=0; raavalsyst[4][22]=0; 
+    raaval[3][25]=0; raavalstat[3][25]=0; raavalsyst[3][25]=0; 
 //ATLAS Data below
 double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259999999999999, 1.0594999999999999, 1.21, 1.385, 1.5899999999999999, 
     1.825, 2.095, 2.4050000000000002, 2.755, 3.1550000000000002, 3.62, 4.15, 4.755, 5.455, 6.255, 
@@ -522,7 +613,7 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   p8800_d40x1y1->SetName("ATLAS_0_5");
   p8800_d40x1y1->SetTitle("ATLAS_0_5");
   p8800_d40x1y1->SetMarkerColor(kBlue);
-  p8800_d40x1y1->SetMarkerColor(kBlue);
+  p8800_d40x1y1->SetMarkerStyle(32);
   p8800_d40x1y1->SetLineColor(kBlue);
 //end ATLAS data
 
@@ -533,7 +624,8 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
     p->SetBinError(i,raavalstat[tempCentralityBin][i-1]); 
   }
   p->SetMarkerColor(kRed);
-  p->SetMarkerSize(1.2);
+  p->SetMarkerStyle(24);
+  p->SetMarkerSize(1.3);
   p->SetLineColor(kRed);
   p->Draw("same");
  
@@ -541,6 +633,8 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   if(doWithSystBoxes){
     for(int i = 0; i<27; i++) bp[i] = new TBox(0.1,0.1,0.2,0.2);
     for(int i = 1; i<p->GetSize()-1; i++){
+      if(tempCentralityBin==3 && i-1==25) continue;
+      if(tempCentralityBin==4 && i-1==22) continue;
       bp[i-1]->SetFillStyle(0);
       bp[i-1]->SetLineColor(kRed);
       bp[i-1]->SetLineWidth(1);
@@ -558,19 +652,25 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   }
 
   TGraphErrors * alice276 = new TGraphErrors("alice276","alice276");
-  getAlice276(alice276);
+  if(centralityBin==1) getAlice276(alice276,1);
+  else getAlice276(alice276);
 
-  TLegend * legRaa276 = new TLegend(0.53,0.725,0.9,0.91);
+  TLegend * legRaa276;
+  if(centralityBin==0)  legRaa276 = new TLegend(0.5,0.7,0.9,0.91);
+  else if(centralityBin==1) legRaa276 = new TLegend(0.5,0.75,0.9,0.91);
+  else legRaa276 = new TLegend(0.5,0.8,0.9,0.91);
   TH1D * dummy = new TH1D("dummy","dummy",10,0,10);
-  dummy->SetMarkerColor(kBlack); dummy->SetMarkerStyle(8); dummy->SetFillColor(kOrange); dummy->SetMarkerSize(1.2);
+  dummy->SetMarkerColor(kBlack); dummy->SetMarkerStyle(8); dummy->SetFillColor(kOrange); dummy->SetMarkerSize(1.3);
   legRaa276->AddEntry(dummy,"CMS 5.02 TeV","pf");
   legRaa276->AddEntry(p,"CMS 2.76 TeV","p");
 
   gStyle->SetErrorX(0.);
-  if(centralityBin==0){
-    legRaa276->AddEntry(p8800_d40x1y1,"ATLAS 2.76 TeV","p");
-    p8800_d40x1y1->SetMarkerSize(1.2);
-    p8800_d40x1y1->Draw("P same");
+  if(centralityBin==0 || centralityBin==1){
+    if(centralityBin==0){
+      legRaa276->AddEntry(p8800_d40x1y1,"ATLAS 2.76 TeV","p");
+      p8800_d40x1y1->SetMarkerSize(1.4);
+      p8800_d40x1y1->Draw("P same");
+    }
 
     legRaa276->AddEntry(alice276,"ALICE 2.76 TeV","p");
     alice276->Draw("P same");
@@ -579,25 +679,20 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   }
   else legRaa276->Draw("same");
   
-  if(doWithSystBoxes){
-    c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
-    c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
-    c276->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin]));
-  } 
-
-  if(centralityBin==0){
+  std::cout << doAddTheory << std::endl;
+  if(centralityBin==0 && doAddTheory==1){
     TH1D * dummy2 = new TH1D("dummy2","dummy2",10,0,10);
     dummy2->SetFillStyle(3002);dummy2->SetFillColor(kRed);dummy2->SetLineWidth(0);
     TH1D * dummy3 = new TH1D("dummy3","dummy3",10,0,10);
     dummy3->SetLineColor(kBlue+1);dummy3->SetLineWidth(3);
-    legRaa276->AddEntry(dummy2,"Y. Chien et al. 0-10%","f");
-    legRaa276->AddEntry(dummy3,"J. Xu et al. 0-10% (h^{#pm}+#pi^{0})","l");
+    legRaa276->AddEntry(dummy2,"SCET_{G} 0-10%","f");
+    legRaa276->AddEntry(dummy3,"CUJET 3.0 0-10% (h^{#pm}+#pi^{0})","l");
     legRaa276->Draw("same");
-    if(doAddTheory)gettheoryRAA(c276,s,centralityBin,"With276");
+    gettheoryRAA(c276,s,centralityBin,"With276");
   }
-  delete legRaa276;
-  delete dummy;
-  if(doWithSystBoxes){for(int i = 0; i<27; i++) delete bp[i];}
+  if(!doWithSystBoxes) delete legRaa276;
+  if(!doWithSystBoxes) delete dummy;
+  //if(doWithSystBoxes){for(int i = 0; i<27; i++) delete bp[i];}
   return;
 }
 
@@ -671,8 +766,10 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
   JiechenXu->Draw("same C");
 
   TLegend * leg_th = new TLegend(0.5,0.75,0.9,0.85);
-  leg_th->AddEntry(vitev,Form("Y. Chien et al. %d-%d%s",theoryCent_Low,theoryCent_High,"%"),"f");
-  leg_th->AddEntry(JiechenXu,Form("J. Xu et al. %d-%d%s (h^{#pm}+#pi^{0})",theoryCent_Low2,theoryCent_High2,"%"),"l");
+  leg_th->SetTextSize(0.03);
+  //leg_th->SetFillStyle(0);
+  leg_th->AddEntry(vitev,Form("SCET_{G} %d-%d%s",theoryCent_Low,theoryCent_High,"%"),"f");
+  leg_th->AddEntry(JiechenXu,Form("CUJET 3.0 %d-%d%s (h^{#pm}+#pi^{0})",theoryCent_Low2,theoryCent_High2,"%"),"l");
   if(saveString=="") leg_th->Draw("same");
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.C",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
   c_th->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheory%s.png",5*s.lowCentBin[centralityBin],5*s.highCentBin[centralityBin],saveString.c_str()));
@@ -681,12 +778,60 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
   return;
 }
 
-void getAlice276(TGraphErrors * Alice276){
-        Alice276->SetMarkerStyle(33);
+void getAlice276(TGraphErrors * Alice276, int centBin){
+        Alice276->SetMarkerStyle(27);
         Alice276->SetMarkerColor(kGreen+1);
-        Alice276->SetMarkerSize(1.5);
+        Alice276->SetMarkerSize(1.7);
         Alice276->SetLineColor(kGreen+1);
-        Alice276->SetPoint(0,0.325,0.1995853);
+
+        double p8210_d16x1y1_xval[] = { 0.175, 0.225, 0.275, 0.325, 0.375, 0.425, 0.475, 0.525, 0.575, 
+    0.625, 0.675, 0.725, 0.775, 0.825, 0.875, 0.925, 0.975, 1.05, 1.15, 
+    1.25, 1.35, 1.45, 1.55, 1.65, 1.75, 1.85, 1.95, 2.1, 2.3, 
+    2.5, 2.7, 2.9, 3.1, 3.3, 3.5, 3.7, 3.9, 4.25, 4.75, 
+    5.25, 5.75, 6.25, 6.75, 7.5, 8.5, 9.5, 10.5, 11.5, 12.5, 
+    13.5, 14.5, 15.5, 17.0, 19.0, 21.0, 23.0, 25.0, 27.0, 29.0, 
+    31.0, 33.0, 35.0, 38.0, 42.5, 47.5 };
+     
+        double p8210_d16x1y1_yval[] = { 0.1921, 0.2001, 0.2076, 0.2163, 0.2254, 0.2366, 0.248, 0.2589, 0.27, 
+    0.281, 0.2927, 0.3038, 0.3137, 0.3255, 0.3355, 0.3462, 0.3552, 0.3673, 0.385, 
+    0.3968, 0.4063, 0.4153, 0.4227, 0.4284, 0.4323, 0.4392, 0.4393, 0.43, 0.4158, 
+    0.4037, 0.3804, 0.3532, 0.3248, 0.2983, 0.2791, 0.2565, 0.2339, 0.2032, 0.1721, 
+    0.1494, 0.139, 0.1336, 0.1323, 0.1334, 0.1431, 0.1535, 0.1614, 0.1743, 0.1847, 
+    0.1965, 0.2063, 0.2246, 0.238, 0.2789, 0.2715, 0.3038, 0.3466, 0.3443, 0.3779, 
+    0.3463, 0.4304, 0.3841, 0.4235, 0.3933, 0.416 };
+        double p8210_d16x1y1_ystatminus[] = { 4.0E-4, 3.0E-4, 2.0E-4, 2.0E-4, 3.0E-4, 3.0E-4, 3.0E-4, 3.0E-4, 4.0E-4, 
+    4.0E-4, 4.0E-4, 5.0E-4, 6.0E-4, 6.0E-4, 7.0E-4, 8.0E-4, 9.0E-4, 6.0E-4, 7.0E-4, 
+    7.0E-4, 8.0E-4, 0.001, 0.001, 0.0012, 0.0012, 0.0015, 0.0015, 0.0012, 0.0012, 
+    0.0014, 0.0014, 0.002, 0.0016, 0.0015, 0.0015, 0.0014, 0.0014, 0.0013, 0.0012, 
+    0.001, 9.0E-4, 9.0E-4, 0.001, 0.001, 0.0014, 0.0018, 0.0023, 0.003, 0.0038, 
+    0.0048, 0.0059, 0.0073, 0.0069, 0.01, 0.0127, 0.017, 0.0226, 0.0276, 0.035, 
+    0.04, 0.0529, 0.0584, 0.0541, 0.0628, 0.0873 };
+          double p8210_d17x1y1_yval[] = { 0.2002, 0.2064, 0.2135, 0.2225, 0.2319, 0.2432, 0.2551, 0.2669, 0.2783, 
+    0.2899, 0.3023, 0.3136, 0.3235, 0.3364, 0.3471, 0.3575, 0.3679, 0.3812, 0.3985, 
+    0.4128, 0.4233, 0.4319, 0.4402, 0.4467, 0.4511, 0.4594, 0.4594, 0.4507, 0.4378, 
+    0.4264, 0.4044, 0.378, 0.351, 0.3249, 0.3063, 0.283, 0.2618, 0.2293, 0.1972, 
+    0.1742, 0.164, 0.1563, 0.1564, 0.1566, 0.1655, 0.1793, 0.1889, 0.1994, 0.2124, 
+    0.2179, 0.2394, 0.2312, 0.278, 0.2848, 0.31, 0.3346, 0.3339, 0.3364, 0.4297, 
+    0.4296, 0.3144, 0.4334, 0.4193, 0.4502, 0.6208 };
+          double p8210_d17x1y1_ystatminus[] = { 4.0E-4, 3.0E-4, 2.0E-4, 3.0E-4, 3.0E-4, 3.0E-4, 3.0E-4, 3.0E-4, 4.0E-4, 
+    4.0E-4, 5.0E-4, 5.0E-4, 6.0E-4, 6.0E-4, 7.0E-4, 8.0E-4, 9.0E-4, 6.0E-4, 7.0E-4, 
+    8.0E-4, 8.0E-4, 0.001, 0.001, 0.0013, 0.0013, 0.0016, 0.0016, 0.0013, 0.0013, 
+    0.0015, 0.0015, 0.0022, 0.0017, 0.0017, 0.0016, 0.0016, 0.0016, 0.0015, 0.0014, 
+    0.0011, 0.0011, 0.0011, 0.0013, 0.0012, 0.0016, 0.0022, 0.0028, 0.0036, 0.0046, 
+    0.0056, 0.0071, 0.0082, 0.0084, 0.0112, 0.0152, 0.02, 0.0249, 0.0306, 0.0421, 
+    0.0503, 0.0507, 0.07, 0.0605, 0.0757, 0.1204 };
+
+        for(int i = 0; i<65; i++){
+          if(centBin==0){
+            Alice276->SetPoint(i,p8210_d16x1y1_xval[i],p8210_d16x1y1_yval[i]);
+            Alice276->SetPointError(i,0,p8210_d16x1y1_ystatminus[i]);
+          } else if(centBin==1){
+            Alice276->SetPoint(i,p8210_d16x1y1_xval[i],p8210_d17x1y1_yval[i]);
+            Alice276->SetPointError(i,0,p8210_d17x1y1_ystatminus[i]);
+          } 
+        }
+
+        /*Alice276->SetPoint(0,0.325,0.1995853);
 	Alice276->SetPointError(0,0,0.000213951);
 	Alice276->SetPoint(1,0.375,0.2054084);
 	Alice276->SetPointError(1,0,0.0002229942);
@@ -787,7 +932,7 @@ void getAlice276(TGraphErrors * Alice276){
 	Alice276->SetPoint(49,17,0.3086412);
 	Alice276->SetPointError(49,0,0.02026634);
 	Alice276->SetPoint(50,19,0.3476079);
-	Alice276->SetPointError(50,0,0.02900859);
+	Alice276->SetPointError(50,0,0.02900859);*/
         return;
 }
 
@@ -833,7 +978,7 @@ void getSTAR(TGraphErrors * gSTAR){
 	gSTAR->SetMarkerStyle(kOpenStar);
 	gSTAR->SetMarkerColor(kOrange+3);
 	gSTAR->SetLineColor(kOrange+3);
-	gSTAR->SetMarkerSize(1.5);
+	gSTAR->SetMarkerSize(1.6);
 	gSTAR->SetPoint(0,0.45,0.29);
 	gSTAR->SetPointError(0,0.0,0.03);
 	gSTAR->SetPoint(1,0.55,0.32);
@@ -906,49 +1051,93 @@ void getSPS(TGraphErrors * SPS){
   SPS->SetMarkerColor(51);
   SPS->SetLineColor(51);
   SPS->SetMarkerStyle(20);
-  SPS->SetMarkerSize(1.3);
+  SPS->SetMarkerSize(1.4);
   SPS->SetPoint(0,0.55,0.331252);
-  SPS->SetPointError(0,0.05,0.0122185);
+  SPS->SetPointError(0,0.0,0.0122185);
   SPS->SetPoint(1,0.75,0.379706);
-  SPS->SetPointError(1,0.05,0.0104571);
+  SPS->SetPointError(1,0.0,0.0104571);
   SPS->SetPoint(2,0.95,0.491605);
-  SPS->SetPointError(2,0.05,0.0113137);
+  SPS->SetPointError(2,0.0,0.0113137);
   SPS->SetPoint(3,1.15,0.521915);
-  SPS->SetPointError(3,0.05,0.0121859);
+  SPS->SetPointError(3,0.0,0.0121859);
   SPS->SetPoint(4,1.35,0.598246);
-  SPS->SetPointError(4,0.05,0.0151033);
+  SPS->SetPointError(4,0.0,0.0151033);
   SPS->SetPoint(5,1.55,0.615134);
-  SPS->SetPointError(5,0.05,0.0185095);
+  SPS->SetPointError(5,0.0,0.0185095);
   SPS->SetPoint(6,1.75,0.655134);
-  SPS->SetPointError(6,0.05,0.0244785);
+  SPS->SetPointError(6,0.0,0.0244785);
   SPS->SetPoint(7,1.95,0.761032);
-  SPS->SetPointError(7,0.05,0.0331196);
+  SPS->SetPointError(7,0.0,0.0331196);
   SPS->SetPoint(8,2.15,0.856371);
-  SPS->SetPointError(8,0.05,0.0478939);
+  SPS->SetPointError(8,0.0,0.0478939);
   SPS->SetPoint(9,2.35,0.939447);
-  SPS->SetPointError(9,0.05,0.0667294);
+  SPS->SetPointError(9,0.0,0.0667294);
   SPS->SetPoint(10,2.5,0.95945);
-  SPS->SetPointError(10,0.1,0.0656273);
+  SPS->SetPointError(10,0.,0.0656273);
   SPS->SetPoint(11,2.7,0.903809);
-  SPS->SetPointError(11,0.1,0.097383);
+  SPS->SetPointError(11,0.,0.097383);
   SPS->SetPoint(12,2.9,1.11914);
-  SPS->SetPointError(12,0.1,0.152564);
+  SPS->SetPointError(12,0.,0.152564);
   SPS->SetPoint(13,3.1,0.812892);
-  SPS->SetPointError(13,0.1,0.233356);
+  SPS->SetPointError(13,0.,0.233356);
   SPS->SetPoint(14,3.3,0.897236);
-  SPS->SetPointError(14,0.1,0.369097);
+  SPS->SetPointError(14,0.,0.369097);
   SPS->SetPoint(15,3.5,1.43641);
-  SPS->SetPointError(15,0.1,0.578);
+  SPS->SetPointError(15,0.,0.578);
   SPS->SetPoint(16,3.7,1.45242);
-  SPS->SetPointError(16,0.1,0.947213);
+  SPS->SetPointError(16,0.,0.947213);
   SPS->SetPoint(17,3.9,2.70719);
-  SPS->SetPointError(17,0.1,1.48834);
+  SPS->SetPointError(17,0.,1.48834);
   SPS->SetPoint(18,4.1,3.58396);
-  SPS->SetPointError(18,0.1,2.4366);
+  SPS->SetPointError(18,0.,2.4366);
   SPS->SetPoint(19,4.3,3.79202);
-  SPS->SetPointError(19,0.1,3.87485);
+  SPS->SetPointError(19,0.,3.87485);
   SPS->SetPoint(20,4.5,12.645);
-  SPS->SetPointError(20,0.1,6.06642);
+  SPS->SetPointError(20,0.,6.06642);
+  return;
+}
+void getNA49(TGraphErrors * NA49){
+  gStyle->SetErrorX(0);
+  NA49->SetMarkerColor(kMagenta+1);
+  NA49->SetLineColor(kMagenta+1);
+  NA49->SetMarkerStyle(21);
+  NA49->SetMarkerSize(1.4);
+  NA49->SetPoint(0,0.35,0.254);
+  NA49->SetPointError(0,0.0,0.293-0.254);
+  NA49->SetPoint(1,0.45,0.281);
+  NA49->SetPointError(1,0.0,0.317-0.281);
+  NA49->SetPoint(2,0.55,0.287);
+  NA49->SetPointError(2,0.0,0.329-0.287);
+  NA49->SetPoint(3,0.65,0.305);
+  NA49->SetPointError(3,0.0,0.346-0.305);
+  NA49->SetPoint(4,0.75,0.346);
+  NA49->SetPointError(4,0.0,0.382-0.346);
+  NA49->SetPoint(5,0.85,0.376);
+  NA49->SetPointError(5,0.0,0.418-0.376);
+  NA49->SetPoint(6,0.95,0.430);
+  NA49->SetPointError(6,0.0,0.472-0.43);
+  NA49->SetPoint(7,1.05,0.472);
+  NA49->SetPointError(7,0.0,0.502-0.472);
+  NA49->SetPoint(8,1.15,0.490);
+  NA49->SetPointError(8,0.0,0.532-0.49);
+  NA49->SetPoint(9,1.25,0.532);
+  NA49->SetPointError(9,0.0,0.573-0.532);
+  NA49->SetPoint(10,1.35,0.585);
+  NA49->SetPointError(10,0.,0.621-0.585);
+  NA49->SetPoint(11,1.45,0.615);
+  NA49->SetPointError(11,0.,0.657-0.615);
+  NA49->SetPoint(12,1.55,0.639);
+  NA49->SetPointError(12,0.,0.681-0.639);
+  NA49->SetPoint(13,1.65,0.639);
+  NA49->SetPointError(13,0.,0.681-0.639);
+  NA49->SetPoint(14,1.75,0.699);
+  NA49->SetPointError(14,0.,0.734-0.699);
+  NA49->SetPoint(15,1.85,0.722);
+  NA49->SetPointError(15,0.,0.758-0.722);
+  NA49->SetPoint(16,1.95,0.82);
+  NA49->SetPointError(16,0.,0.896-0.82);
+  NA49->SetPoint(17,2.1,1.03);
+  NA49->SetPointError(17,0.,1.178-1.03);
   return;
 }
 #endif

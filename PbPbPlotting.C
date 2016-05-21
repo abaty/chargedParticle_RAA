@@ -133,7 +133,7 @@ void makePlotsPbPb(Settings s)
     s.HIJetsByTrigger[4][c]->Draw("same");
     gStyle->SetLegendBorderSize(0); 
     leg = new TLegend(0.1779449,0.652819,0.6077694,0.8916914);
-    leg->AddEntry((TObject*)0,"akPU4Calo Jets, |#eta|<2","");
+    leg->AddEntry((TObject*)0,"Anti-K_{T} Jets, |#eta|<2","");
     leg->AddEntry(s.HIJetsByTrigger[1][c],"Jet40/Minimum Bias","p");
     leg->AddEntry(s.HIJetsByTrigger[2][c],"Jet60/Jet40","p");
     leg->AddEntry(s.HIJetsByTrigger[3][c],"Jet80/Jet60","p");
@@ -215,15 +215,17 @@ void makePlotsPbPb(Settings s)
     s.HI[c]->GetXaxis()->SetRangeUser(0.7,400);
     s.HI[c]->Draw();
     s.HIUsedByTrigger[0][c]->SetFillColor(kGray);
-    s.HIUsedByTrigger[4][c]->SetFillColor(kCyan+2);
+    //s.HIUsedByTrigger[4][c]->SetFillColor(kCyan+2);
+    s.HIUsedByTrigger[4][c]->SetFillColor(kCyan-10);
     s.HIUsedByTrigger[3][c]->Add(s.HIUsedByTrigger[4][c]);
+    s.HIUsedByTrigger[3][c]->SetFillColor(kCyan+2);
     s.HIUsedByTrigger[2][c]->Add(s.HIUsedByTrigger[3][c]);
     s.HIUsedByTrigger[1][c]->Add(s.HIUsedByTrigger[2][c]);
     s.HIUsedByTrigger[0][c]->Add(s.HIUsedByTrigger[1][c]);
     for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Draw("HIST same");
     s.HI[c]->Draw("sameaxis");
     s.HI[c]->Draw("same");
-    leg = new TLegend(0.5639098,0.541543,0.9323308,0.7626113);
+    leg = new TLegend(0.51,0.61,0.95,0.9,NULL,"brNDC");
     leg->AddEntry(s.HI[c],"PbPb Uncorrected Spectrum","p");
     leg->AddEntry(s.HIUsedByTrigger[0][c],"Minimum Bias","f");
     leg->AddEntry(s.HIUsedByTrigger[1][c],"Jet40 trigger","f");
@@ -259,6 +261,9 @@ void makePlotsPbPb(Settings s)
     canv->SetTickx(0);
     canv->SetTicky(0);
     s.HI[c]->GetXaxis()->SetRangeUser(0.7,350);
+    s.HI[c]->GetYaxis()->SetRangeUser(1e-14,999);
+    s.HI[c]->GetYaxis()->SetNdivisions(508);
+    s.HI[c]->SetMarkerSize(1.2);
     s.HI[c]->GetXaxis()->CenterTitle();
     s.HI[c]->GetXaxis()->SetTitle("p_{T} (GeV)");
     s.HI[c]->GetXaxis()->SetLabelSize(0.04);
@@ -271,6 +276,7 @@ void makePlotsPbPb(Settings s)
     for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Draw("HIST same");
     s.HI[c]->Draw("sameaxis");
     s.HI[c]->Draw("same");
+    leg->SetTextSize(0.03);
     leg->Draw("same");
     
     int iPeriod = 0;
@@ -278,7 +284,7 @@ void makePlotsPbPb(Settings s)
     writeExtraText = true;  
     extraText  = "Preliminary";
     //extraText  = "Unpublished";
-    CMS_lumi( canv, iPeriod, 33 );
+    CMS_lumi( canv, iPeriod, 11, true );
     canv->SetLogy();
     canv->Update();
     canv->RedrawAxis();

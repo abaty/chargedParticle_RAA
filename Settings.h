@@ -39,12 +39,12 @@ class Settings {
   static const int nTrktriggerBins = 500;
   static const int maxTrktriggerBin = 500;
   
-  static const int nCentBins = 32;
-  int lowCentBin[nCentBins] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,6,10,2,6,10,14,16,0,0,14,0};
-  int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18,6,10,18,2};
-  double nColl[nCentBins] = {1819,1433,1127,882,685.9,526.5,399.3,297.5,217.1,155.1,107.9,73.51,48.76,31.46,19.69,12.02,7.042,3.974,2.12,1.164,392.4,98.33,30.74,805.7,267.25,65.415,15.87,5.502,1079.1,754,10.686, 1626};
-  double TAA[nCentBins] = {25.98,20.46,1127./70.0,882./70.0,685.9/70.0,526.5/70.0,399.3/70.0,297.5/70.0,217.1/70.0,155.1/70.0,107.9/70.0,73.51/70.0,48.76/70.0,31.46/70.0,19.69/70.0,12.02/70.0,7.042/70.0,3.974/70.0,2.12/70.0,1.164/70.0,5.607,98.33/70.0,30.74/70.0,11.51,3.819,0.9345,15.87/70.0,5.502/70.0,1079.1/70.0,754/70.0,0.1525, 23.22};//Ncoll/70.0for TAA in most places, otherwise we are using offical numbers from cent group if no 70.0is there
-  double TAAuncert[nCentBins] = {1.7,1.8,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,2.5,5,5,2.3,5.0,9.5,5,5,5,5,16.,1.8};//assume 5% uncert for 'unofficial' values for now (5.0 is official, 5 is not in this list)
+  static const int nCentBins = 33;
+  int lowCentBin[nCentBins] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,6,10,2,6,10,14,16,0,0,14,0,10};
+  int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18,6,10,18,2,18};
+  double nColl[nCentBins] = {1819,1433,1127,882,685.9,526.5,399.3,297.5,217.1,155.1,107.9,73.51,48.76,31.46,19.69,12.02,7.042,3.974,2.12,1.164,392.4,98.33,30.74,805.7,267.25,65.415,15.87,5.502,1079.1,754,10.686, 1626,38.04};
+  double TAA[nCentBins] = {25.98,20.46,1127./70.0,882./70.0,685.9/70.0,526.5/70.0,399.3/70.0,297.5/70.0,217.1/70.0,155.1/70.0,107.9/70.0,73.51/70.0,48.76/70.0,31.46/70.0,19.69/70.0,12.02/70.0,7.042/70.0,3.974/70.0,2.12/70.0,1.164/70.0,5.607,98.33/70.0,30.74/70.0,11.51,3.819,0.9345,15.87/70.0,5.502/70.0,1079.1/70.0,754/70.0,0.1525, 23.22, 0.5435};//Ncoll/70.0for TAA in most places, otherwise we are using offical numbers from cent group if no 70.0is there
+  double TAAuncert[nCentBins] = {1.7,1.7,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,8.9,5,5,2.4,4.9,9.6,5,5,5,5,16.,1.7,12.8};//assume 5% uncert for 'unofficial' values for now (5.0 is official, 5 is not in this list)
   /*static const int nCentBins = 31;
   int lowCentBin[nCentBins] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,0,6,10,2,6,10,14,16,0,0,14};
   int highCentBin[nCentBins] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,20,20,20,6,10,14,16,18,6,10,18};
@@ -80,7 +80,7 @@ class Settings {
   TH2D *h_scale, *h_scale_trk, *h_HIscale, *h_HIscale_trk;
   TH2D *h_normErr, *h_normErr_trk, *h_HInormErr, *h_HInormErr_trk;
   TH1D *h_normSyst, *h_normSyst_trk, *h_HInormSyst[nCentBins], *h_HInormSyst_trk[nCentBins];
-  TH1D *RAA_totSyst[nCentBins], *PbPb_totSyst[nCentBins], *pp_totSyst; 
+  TH1D *RAA_totSyst[nCentBins], *PbPb_totSyst[nCentBins], *pp_totSyst, *RCP_totSyst[nCentBins]; 
  
   Settings();
 };

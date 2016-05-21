@@ -4,7 +4,7 @@
 #include <iostream>
 
 void 
-CMS_lumi( TPad* pad, int iPeriod, int iPosX )
+CMS_lumi( TPad* pad, int iPeriod, int iPosX, bool doBotLeft )
 {            
   bool outOfFrame    = false;
   if( iPosX/10==0 ) 
@@ -116,6 +116,7 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX )
       posX_ =  1-r - relPosX*(1-l-r);
     }
   float posY_ = 1-t - relPosY*(1-t-b);
+  if(doBotLeft) posY_ = b + relPosY*(1-t-b)+0.13; 
   if( !outOfFrame )
     {
       if( drawLogo )
