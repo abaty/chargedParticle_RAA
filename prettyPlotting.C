@@ -38,7 +38,7 @@ inline int getHypInd(int c){
   if(c==24) hyperonIndex=3;
   if(c==25 || c==30) hyperonIndex=4;
   //if(c==30) hyperonIndex=5;
-  if(c==31) hyperonIndex=6;
+  if(c==31 || c==32) hyperonIndex=6;
   return hyperonIndex;
 }
 void getSPS(TGraphErrors * SPS);
@@ -88,6 +88,14 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=f
 	  }
           //accounting for the 99% event selection efficiency by scaling by 1.01 in 0-100%
           h[20]->Scale(0.99);
+          //for RCP
+          for(int c = 0; c<s.nCentBins;c++){
+            if(c==0 || c==1 || c==23 || c==24 || c==31){
+              RCP[c]->Divide(RCP[32]);
+              RCP[c]->Scale(s.TAA[32]/s.TAA[c]);
+              RCP[c]->Print("All");
+            }
+          }
 
 	  //which hyperon correction to pick up (cent dependent) (inclusive is the default)
 	  TH1D * hyperonPbPb[8];
@@ -95,14 +103,19 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=f
 	    std::cout << i << std::endl;
 	    hyperonPbPb[i] = (TH1D*)h[0]->Clone("hyperonPbPb");
 	    returnHyperonCorrection(0,hyperonPbPb[i],i,"hyperon_check/CurrentHyperonFractions_PASResult/");
-	    hyperonPbPb[i]->Print("All");
+	    //hyperonPbPb[i]->Print("All");
 	  }
 	  TH1D * hyperonpp = (TH1D*)h[0]->Clone("hyperonpp");
 	  returnHyperonCorrection(1,hyperonpp,0,"hyperon_check/CurrentHyperonFractions_PASResult/");//need to change to pp
-	  hyperonpp->Print("All");
+	  //hyperonpp->Print("All");
 	  for(int c = 0; c<s.nCentBins; c++){
 	    h[c]->Multiply(hyperonPbPb[getHypInd(c)]);
 	    h[c]->Divide(hyperonpp);
+            //RCP
+            if(c==0 || c==1 || c==23 || c==24 || c==31){
+	      RCP[c]->Multiply(hyperonPbPb[getHypInd(c)]);
+	      RCP[c]->Divide(hyperonPbPb[getHypInd(32)]);
+            }
 	  }
 
 	  //hyperon correctoin plot
@@ -171,11 +184,13 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=f
 	  
 
 	  float TAAUncert;
+	  float RCP_TAAUncert;
 	  float lumiUncert;//12% for pp lumi
 	  for(int c = 0; c<s.nCentBins; c++){
 	    //adding up uncertainties
 	    for(int i = 1; i<s.RAA_totSyst[c]->GetSize()-1; i++){
 	      s.RAA_totSyst[c]->SetBinContent(i,0);
+	      s.RCP_totSyst[c]->SetBinContent(i,0);
 	      s.PbPb_totSyst[c]->SetBinContent(i,0);
 	      if(c==0) s.pp_totSyst->SetBinContent(i,0);
 	    
@@ -188,12 +203,14 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=f
 	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure (PbPb)
 	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% for nonclosure pp 
 	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% for nonclosure in pp
+	      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),0.07));//5% for nonclosure PbPb
 	      
 	      //!this sytematic is largely bullshit since we don't know the data fake rate!
 	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//3% for MC-based fake rate PbPb
 	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.03));//3% difference in data/MC (PbPb)
 	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//for MC-based fake rate pp 
 	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//for MC-based faked rate pp
+	      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),0.03));//for MC-based fake rate pp 
 	      
 	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
 	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
@@ -204,11 +221,15 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=f
 	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
 	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
 	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),s.h_normSyst->GetBinContent(i)));//add in pp normalization uncert
+	      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
+	      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),s.h_HInormSyst[32]->GetBinContent(i)));//add in PbPb normalization uncert
 	      
 	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
 	      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
 	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
 	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
+	      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
+	      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(32)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
 	      
 	      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//pp uncertainty for pileup
 	      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.03));//pp uncertainty for pileup
@@ -222,6 +243,7 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=f
 	    s.RAA_totSyst[c]->Write();
 	    s.PbPb_totSyst[c]->Write();
 	    if(c==0) s.pp_totSyst->Write();
+	    if(c==0 || c==1 || c==23 || c==24 || c==31)s.RCP_totSyst[c]->Write();
 
 	    //plotting
 	    canv->Clear();
@@ -300,6 +322,58 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=f
       gettheoryRAA(canv_th,s,c,"");
       //gettheoryRAA(canv,s,c,"");
     }
+
+    //RCP
+      if(c==0 || c==1 || c==23 || c==24 || c==31){
+	    canv->Clear();
+	    RCP[c]->GetXaxis()->SetRangeUser(0.7,350);
+	    RCP[c]->GetXaxis()->SetLabelOffset(-0.005);
+	    RCP[c]->GetXaxis()->CenterTitle();
+	    RCP[c]->GetYaxis()->CenterTitle();
+	    RCP[c]->GetYaxis()->SetRangeUser(0,1.6);
+	    RCP[c]->SetMarkerSize(1.3);
+	    RCP[c]->GetYaxis()->SetTitle("R_{CP}");
+	    RCP[c]->Draw();
+	 
+	    TAAUncert = TMath::Power(s.TAAuncert[c]*s.TAAuncert[c]+s.TAAuncert[32]*s.TAAuncert[32],0.5)/100.0;
+	    bTAA->SetFillColor(kBlue-9);
+	    bTAA->SetLineWidth(0);
+	    bTAA->DrawBox(0.9,1-TAAUncert,TMath::Power(10,TMath::Log10(0.9)+(TMath::Log10(1.5)-TMath::Log10(0.9))/2.0),1+TAAUncert);
+	  
+	    line1->Draw("same");
+	  
+	    tex2->DrawLatex(0.9,0.1,Form("(%d-%d%%)/(50-90%%)",5*s.lowCentBin[c],5*s.highCentBin[c]));
+	    tex->SetTextFont(42);
+	    tex->SetTextSize(lumiTextSize*0.08);
+	    tex->DrawLatex(1.8,1.03,"T_{AA} uncertainty     |#eta|<1");
+	  
+	    for(int i = 1; i<h[c]->GetSize()-1; i++){
+	      if(i<3) continue;
+	      b[i-1]->SetFillColor(kOrange);
+	      b[i-1]->SetX1(RCP[c]->GetXaxis()->GetBinLowEdge(i));
+	      b[i-1]->SetX2(RCP[c]->GetXaxis()->GetBinUpEdge(i));
+	      b[i-1]->SetY1((RCP[c]->GetBinContent(i))*(1-s.RCP_totSyst[c]->GetBinContent(i)));
+	      b[i-1]->SetY2(RCP[c]->GetBinContent(i)*(1+s.RCP_totSyst[c]->GetBinContent(i)));
+	      b[i-1]->Draw("same");
+	    }
+	    RCP[c]->SetMarkerSize(1.3);
+	    line1->Draw("same");
+	    RCP[c]->Draw("same");
+	  
+	    int iPeriod = 0;
+	    lumi_sqrtS = "404 #mub^{-1} (5.02 TeV PbPb)";
+	    writeExtraText = true;  
+	    extraText  = "Preliminary";
+	    //extraText  = "Unpublished";
+	    CMS_lumi( canv, iPeriod, 11 );
+	 
+	    canv->Update();
+	    canv->RedrawAxis();
+	    canv->GetFrame()->Draw();    
+	    canv->SaveAs(Form("plots/prettyPlots/RCP_%d_%d.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
+	    canv->SaveAs(Form("plots/prettyPlots/RCP_%d_%d.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
+	    canv->SaveAs(Form("plots/prettyPlots/RCP_%d_%d.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
+    }
     delete line1;
   }
 
@@ -351,7 +425,7 @@ void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=f
   pbpbSpec[30]->Draw("same");
   ppSpec->SetMarkerStyle(5);
   ppSpec->Scale(1/70.0);//scaled by inelastic xsection of 70 mb
-  ppSpec->Print("All");
+  //ppSpec->Print("All");
   ppSpec->Draw("same");
   TLegend * specLeg = new TLegend(0.25,0.1,0.45,0.5);
   //specLeg->SetFillStyle(0);
