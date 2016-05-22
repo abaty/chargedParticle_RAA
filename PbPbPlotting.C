@@ -548,7 +548,7 @@ void makePlotsPbPb(Settings s)
     leg->AddEntry((TObject*)0,Form("%d_%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->AddEntry((TObject*)0,"Jet Triggers","");
     s.h_HInormSyst[c]->Draw();
-    s.h_HInormSyst[c]->Print("All");
+    //s.h_HInormSyst[c]->Print("All");
     leg->Draw("same");
     c2->SaveAs(Form("plots/png/HI_normalizationError_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
     c2->SaveAs(Form("plots/pdf/HI_normalizationError_%d_%d.pdf",s.lowCentBin[c]*5,s.highCentBin[c]*5));
