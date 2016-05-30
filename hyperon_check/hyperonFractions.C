@@ -23,7 +23,7 @@ void hyperonFractions(int isPP = 0, int hLow = 0, int hHigh = 100){
   int EPOSEvts = 5000;*/
   int nEvts = 100000;
   int PHEvts = 200000;
-  int EPOSEvts = 60000;
+  int EPOSEvts = 30000;
   if(isPP){
   int nEvts = 10000;
     PHEvts = 300000;
@@ -536,8 +536,8 @@ void hyperonFractions(int isPP = 0, int hLow = 0, int hHigh = 100){
   }
 
  
-  //TCut ts = "!(mtrkPtError/mtrkPt>0.1 || TMath::Abs(mtrkDz1/mtrkDzError1)>3 || TMath::Abs(mtrkDxy1/mtrkDxyError1)>3 || mhighPurity==0 || (mtrkNHit<11 && mtrkPt>0.7) || mtrkChi2/mtrkNdof/mtrkNlayer>0.15)";
-  TCut ts = "!(mtrkPtError/mtrkPt>0.3 || TMath::Abs(mtrkDz1/mtrkDzError1)>3 || TMath::Abs(mtrkDxy1/mtrkDxyError1)>3 || mhighPurity==0";
+  TCut ts = "!(mtrkPtError/mtrkPt>0.1 || TMath::Abs(mtrkDz1/mtrkDzError1)>3 || TMath::Abs(mtrkDxy1/mtrkDxyError1)>3 || mhighPurity==0 || (mtrkNHit<11 && mtrkPt>0.7) || mtrkChi2/mtrkNdof/mtrkNlayer>0.15)";
+  //TCut ts = "!(mtrkPtError/mtrkPt>0.3 || TMath::Abs(mtrkDz1/mtrkDzError1)>3 || TMath::Abs(mtrkDxy1/mtrkDxyError1)>3 || mhighPurity==0)";
  
   TH1D *gen[9];
   TH1D *mgen[9];
