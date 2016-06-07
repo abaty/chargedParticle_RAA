@@ -118,6 +118,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   unsigned int run=0;
   unsigned int lumi=0;
+  unsigned long long evt=0;
 
   int pVtx;
   int pBeamScrape;
@@ -189,12 +190,13 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //Ntuple for looking at specific tracks
   std::string trkSkimVars;
-  trkSkimVars=   "run:lumi:isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxjteta:maxjtphi:inConeJetPt:inConeJetEta:inConeJetPhi:passesJetID:ecalSum:hcalSum:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34:isMu20";
+  trkSkimVars=   "run:lumi:evt:isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxjteta:maxjtphi:inConeJetPt:inConeJetEta:inConeJetPhi:passesJetID:ecalSum:hcalSum:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34:isMu20";
   TNtuple * trkSkim  = new TNtuple("trkSkim","",trkSkimVars.data()); 
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
   //0 is MB, 1 is jet40/60, 2 is jet80
   int PDindx[5000];
+  int MBPDindx[5000] = {0};
   for(unsigned int i = 0; i<inputFiles.size(); i++)
   {
     if(isPP){
@@ -204,7 +206,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       else if(inputFiles.at(i).find("FullTrack") != std::string::npos) PDindx[i]=3;
       else PDindx[i]=-1;
     }else{
-      if((inputFiles.at(i).find("MinimumBias") != std::string::npos) || (inputFiles.at(i).find("MinBias") != std::string::npos)) PDindx[i]=0;
+      if((inputFiles.at(i).find("MinimumBias") != std::string::npos) || (inputFiles.at(i).find("MinBias") != std::string::npos)){
+        PDindx[i]=0;
+        if((inputFiles.at(i).find("MinimumBias2") != std::string::npos) || (inputFiles.at(i).find("MinBias2") != std::string::npos))  MBPDindx[i]=2;
+        if((inputFiles.at(i).find("MinimumBias3") != std::string::npos) || (inputFiles.at(i).find("MinBias3") != std::string::npos))  MBPDindx[i]=3;
+        if((inputFiles.at(i).find("MinimumBias4") != std::string::npos) || (inputFiles.at(i).find("MinBias4") != std::string::npos))  MBPDindx[i]=4;
+      }
       else if(inputFiles.at(i).find("HIHardProbes-") != std::string::npos) PDindx[i]=1;
       else if(inputFiles.at(i).find("HIHardProbesPeripheral") != std::string::npos) PDindx[i]=2;
       else PDindx[i]=-1;
@@ -273,6 +280,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       hiCh->SetBranchAddress("hiHF",&hiHF);
       hiCh->SetBranchAddress("run",&run);
       hiCh->SetBranchAddress("lumi",&lumi);
+      hiCh->SetBranchAddress("evt",&evt);
       evtCh->AddFriend(hiCh);
     }
    
@@ -298,11 +306,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_Cent30_100_v1",&HIj40_c30);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent30_100_v1",&HIj60_c30);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent30_100_v1",&HIj80_c30);
-      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent30_100_v1",&HIj100_c30);
+      //hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent30_100_v1",&HIj100_c30);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_Cent50_100_v1",&HIj40_c50);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent50_100_v1",&HIj60_c50);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent50_100_v1",&HIj80_c50);
-      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent50_100_v1",&HIj100_c50);
+      //hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent50_100_v1",&HIj100_c50);
       hltCh->SetBranchAddress("HLT_HIFullTrack12_L1MinimumBiasHF2_AND_v1",&HIt12);
       hltCh->SetBranchAddress("HLT_HIFullTrack18_L1MinimumBiasHF2_AND_v1",&HIt18);
       hltCh->SetBranchAddress("HLT_HIFullTrack24_v1",&HIt24);
@@ -311,7 +319,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       //hltCh->SetBranchAddress("HLT_HIFullTrack18_L1Centrality30100_v1",&HIt18_c30);
       hltCh->SetBranchAddress("HLT_HIFullTrack24_L1Centrality30100_v1",&HIt24_c30);
       hltCh->SetBranchAddress("HLT_HIFullTrack34_L1Centrality30100_v1",&HIt34_c30);
-      hltCh->SetBranchAddress("HI_Muon_L2Mu20",&HI_Muon_L2Mu20);
+      hltCh->SetBranchAddress("HLT_HIL2Mu20_v1",&HI_Muon_L2Mu20);
     }
     trkCh->AddFriend(hltCh);
   //***********************************************************************************
@@ -341,7 +349,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(hasGoodVtx==false) continue;
 
       bool MinBias = 0;
-      for(int j = 0; j<21; j++) MinBias = MinBias || ((isPP)?(MB[j]==1):(HIMB[j]==1));
+      for(int j = 0; j<21; j++) MinBias = MinBias || ((isPP)?(MB[j]==1):(HIMB[j]==1 && isGoodMB(MBPDindx[nFile],run)));
       HIj40 = (HIj40_v1==1) || (HIj40_v2==1);
       if(isPP && !MinBias && !j40 && !j60 && !j80 && !t18 && !t24 && !t34 && !t45 && !t53) continue;
       if(!isPP && !MinBias && !HIj40 && !HIj60 && !HIj80 && !HIj100 && !HIj40_c30 && !HIj60_c30 && !HIj80_c30 && !HIj100_c30&& !HIj40_c50 && !HIj60_c50 && !HIj80_c50 && !HIj100_c50 && !HIt12 && !HIt18 && !HIt24 && !HIt34 && !HIt12_c30 && !HIt18_c30 && !HIt24_c30 && !HIt34_c30) continue;
@@ -438,11 +446,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(HIj40_c30  && HIj40!=1 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
       if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
       if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-      if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+      //if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
       if(HIj40_c50  && HIj40!=1 && !HIj40_c30 && PD==2 && hiBin>=100)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
       if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
       if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-      if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+      //if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
       if(HIt12 && PD==1) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
       if(HIt18 && PD==1) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
       if(HIt24 && PD==1) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
@@ -584,7 +592,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
                    passesJetID = !((ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05) || (hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1));
                  }
                }
-             float skimEntry[] = {(float)run,(float)lumi,(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,passesJetID,ecSum,hcSum,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
+             float skimEntry[] = {(float)run,(float)lumi,(float)evt,(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,passesJetID,ecSum,hcSum,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
               trkSkim->Fill(skimEntry);
               //if(inConeJetPt==0) continue;//upper boundary on track pt
             }
@@ -610,11 +618,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(HIj40_c30  && HIj40!=1 && PD==2 && hiBin>=60)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-            if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            //if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj40_c50  && HIj40!=1 && !HIj40_c30 && PD==2 && hiBin>=100)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-            if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
+            //if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
           }
         } //end trk loop
       }//end if statement  

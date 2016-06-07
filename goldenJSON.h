@@ -1,6 +1,14 @@
 #ifndef goldenJSON_h
 #define goldenJSON_h
 
+bool isGoodMB(int MBPD, const UInt_t run)
+{
+  bool isGood = false;
+  if(MBPD==2 && run>=263155 && run<=263797) isGood=true;  
+  if((MBPD==3 || MBPD==4) && run>=263192 && run<=263797) isGood=true;  
+  return isGood;
+}
+
 Bool_t isInGoldenJSON(const UInt_t run, const UInt_t lumi)
 {
   if(run == 262620){
