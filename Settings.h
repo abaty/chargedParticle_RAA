@@ -22,9 +22,13 @@ class Settings {
   static const int nTriggers = 4;
   double triggerBins[nTriggers+1] = {0,60,80,100,1200};
   double triggerOverlapBins[nTriggers] = {0,60,80,100};
+  /*double triggerBins[nTriggers+1] = {0,55,75,95,1200};
+  double triggerOverlapBins[nTriggers] = {0,55,75,95};*/
   static const int HInTriggers = 5;
   double HItriggerBins[HInTriggers+1] = {0,60,80,100,120,1200};
   double HItriggerOverlapBins[HInTriggers] = {0,60,80,100,120};
+  /*double HItriggerBins[HInTriggers+1] = {0,55,75,95,115,1200};
+  double HItriggerOverlapBins[HInTriggers] = {0,55,75,95,115};*/
   
   static const int njetBins = 240;
   static const int maxJetBin = 1200;

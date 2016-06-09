@@ -172,11 +172,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_pp/");
     //trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
   }else{
-    //trkCorr = new TrkCorr("TrkCorr_Mar15_Iterative_PbPb/");
-    trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
-    trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
-    //trkCorr_trk = new TrkCorr("TrkCorr_Mar4_Iterative_PbPb_TrkTrig/");
-    //trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_PbPb/");
+    trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
+    //trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
+    //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
   }
   EventSelectionCorrector corrEvSel;
   Chi2Corrector_PbPb * chi2corr = new Chi2Corrector_PbPb();
@@ -306,11 +305,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_Cent30_100_v1",&HIj40_c30);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent30_100_v1",&HIj60_c30);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent30_100_v1",&HIj80_c30);
-      //hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent30_100_v1",&HIj100_c30);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent30_100_v1",&HIj100_c30);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet40_Eta5p1_Cent50_100_v1",&HIj40_c50);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet60_Eta5p1_Cent50_100_v1",&HIj60_c50);
       hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet80_Eta5p1_Cent50_100_v1",&HIj80_c50);
-      //hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent50_100_v1",&HIj100_c50);
+      hltCh->SetBranchAddress("HLT_HIPuAK4CaloJet100_Eta5p1_Cent50_100_v1",&HIj100_c50);
       hltCh->SetBranchAddress("HLT_HIFullTrack12_L1MinimumBiasHF2_AND_v1",&HIt12);
       hltCh->SetBranchAddress("HLT_HIFullTrack18_L1MinimumBiasHF2_AND_v1",&HIt18);
       hltCh->SetBranchAddress("HLT_HIFullTrack24_v1",&HIt24);
@@ -446,11 +445,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       if(HIj40_c30  && HIj40!=1 && PD==2 && hiBin>=60)   s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
       if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
       if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-      //if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+      if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
       if(HIj40_c50  && HIj40!=1 && !HIj40_c30 && PD==2 && hiBin>=100)  s.HIevtCount[1][hiBin/10]->Fill(maxJtPt);  
       if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)  s.HIevtCount[2][hiBin/10]->Fill(maxJtPt);  
       if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)  s.HIevtCount[3][hiBin/10]->Fill(maxJtPt);  
-      //if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
+      if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100)  s.HIevtCount[4][hiBin/10]->Fill(maxJtPt);  
       if(HIt12 && PD==1) s.HIevtCount_trk[1][hiBin/10]->Fill(maxTrackPt);  
       if(HIt18 && PD==1) s.HIevtCount_trk[2][hiBin/10]->Fill(maxTrackPt);  
       if(HIt24 && PD==1) s.HIevtCount_trk[3][hiBin/10]->Fill(maxTrackPt);  
@@ -618,11 +617,11 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(HIj40_c30  && HIj40!=1 && PD==2 && hiBin>=60)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj60_c30  && !HIj60 && PD==2 && hiBin>=60)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj80_c30  && !HIj80 && PD==2 && hiBin>=60)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-            //if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
+            if(HIj100_c30 && !HIj100&& PD==2 && hiBin>=60)   s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj40_c50  && HIj40!=1 && !HIj40_c30 && PD==2 && hiBin>=100)   s.HIspec[1][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj60_c50  && !HIj60 && !HIj60_c30 && PD==2 && hiBin>=100)   s.HIspec[2][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
             if(HIj80_c50  && !HIj80 && !HIj80_c30 && PD==2 && hiBin>=100)   s.HIspec[3][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);
-            //if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
+            if(HIj100_c50 && !HIj100 && !HIj100_c30 && PD==2 && hiBin>=100) s.HIspec[4][hiBin/10]->Fill(maxJtPt,trkPt[j],correction/binCenter);  
           }
         } //end trk loop
       }//end if statement  
