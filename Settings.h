@@ -24,6 +24,8 @@ class Settings {
   double triggerOverlapBins[nTriggers] = {0,60,80,100};
   /*double triggerBins[nTriggers+1] = {0,55,75,95,1200};
   double triggerOverlapBins[nTriggers] = {0,55,75,95};*/
+
+  bool   doBetterHITrig = true;//removes jet40 from 0-30% and removes jet80/100 for 50-100 and 30-100%
   static const int HInTriggers = 5;
   double HItriggerBins[HInTriggers+1] = {0,60,80,100,120,1200};
   double HItriggerOverlapBins[HInTriggers] = {0,60,80,100,120};

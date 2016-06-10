@@ -82,8 +82,19 @@ void makeSpectrum()
   {
     for(int i = 0; i<s.HInTriggers; i++)
     {
-      s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",i,c));
-      s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",i,c));
+      if(s.doBetterHITrig && c<6 && i==1){//replaces a few triggers for better stats
+          s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",i-1,c));
+          s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",i-1,c));
+      }else if(s.doBetterHITrig && c>=6 && c<10 && i==s.HInTriggers-1){
+          s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",s.HInTriggers-2,c));
+          s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",s.HInTriggers-2,c));
+      }else if(s.doBetterHITrig && c>=10 && i>=s.HInTriggers-2){
+        s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",s.HInTriggers-3,c));
+        s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",s.HInTriggers-3,c));
+      }else{//behavior without better trigger handling
+        s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",i,c));
+        s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",i,c));
+      }
       s.HIspec[i][c]->SetDirectory(0);
       s.HIevtCount[i][c]->SetDirectory(0);
     }
@@ -204,6 +215,9 @@ void makeSpectrum()
       for(int j = 0; j<i; j++){
         HIscale[i][m] = HIscale[i][m]*tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j][m]->FindBin(s.maxJetBin))/(double)tempEvtCount[j+1][m]->Integral(tempEvtCount[j+1][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j+1][m]->FindBin(s.maxJetBin));
         if(i>0) s.h_HInormErr->SetBinContent(i,m+1,TMath::Power(1.0/tempEvtCount[j][m]->Integral(tempEvtCount[j][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j][m]->FindBin(s.maxJetBin))+1.0/tempEvtCount[j+1][m]->Integral(tempEvtCount[j+1][m]->FindBin(s.HItriggerOverlapBins[j+1]),tempEvtCount[j+1][m]->FindBin(s.maxJetBin)),0.5));
+        if(s.doBetterHITrig && i==1 && m==0) s.h_HInormErr->SetBinContent(i,m+1,0);//remove jet40
+        if(s.doBetterHITrig && i==s.HInTriggers-1 && m>0)  s.h_HInormErr->SetBinContent(i-1,m+1,s.h_HInormErr->GetBinContent(i,m+1));//remove jet100
+        if(s.doBetterHITrig && i==s.HInTriggers-2 && m>1)  s.h_HInormErr->SetBinContent(i-1,m+1,s.h_HInormErr->GetBinContent(i,m+1));//remove jet80
       }
       std::cout <<"PbPb scale: Trigger and cent region "<< i<<" "<<m<<" "<<HIscale[i][m] << std::endl;
     }

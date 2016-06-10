@@ -78,7 +78,9 @@ void makePlotsPbPb(Settings s)
     c1->Clear();
     s.HIJets[c]->GetYaxis()->SetRangeUser(Ymin,Ymax);
     s.HIJets[c]->Draw("h");
-    for(int i = 0; i<s.HInTriggers; i++) s.HIJetsByTrigger[i][c]->Draw("same");
+    for(int i = 0; i<s.HInTriggers; i++){
+      s.HIJetsByTrigger[i][c]->Draw("same");
+    }
     leg->Clear();
     leg->AddEntry(s.HIJets[c],"Jet Spectrum (x100)","l");
     leg->AddEntry(s.HIJetsByTrigger[0][c],"MB (I)","p");
@@ -125,19 +127,26 @@ void makePlotsPbPb(Settings s)
     c1->SetLogy(0);
     for(int i = 0; i<s.HInTriggers-1; i++) s.HIJetsByTrigger[s.HInTriggers-1-i][c]->Divide(s.HIJetsByTrigger[s.HInTriggers-2-i][c]);
     s.HIJetsByTrigger[1][c]->GetYaxis()->SetRangeUser(0,2);
+    s.HIJetsByTrigger[2][c]->GetYaxis()->SetRangeUser(0,2);
     s.HIJetsByTrigger[1][c]->GetXaxis()->SetRangeUser(20,140);
+    s.HIJetsByTrigger[2][c]->GetXaxis()->SetRangeUser(20,140);
     s.HIJetsByTrigger[1][c]->GetXaxis()->SetTitle("Leading jet p_{T}");
+    s.HIJetsByTrigger[2][c]->GetXaxis()->SetTitle("Leading jet p_{T}");
     s.HIJetsByTrigger[1][c]->Draw();
     s.HIJetsByTrigger[2][c]->Draw("same");
-    s.HIJetsByTrigger[3][c]->Draw("same");
-    s.HIJetsByTrigger[4][c]->Draw("same");
+    if(s.doBetterHITrig && s.lowCentBin[c]<10) s.HIJetsByTrigger[3][c]->Draw("same");
+    if(s.doBetterHITrig && s.lowCentBin[c]<6)  s.HIJetsByTrigger[4][c]->Draw("same");
     gStyle->SetLegendBorderSize(0); 
     leg = new TLegend(0.1779449,0.652819,0.6077694,0.8916914);
     leg->AddEntry((TObject*)0,"Anti-K_{T} Jets, |#eta|<2","");
-    leg->AddEntry(s.HIJetsByTrigger[1][c],"Jet40/Minimum Bias","p");
-    leg->AddEntry(s.HIJetsByTrigger[2][c],"Jet60/Jet40","p");
-    leg->AddEntry(s.HIJetsByTrigger[3][c],"Jet80/Jet60","p");
-    leg->AddEntry(s.HIJetsByTrigger[4][c],"Jet100/Jet80","p");
+    if(s.doBetterHITrig && s.lowCentBin[c]>5){ 
+      leg->AddEntry(s.HIJetsByTrigger[1][c],"Jet40/Minimum Bias","p");
+      leg->AddEntry(s.HIJetsByTrigger[2][c],"Jet60/Jet40","p");
+    }else{
+      leg->AddEntry(s.HIJetsByTrigger[2][c],"Jet60/Minimum Bias","p");
+    }
+    if(s.doBetterHITrig && s.lowCentBin[c]<10)  leg->AddEntry(s.HIJetsByTrigger[3][c],"Jet80/Jet60","p");
+    if(s.doBetterHITrig && s.lowCentBin[c]<6)   leg->AddEntry(s.HIJetsByTrigger[4][c],"Jet100/Jet80","p");
     leg->AddEntry((TObject*)0,Form("%d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
     c1->SaveAs(Form("plots/png/HI_JetRelativeTurnOnes_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
@@ -166,27 +175,28 @@ void makePlotsPbPb(Settings s)
     canv->SetTickx(0);
     canv->SetTicky(0);
     for(int i=1; i<5; i++) s.HIJetsByTrigger[i][c]->SetMarkerSize(1);
-    s.HIJetsByTrigger[1][c]->GetXaxis()->CenterTitle();
-    s.HIJetsByTrigger[1][c]->GetXaxis()->SetTitle("Offline Leading Jet p_{T} (GeV)");
-    s.HIJetsByTrigger[1][c]->GetXaxis()->SetLabelSize(0.04);
-    s.HIJetsByTrigger[1][c]->GetXaxis()->SetTitleSize(0.05);
-    s.HIJetsByTrigger[1][c]->GetYaxis()->CenterTitle();
-    s.HIJetsByTrigger[1][c]->GetYaxis()->SetLabelSize(0.04);
-    s.HIJetsByTrigger[1][c]->GetYaxis()->SetTitleSize(0.05);
-    s.HIJetsByTrigger[1][c]->GetYaxis()->SetTitleOffset(1.3);
-    s.HIJetsByTrigger[1][c]->GetYaxis()->SetTitle("Triggered Spectrum Ratio");
+    s.HIJetsByTrigger[2][c]->GetXaxis()->CenterTitle();
+    s.HIJetsByTrigger[2][c]->GetXaxis()->SetTitle("Offline Leading Jet p_{T} (GeV)");
+    s.HIJetsByTrigger[2][c]->GetXaxis()->SetLabelSize(0.04);
+    s.HIJetsByTrigger[2][c]->GetXaxis()->SetTitleSize(0.05);
+    s.HIJetsByTrigger[2][c]->GetYaxis()->CenterTitle();
+    s.HIJetsByTrigger[2][c]->GetYaxis()->SetLabelSize(0.04);
+    s.HIJetsByTrigger[2][c]->GetYaxis()->SetTitleSize(0.05);
+    s.HIJetsByTrigger[2][c]->GetYaxis()->SetTitleOffset(1.3);
+    s.HIJetsByTrigger[2][c]->GetYaxis()->SetTitle("Triggered Spectrum Ratio");
     gStyle->SetErrorX(0.);
-    s.HIJetsByTrigger[1][c]->Draw("p");
+    s.HIJetsByTrigger[2][c]->Draw("p");
     TLine * line1 = new TLine(20,1,140,1);
     line1->SetLineWidth(2);
     line1->SetLineStyle(2);
     line1->Draw("same");
-    s.HIJetsByTrigger[1][c]->Draw("same p");
+    if(s.doBetterHITrig && s.lowCentBin[c]>5) s.HIJetsByTrigger[1][c]->Draw("same p");
     s.HIJetsByTrigger[2][c]->Draw("same p");
-    s.HIJetsByTrigger[3][c]->Draw("same p");
-    s.HIJetsByTrigger[4][c]->Draw("same p");
-    s.HIJetsByTrigger[1][c]->Draw("sameaxis");
-    s.HIJetsByTrigger[1][c]->Draw("same");
+    if(s.doBetterHITrig && s.lowCentBin[c]<10) s.HIJetsByTrigger[3][c]->Draw("same p");
+    if(s.doBetterHITrig && s.lowCentBin[c]<6)  s.HIJetsByTrigger[4][c]->Draw("same p");
+    s.HIJetsByTrigger[2][c]->Draw("sameaxis");
+    s.HIJetsByTrigger[2][c]->Draw("same");
+    if(s.doBetterHITrig && s.lowCentBin[c]>5) s.HIJetsByTrigger[1][c]->Draw("same");
     leg->Draw("same");
     
     int iPeriod = 0;
@@ -222,16 +232,24 @@ void makePlotsPbPb(Settings s)
     s.HIUsedByTrigger[2][c]->Add(s.HIUsedByTrigger[3][c]);
     s.HIUsedByTrigger[1][c]->Add(s.HIUsedByTrigger[2][c]);
     s.HIUsedByTrigger[0][c]->Add(s.HIUsedByTrigger[1][c]);
-    for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Draw("HIST same");
+    /*if(s.doBetterHITrig && s.lowCentBin[c]<6){  s.HIUsedByTrigger[1][c]->SetFillColor(kGray); s.HIUsedByTrigger[1][c]->SetLineWidth(-1);}
+    if(s.doBetterHITrig && s.lowCentBin[c]>5){  s.HIUsedByTrigger[4][c]->SetFillColor(kCyan+2);s.HIUsedByTrigger[3][c]->SetLineWidth(-1);}
+    if(s.doBetterHITrig && s.lowCentBin[c]>9){  s.HIUsedByTrigger[3][c]->SetFillColor(2); s.HIUsedByTrigger[4][c]->SetFillColor(2); s.HIUsedByTrigger[2][c]->SetLineWidth(0); s.HIUsedByTrigger[3][c]->SetLineWidth(0);}*/
+    for(int i = 0; i<s.HInTriggers; i++){
+      if(s.doBetterHITrig && s.lowCentBin[c]<6 && i==1) continue;
+      if(s.doBetterHITrig && s.lowCentBin[c]>5 && i==4) continue;
+      if(s.doBetterHITrig && s.lowCentBin[c]>9 && (i==3 || i==4)) continue;
+      s.HIUsedByTrigger[i][c]->Draw("HIST same");
+    }
     s.HI[c]->Draw("sameaxis");
     s.HI[c]->Draw("same");
     leg = new TLegend(0.51,0.61,0.95,0.9,NULL,"brNDC");
     leg->AddEntry(s.HI[c],"PbPb Uncorrected Spectrum","p");
     leg->AddEntry(s.HIUsedByTrigger[0][c],"Minimum Bias","f");
-    leg->AddEntry(s.HIUsedByTrigger[1][c],"Jet40 trigger","f");
+    if(s.doBetterHITrig && s.lowCentBin[c]>5) leg->AddEntry(s.HIUsedByTrigger[1][c],"Jet40 trigger","f");
     leg->AddEntry(s.HIUsedByTrigger[2][c],"Jet60 trigger","f");
-    leg->AddEntry(s.HIUsedByTrigger[3][c],"Jet80 trigger","f");
-    leg->AddEntry(s.HIUsedByTrigger[4][c],"Jet100 trigger","f");
+    if(s.doBetterHITrig && s.lowCentBin[c]<10) leg->AddEntry(s.HIUsedByTrigger[3][c],"Jet80 trigger","f");
+    if(s.doBetterHITrig && s.lowCentBin[c]<6) leg->AddEntry(s.HIUsedByTrigger[4][c],"Jet100 trigger","f");
     leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
     c1->SaveAs(Form("plots/png/HITrack_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
@@ -273,7 +291,12 @@ void makePlotsPbPb(Settings s)
     s.HI[c]->GetYaxis()->SetTitleOffset(1.6);
     s.HI[c]->GetYaxis()->SetTitle("#frac{1}{N_{evt}} E#frac{d^{3}N_{trk}}{dp^{3}} (GeV)^{-2}");
     s.HI[c]->Draw();
-    for(int i = 0; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Draw("HIST same");
+    for(int i = 0; i<s.HInTriggers; i++){
+      if(s.doBetterHITrig && s.lowCentBin[c]<6 && i==1) continue;
+      if(s.doBetterHITrig && s.lowCentBin[c]>5 && i==4) continue;
+      if(s.doBetterHITrig && s.lowCentBin[c]>9 && (i==3 || i==4)) continue;
+      s.HIUsedByTrigger[i][c]->Draw("HIST same");
+    }
     s.HI[c]->Draw("sameaxis");
     s.HI[c]->Draw("same");
     leg->SetTextSize(0.03);
@@ -300,7 +323,12 @@ void makePlotsPbPb(Settings s)
     s.HIUsedByTrigger[0][c]->GetYaxis()->SetRangeUser(0,2);
     s.HIUsedByTrigger[0][c]->GetYaxis()->SetTitle("Relative Contribution to Bin");
     s.HIUsedByTrigger[0][c]->Draw("HIST");
-    for(int i = 1; i<s.HInTriggers; i++) s.HIUsedByTrigger[i][c]->Draw("HIST same");
+    for(int i = 1; i<s.HInTriggers; i++){
+      if(s.doBetterHITrig && s.lowCentBin[c]<6 && i==1) continue;
+      if(s.doBetterHITrig && s.lowCentBin[c]>5 && i==4) continue;
+      if(s.doBetterHITrig && s.lowCentBin[c]>9 && (i==3 || i==4)) continue;
+      s.HIUsedByTrigger[i][c]->Draw("HIST same");
+    }
     s.HIUsedByTrigger[0][c]->Draw("sameaxis");
     leg->Draw("same");
     c1->SaveAs(Form("plots/png/HITrack_FullSpectrum_%d_%d_relativeContribution.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
