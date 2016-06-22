@@ -172,12 +172,12 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_pp/");
     //trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
   }else{
-    trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb_noChi2Cut/");
-    trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb_noChi2Cut/");
+    //trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb_noChi2Cut/");
+    //trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb_noChi2Cut/");
     //trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
     //trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
-    //trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
-    //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
+    trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
+    trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
   }
   EventSelectionCorrector corrEvSel;
   Chi2Corrector_PbPb * chi2corr = new Chi2Corrector_PbPb();
@@ -381,7 +381,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       
         if(trkPtError[j]/trkPt[j]>0.1) continue; 
 
-        //if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;      
+        if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;      
         if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
         if(isPP){
           bool isCompatibleWithVertex = false;
@@ -468,38 +468,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
           if(trkPt[j]<0.5 || trkPt[j]>=400) continue;
           if(TMath::Abs(trkEta[j])>1) continue;
           if(highPurity[j]!=1) continue;
-          /*//FIXME
-          float correction = 1;
-          float rmin = 999;
-          float Et = (pfHcal[j]+pfEcal[j])/TMath::CosH(trkEta[j]);
-          if(!(trkPt[j]<caloMatchStart || (Et>caloMatchValue*trkPt[j]))){
-            if(!isPP){
-               float inConeJetPt = 0;
-               float inConeJetEta = 0;
-               float inConeJetPhi = 0;
-               float passesJetID = 0;
-               float ecSum = 0;
-               float hcSum = 0;
-               for(int jt = 0; jt<nref; jt++)
-               {
-                 if((chargedSum[jt]/rawpt[jt]<0.01 || TMath::Abs(jteta[jt])>2)) continue;
-                 //if((ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05 || hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1 || TMath::Abs(jteta[jt])>jetEtaSelection)) continue;
-                 if(jtpt[jt]>inConeJetPt && TMath::Power(TMath::Power(trkEta[j]-jteta[jt],2)+TMath::Power(TMath::ACos(TMath::Cos(trkPhi[j]-jtphi[jt])),2),0.5)<0.4){
-                   inConeJetPt =  jtpt[jt];
-                   inConeJetEta = jteta[jt];
-                   inConeJetPhi = jtphi[jt];
-                   ecSum = ecalSum[jt];
-                   hcSum = hcalSum[jt];
-                   passesJetID = !((ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05) || (hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1));
-                 }
-               }
-             float skimEntry[] = {(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,passesJetID,ecSum,hcSum,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
-              trkSkim->Fill(skimEntry);
-            }
-            continue; //Calo Matching
-          }
-          //End FIXME*/
-
+          
           if( trkPtError[j]/trkPt[j]>0.3) continue;       
          
           if(isPP){
@@ -529,7 +498,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(rmin*rmin>R) rmin=TMath::Power(R,0.5);
           }
   
-          float correction;
+          float correction=1;
           if(!useTrkCorrEverywhere) correction = trkCorr->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
                                     //correction = trkCorr_loosepp->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
           else                      correction = trkCorr_trk->getTrkCorr(trkPt[j],trkEta[j],trkPhi[j],hiBin,rmin);
