@@ -172,8 +172,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
     //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_pp/");
     //trkCorr_loosepp = new TrkCorr("TrkCorr_Feb16_Iterative_pp/");
   }else{
-    trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
-    trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
+    trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb_noChi2Cut/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb_noChi2Cut/");
+    //trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
+    //trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
     //trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
     //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
   }
@@ -379,7 +381,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
       
         if(trkPtError[j]/trkPt[j]>0.1) continue; 
 
-        if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;      
+        //if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;      
         if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
         if(isPP){
           bool isCompatibleWithVertex = false;
