@@ -65,7 +65,7 @@ void prettyPlotting(Settings s){
 
   for(int c = 0; c<s.nCentBins; c++) h[c] = (TH1D*)inputPlots->Get(Form("RAA_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
   for(int c = 0; c<s.nCentBins; c++) pbpbSpec[c] = (TH1D*)inputPlots->Get(Form("PbPbTrackSpectrum_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
-  for(int c = 0; c<s.nCentBins; c++) RCP[c] = (TH1D*)inputPlots->Get(Form("PbPbTrackSpectrum_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+  for(int c = 0; c<s.nCentBins; c++) RCP[c] = (TH1D*)pbpbSpec[c]->Clone(Form("PbPbTrackSpectrum_forRCP_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
   ppSpec = (TH1D*)inputPlots->Get(Form("pp_NotperMBTrigger"));
   for(int c = 0; c<s.nCentBins; c++){
      h[c]->SetDirectory(0);

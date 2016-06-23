@@ -85,12 +85,12 @@ void makeSpectrum()
       if(s.doBetterHITrig && c<6 && i==1){//replaces a few triggers for better stats
           s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",i-1,c));
           s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",i-1,c));
-      }else if(s.doBetterHITrig && c>=6 && c<10 && i==s.HInTriggers-1){
+      /*}else if(s.doBetterHITrig && c>=6 && c<10 && i==s.HInTriggers-1){
           s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",s.HInTriggers-2,c));
           s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",s.HInTriggers-2,c));
       }else if(s.doBetterHITrig && c>=10 && i>=s.HInTriggers-2){
         s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",s.HInTriggers-3,c));
-        s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",s.HInTriggers-3,c));
+        s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",s.HInTriggers-3,c));*/ //removes other unprescaled triggers, should be equivilent to below (maybe changes if have failed jobs)
       }else{//behavior without better trigger handling
         s.HIspec[i][c] = (TH2D*) inFile->Get(Form("HI_spectrum_trigger%d_cent%d",i,c));
         s.HIevtCount[i][c] = (TH1D*) inFile->Get(Form("HI_evtCount%d_cent%d",i,c));

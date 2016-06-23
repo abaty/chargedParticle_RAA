@@ -23,9 +23,6 @@
 void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool isTest = false)
 {
   //TODO
-  //better corrections
-  //better trig combo (replace triggers)
-  //more MB
   //fix 19 tracks?
   //figure out pp EPOS difference
   //pp alignement
@@ -174,10 +171,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   }else{
     //trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb_noChi2Cut/");
     //trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb_noChi2Cut/");
-    //trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
-    //trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
-    trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
-    trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
+    trkCorr = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
+    trkCorr_trk = new TrkCorr("TrkCorr_Jun7_Iterative_PbPb/");
+    //trkCorr = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
+    //trkCorr_trk = new TrkCorr("TrkCorr_May6_Iterative_PbPb/");
   }
   EventSelectionCorrector corrEvSel;
   Chi2Corrector_PbPb * chi2corr = new Chi2Corrector_PbPb();
