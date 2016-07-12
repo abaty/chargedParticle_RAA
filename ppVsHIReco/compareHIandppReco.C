@@ -10,7 +10,7 @@
 #include <vector>
 
 bool passesTrigger(int HIj40_c30, int HIj40_c50, int HIj60_c30, int HIj60_c50, int HIj80_c30, int HIj80_c50){
-  if(HIj80_c30 || HIj80_c50) return true;
+  if(HIj40_c30 || HIj40_c50 || HIj60_c30 || HIj60_c50 || HIj80_c30 || HIj80_c50) return true;
   else return false;
 }
 
@@ -23,7 +23,7 @@ void clearIndex(std::map<long,int> Map, int evt,int run){
   return;
 }
 
-void compareHIandppReco(bool isTest = true, bool makeMap = false){
+void compareHIandppReco(bool isTest = true, bool makeMap = false, bool isMC = false){
   TH1::SetDefaultSumw2();
   TH2::SetDefaultSumw2();
   const int cent = 4;
@@ -39,7 +39,9 @@ void compareHIandppReco(bool isTest = true, bool makeMap = false){
 
   if(makeMap){
     int nEv, nRun;
-    TFile * inf = TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/ppReco_HIHardProbesPeripheral2015/0.root","read");
+    TFile * inf;
+    if(!isMC) inf = TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/ppReco_HIHardProbesPeripheral2015/0.root","read");
+    else      inf = TFile::Open("/mnt/hadoop/cms/store/user/abaty/ppReco_diJet50PrivateSamples/ppRecoForest/Baty_ppReco_diJet50PrivateSamples_GENSIM/crab_20160627_154502/160627_134528/0000/HiForestAOD_10.root","read");
     TTree * trkTree = (TTree*)inf->Get("ppTrack/trackTree"); 
     trkTree->SetBranchAddress("nEv",&nEv);
     trkTree->SetBranchAddress("nRun",&nRun);
@@ -56,7 +58,7 @@ void compareHIandppReco(bool isTest = true, bool makeMap = false){
     for(int i = 0; i<trkTree->GetEntries(); i++){
       if(i%1000==0) std::cout << i <<"/" << trkTree->GetEntries()<< std::endl; 
       trkTree->GetEntry(i);
-      if(!passesTrigger(HIj40_c30, HIj40_c50, HIj60_c30, HIj60_c50, HIj80_c30, HIj80_c50)) continue;
+      //if(!passesTrigger(HIj40_c30, HIj40_c50, HIj60_c30, HIj60_c50, HIj80_c30, HIj80_c50)) continue;
       long hash = getHash(nEv,nRun);
       Map.insert(std::pair<long,int>(hash,i));
     }
@@ -65,14 +67,17 @@ void compareHIandppReco(bool isTest = true, bool makeMap = false){
     
     //write map
     ofstream centMap;
-    centMap.open ("centMap.txt");
+    if(!isMC) centMap.open("centMap.txt");
+    else      centMap.open("centMap_MC.txt");
     for (std::map<long,int>::iterator it=Map.begin(); it!=Map.end(); ++it){
       centMap << it->first << " " << it->second << '\n';
     }
     centMap.close();
   }else{
     std::cout << "Loading cent Map" << std::endl;
-    std::fstream centMap("centMap.txt", std::ios_base::in);;
+    std::fstream centMap;
+    if(!isMC) centMap.open("centMap.txt");
+    else      centMap.open("centMap_MC.txt");
     if (centMap.is_open())
     {
       int tmpIndex;
@@ -95,9 +100,14 @@ void compareHIandppReco(bool isTest = true, bool makeMap = false){
   }
   //end map
 
+  std::cout << "opening HI files" << std::endl;
   std::string fList;
-  if(isTest) fList = "HIRecoFilesTest.txt";
-  else       fList = "HIRecoFiles.txt";  
+  if(!isMC){
+    if(isTest) fList = "HIRecoFilesTest.txt";
+    else       fList = "HIRecoFiles.txt";  
+  }else{
+    fList = "HIRecoFiles_MC.txt";
+  }
   std::string buffer;
   std::vector<std::string> listOfFiles;
   std::ifstream inFile(fList.data());
@@ -123,8 +133,13 @@ void compareHIandppReco(bool isTest = true, bool makeMap = false){
     TH2D * ppReco = new TH2D("ppReco","ppReco",cent,centBins,pt,ptBins);
     HIReco->SetDirectory(0);
     ppReco->SetDirectory(0); 
-    
-    TFile * ppFile = TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/ppReco_HIHardProbesPeripheral2015/0.root","read");
+   
+    TFile * ppFile;
+    if(!isMC){
+      ppFile = TFile::Open("/mnt/hadoop/cms/store/user/abaty/mergedForests/ppReco_HIHardProbesPeripheral2015/0.root","read");
+    }else{
+      ppFile = TFile::Open("/mnt/hadoop/cms/store/user/abaty/ppReco_diJet50PrivateSamples/ppRecoForest/Baty_ppReco_diJet50PrivateSamples_GENSIM/crab_20160627_154502/160627_134528/0000/HiForestAOD_10.root","read");
+    }
     TTree * pptrkCh = (TTree*)ppFile->Get("ppTrack/trackTree");
     int nTrk2;
     int nVtx2;
@@ -174,8 +189,7 @@ void compareHIandppReco(bool isTest = true, bool makeMap = false){
     pptrkCh->SetBranchAddress("zVtx",&zVtx2);
 
   std::cout << "Number of HI Reco Files: " << listOfFiles.size() << std::endl;
-  //for(int f = 0; f<listOfFiles.size(); f++){
-  for(int f = 670; f<676; f++){
+  for(int f = 0; f<listOfFiles.size(); f++){
     std::cout << "File: " << f << "/" << listOfFiles.size() << std::endl;
     TFile * inputFile = TFile::Open(listOfFiles[f].data(),"read");
     TTree * hltCh = (TTree*)inputFile->Get("hltanalysis/HltTree");
@@ -244,7 +258,7 @@ void compareHIandppReco(bool isTest = true, bool makeMap = false){
 
     for(int i = 0; i<hltCh->GetEntries(); i++){
       hltCh->GetEntry(i);
-      if(!passesTrigger(HIj40_c30, HIj40_c50, HIj60_c30, HIj60_c50, HIj80_c30, HIj80_c50)) continue;
+      //if(!passesTrigger(HIj40_c30, HIj40_c50, HIj60_c30, HIj60_c50, HIj80_c30, HIj80_c50)) continue;
 
       //syncing for centrality
       hiCh->GetEntry(i);
@@ -290,11 +304,16 @@ void compareHIandppReco(bool isTest = true, bool makeMap = false){
   }
   ppFile->Close();
 
-  TFile * out = TFile::Open("out.root","recreate");
+  TFile * out; 
+  if(!isMC) out = TFile::Open("outJetAll.root","recreate");
+  else      out = TFile::Open("outJetAll_MC.root","recreate");
+  //TH2D * test123 = new TH2D("test123","test123",10,0,10,10,0,10);
+  //test123->Write();
   HIReco->Write();
   ppReco->Write();
-  TH2D * Ratio = (TH2D*) HIReco->Clone("ratio");
+  TH2D * Ratio = (TH2D*) HIReco->Clone("RecoRatio");
   Ratio->Divide(ppReco);
   Ratio->Write();
-  out->Close();
+  std::cout << "Done" << std::endl;
+  //out->Close();
 }

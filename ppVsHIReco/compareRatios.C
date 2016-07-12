@@ -9,7 +9,7 @@ void compareRatios()
   
   const char * histName = "RecoRatio";
   TFile * fnew = TFile::Open("outJetAll.root","read");
-  TFile * fold = TFile::Open("outJetAll_MC.root","read");
+  TFile * fold = TFile::Open("outJetAll_MC_Scaledchi2.root","read");
   TH2D * num = (TH2D*)fnew->Get(Form("%s",histName));
   TH2D * den = (TH2D*)fold->Get(Form("%s",histName));
   //den->Add(num);
@@ -19,7 +19,7 @@ void compareRatios()
   num->GetZaxis()->SetRangeUser(0.9,1.1);
   num->GetYaxis()->SetRangeUser(0.7,60);
   num->Print("All");
-  //num->Draw("colz");
+  num->Draw("colz");
   c1->SetLogy();
   c1->SaveAs("doubleRatio.png");
   c1->SaveAs("doubleRatio.pdf");
@@ -35,7 +35,15 @@ void compareRatios()
       proj[i]->SetBinContent(j,num->GetBinContent(i+2,j));
       proj[i]->SetBinError(j,num->GetBinError(i+2,j));
     }
+    proj[i]->GetYaxis()->SetRangeUser(0.9,1.1);
+    proj[i]->GetXaxis()->SetRangeUser(0.7,20);
+    proj[i]->GetYaxis()->SetTitle(Form("#Delta_{HI}/#Delta_{pp} %d-%d%%",30+i*20,50+i*20));
     proj[i]->Print("All");
+    proj[i]->Draw();
+    c1->SetLogy(0);
+    c1->SetLogx();
+    c1->SaveAs(Form("doubleRatio_%d_%d.png",30+i*20,50+i*20));
+    c1->SaveAs(Form("doubleRatio_%d_%d.pdf",30+i*20,50+i*20));
   }
 
   /*const char * histName = "PbPbTrackSpectrum_0_5";

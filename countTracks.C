@@ -188,7 +188,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
 
   //Ntuple for looking at specific tracks
   std::string trkSkimVars;
-  trkSkimVars=   "run:lumi:evt:isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxjteta:maxjtphi:inConeJetPt:inConeJetEta:inConeJetPhi:passesJetID:ecalSum:hcalSum:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34:isMu20";
+  trkSkimVars=   "nTrk:run:lumi:evt:isPP:trkPt:trkEta:trkPhi:hiBin:hiHF:rmin:correction:maxjtpt:maxjteta:maxjtphi:inConeJetPt:inConeJetEta:inConeJetPhi:passesJetID:ecalSum:hcalSum:maxTrackPt:PD:trkNHit:trkChi2:trkMVA:highPurity:trkPtError:trkDxy1:trkDxyError1:trkDz1:trkDzError1:pfEcal:pfHcal:trkNlayer:trkNdof:trkAlgo:trkOriginalAlgo:isMB:isj40:isj60:isj80:isj100:ist12:ist18:ist24:ist34:isMu20";
   TNtuple * trkSkim  = new TNtuple("trkSkim","",trkSkimVars.data()); 
 
   //for documenting which PD a file comes out of to avoid overlaps between PDs
@@ -251,6 +251,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
   
     if(isPP) jetCh = (TTree*)inputFile->Get("ak4CaloJetAnalyzer/t");
     else     jetCh = (TTree*)inputFile->Get("akPu4CaloJetAnalyzer/t");
+   // else     jetCh = (TTree*)inputFile->Get("akPu4PFJetAnalyzer/t");
     jetCh->SetBranchAddress("nref",&nref);
     jetCh->SetBranchAddress("jtpt",&jtpt);
     jetCh->SetBranchAddress("jteta",&jteta);  
@@ -480,7 +481,9 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(!isCompatibleWithVertex) continue;
           }else{
             if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-            if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>((doChi2Shift)?chi2corr->getChi2Scale(hiBin,trkPt[j]):1)*0.15) continue; 
+            //FIXME
+            //FIXME
+            //if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>((doChi2Shift)?chi2corr->getChi2Scale(hiBin,trkPt[j]):1)*0.15) continue; 
             if(trkPtError[j]/trkPt[j]>0.1) continue;       
             if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
           } 
@@ -538,8 +541,10 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             continue;
           }  
 
-          if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)){
-            if(!isPP){
+          //FIXME
+          //if((maxJtPt>jetTrackCutThreshhold && trkPt[j]>maxJtPt+trkBufferSize) || (maxJtPt<=jetTrackCutThreshhold && trkPt[j]>jetTrackCutThreshhold+trkBufferSize)){
+          if(trkPt[j]>80 && (trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>((doChi2Shift)?chi2corr->getChi2Scale(hiBin,trkPt[j]):1)*0.15)){  
+             if(!isPP){
                float inConeJetPt = 0;
                float inConeJetEta = 0;
                float inConeJetPhi = 0;
@@ -559,7 +564,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
                    passesJetID = !((ecalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.05) || (hcalSum[jt]/(ecalSum[jt]+hcalSum[jt])<0.1));
                  }
                }
-             float skimEntry[] = {(float)run,(float)lumi,(float)evt,(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,passesJetID,ecSum,hcSum,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
+             float skimEntry[] = {(float)nTrk, (float)run,(float)lumi,(float)evt,(float)isPP,trkPt[j],trkEta[j],trkPhi[j],(float)hiBin,hiHF,rmin,correction,maxJtPt,maxJtEta,maxJtPhi,inConeJetPt,inConeJetEta,inConeJetPhi,passesJetID,ecSum,hcSum,maxTrackPt,(float)PD,(float)trkNHit[j],trkChi2[j],trkMVA[j],(float)highPurity[j],trkPtError[j],trkDxy1[j],trkDxyError1[j],trkDz1[j],trkDzError1[j],pfEcal[j],pfHcal[j],(float)trkNlayer[j],trkNdof[j],(float)trkAlgo[j],(float)trkOriginalAlgo[j],(float)MinBias,(float)HIj40,(float)HIj60,(float)HIj80,(float)HIj100,(float)HIt12,(float)HIt18,(float)HIt24,(float)HIt34,(float)HI_Muon_L2Mu20};
               trkSkim->Fill(skimEntry);
               //if(inConeJetPt==0) continue;//upper boundary on track pt
             }

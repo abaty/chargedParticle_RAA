@@ -453,8 +453,8 @@ void makeSpectrum()
   
   s.pp_perMBTrigger = (TH1D*)s.pp->Clone("pp_NotperMBTrigger");
   s.pp_perMBTrigger_trk = (TH1D*)s.pp_trk->Clone("pp_NotperMBTrigger_trk");
-  s.pp_perMBTrigger->Scale(1.0/((scale[s.nTriggers-1])*(25.775*1000000000)));//25.775 pb GOLDEN JSON LUMI for jet80 trigger
-  s.pp_perMBTrigger_trk->Scale(1.0/((scale_trk[s.nTriggers_trk-1])*(5.714069*1000000000)));//25.775 pb GOLDEN JSON LUMI for track53 trigger
+  s.pp_perMBTrigger->Scale(1.0/((scale[s.nTriggers-1])*(27.944824953*1000000000)));//25.775 pb GOLDEN JSON LUMI for jet80 trigger
+  s.pp_perMBTrigger_trk->Scale(1.0/((scale_trk[s.nTriggers_trk-1])*(5.714069*1.084*1000000000)));//25.775 pb GOLDEN JSON LUMI for track53 trigger
 
   s.pp_perMBTrigger->Write();
   s.pp_perMBTrigger_trk->Write();

@@ -85,6 +85,7 @@ void prettyPlotting(Settings s){
      if(c==0){
        s.pp_totSyst = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
        s.pp_totSyst->Reset();
+       s.pp_totSyst->SetTitle("ppSpectrum_NormSyst");
        s.pp_totSyst->SetDirectory(inputPlots);
      }
   }
@@ -195,17 +196,32 @@ void prettyPlotting(Settings s){
       s.RCP_totSyst[c]->SetBinContent(i,0);
       s.PbPb_totSyst[c]->SetBinContent(i,0);
       if(c==0) s.pp_totSyst->SetBinContent(i,0);
-    
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//4% difference in data/MC (PbPb)
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//4% difference in data/MC (PbPb)
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
+
+      if(i<6){//low pt part
+        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));
+      }else if(c==24){//30-50
+        if(i<9) s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.045));
+        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% difference in data/MC (PbPb)
+      }else if(c==25){//50-70
+        if(i<9) s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.035));
+        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//5% difference in data/MC (PbPb)
+      }else if(c==30){//70-90
+        if(i<9) s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));
+        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//5% difference in data/MC (PbPb)
+      }else{
+        if(i<9) s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.052));
+        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% difference in data/MC (PbPb)
+        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
+      }
+
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//5% difference in data/MC (PbPb)
       if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//4% difference in data/MC (pp)
       
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure PbPb
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//5% for nonclosure (PbPb)
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.025));//5% for nonclosure PbPb
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.025));//5% for nonclosure (PbPb)
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% for nonclosure pp 
       if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% for nonclosure in pp
-      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),0.07));//5% for nonclosure PbPb
+      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),0.027));//5% for nonclosure PbPb
       
       //!this sytematic is largely bullshit since we don't know the data fake rate!
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//3% for MC-based fake rate PbPb
@@ -239,7 +255,7 @@ void prettyPlotting(Settings s){
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
       s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
       
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.12));//pplumi uncertainty for spectrum
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//pplumi uncertainty for spectrum
       if(c==21)s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% event selection uncertainty for 0-100% RAA
     }
     s.RAA_totSyst[c]->Write();
@@ -256,7 +272,7 @@ void prettyPlotting(Settings s){
     h[c]->Draw();
  
     TAAUncert = s.TAAuncert[c]/100.0;
-    lumiUncert = 0.12;//12% for pp lumi
+    lumiUncert = 0.04;//12% for pp lumi
     bLumi->SetFillColor(kGray);
     bTAA->SetFillColor(kBlue-9);
     bLumi->SetLineWidth(0);
@@ -288,8 +304,8 @@ void prettyPlotting(Settings s){
     h[c]->Draw("same");
   
     int iPeriod = 0;
-    lumi_sqrtS = "25.8 pb^{-1} (5.02 TeV pp) + 404 #mub^{-1} (5.02 TeV PbPb)";
-    writeExtraText = true;  
+    lumi_sqrtS = "27.9 pb^{-1} (5.02 TeV pp) + 404 #mub^{-1} (5.02 TeV PbPb)";
+    writeExtraText = false;  
     extraText  = "Preliminary";
     //extraText  = "Unpublished";
     CMS_lumi( canv, iPeriod, 11 );

@@ -3842,7 +3842,7 @@ tex->SetNDC();
    c2ai->cd();
    c2ai->SetSelected(c2ai);
 
-  TFile * ourRpPb = TFile::Open("Spectra_May12_PbPbFullStats.root","read");
+  TFile * ourRpPb = TFile::Open("Spectra_July8_FullStatsNoJet40_CurrentBest.root","read");
   TH1D * rppb = (TH1D*)ourRpPb->Get("RpPb");
   rppb->SetMarkerColor(kRed);
   rppb->SetMarkerSize(0.8);
@@ -3900,8 +3900,8 @@ if(x<1.0) {
     bp[i-1]->SetLineWidth(1);
     bp[i-1]->SetX1(rppb->GetXaxis()->GetBinLowEdge(i));
     bp[i-1]->SetX2(rppb->GetXaxis()->GetBinUpEdge(i));
-    bp[i-1]->SetY1(rppb->GetBinContent(i)*(1+TMath::Power(0.13*0.13+err_h*err_h-0.12*0.12,0.5)));
-    bp[i-1]->SetY2(rppb->GetBinContent(i)*(1-TMath::Power(0.13*0.13+err_l*err_l-0.12*0.12,0.5)));
+    bp[i-1]->SetY1(rppb->GetBinContent(i)*(1+TMath::Power(0.07*0.07+err_h*err_h-0.12*0.12,0.5)));
+    bp[i-1]->SetY2(rppb->GetBinContent(i)*(1-TMath::Power(0.07*0.07+err_l*err_l-0.12*0.12,0.5)));
     bp[i-1]->Draw("same");
   }
    TLegendEntry *entry3=leg->AddEntry("RpPb","With HIN-15-015 pp","p");
@@ -3910,4 +3910,7 @@ if(x<1.0) {
    entry3->SetMarkerColor(kRed);
    entry3->SetMarkerSize(0.8);
    leg->Draw();
+   c2ai->SaveAs("plots/PublishedRpPbWithNewpp.C");
+   c2ai->SaveAs("plots/PublishedRpPbWithNewpp.png");
+   c2ai->SaveAs("plots/PublishedRpPbWithNewpp.pdf"); 
 }
