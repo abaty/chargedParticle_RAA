@@ -5257,7 +5257,6 @@
 /mnt/hadoop/cms/store/user/abaty/unmergedForests/2015PbPb_MinBias4_HF2ANDFilter/HIMinimumBias4/crab_20160505_212026/160505_192051/0002/HiForestAOD_2513.root
 /mnt/hadoop/cms/store/user/abaty/unmergedForests/2015PbPb_MinBias4_HF2ANDFilter/HIMinimumBias4/crab_20160505_212026/160505_192051/0002/HiForestAOD_2514.root
 /mnt/hadoop/cms/store/user/abaty/unmergedForests/2015PbPb_MinBias4_HF2ANDFilter/HIMinimumBias4/crab_20160505_212026/160505_192051/0002/HiForestAOD_2515.root
-/mnt/hadoop/cms/store/user/abaty/unmergedForests/2015PbPb_MinBias4_HF2ANDFilter/HIMinimumBias4/crab_20160505_212026/160505_192051/0002/HiForestAOD_2516.root
 /mnt/hadoop/cms/store/user/abaty/unmergedForests/2015PbPb_MinBias4_HF2ANDFilter/HIMinimumBias4/crab_20160505_212026/160505_192051/0002/HiForestAOD_2517.root
 /mnt/hadoop/cms/store/user/abaty/unmergedForests/2015PbPb_MinBias4_HF2ANDFilter/HIMinimumBias4/crab_20160505_212026/160505_192051/0002/HiForestAOD_2519.root
 /mnt/hadoop/cms/store/user/abaty/unmergedForests/2015PbPb_MinBias4_HF2ANDFilter/HIMinimumBias4/crab_20160505_212026/160505_192051/0002/HiForestAOD_2520.root

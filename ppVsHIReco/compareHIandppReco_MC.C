@@ -1,3 +1,4 @@
+#include "Chi2Corrector_PbPb.C"
 #include <map>
 #include "TH1D.h"
 #include "TH2D.h"
@@ -26,6 +27,7 @@ void clearIndex(std::map<long,int> Map, int evt,int run){
 void compareHIandppReco_MC(bool isTest = true, bool makeMap = false, bool isMC = true){
   TH1::SetDefaultSumw2();
   TH2::SetDefaultSumw2();
+  Chi2Corrector_PbPb * chi2corr = new Chi2Corrector_PbPb();
   const int cent = 4;
   const float centBins[cent+1] = {25,30,50,70,90};
   const int pt = 12;
@@ -296,7 +298,8 @@ void compareHIandppReco_MC(bool isTest = true, bool makeMap = false, bool isMC =
         if(TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
         if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3) continue;
         if(trkNHit[j]<11) continue;
-        if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;
+        //if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>0.15) continue;
+        if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>(1.0/chi2corr->getChi2Scale(hiBin,trkPt[j]))*0.15) continue;
         float Et = (pfEcal[j]+pfHcal[j])/TMath::CosH(trkEta[j]);
         if(!(trkPt[j]<20 || (Et>0.5*trkPt[j]))) continue;
 
@@ -323,7 +326,7 @@ void compareHIandppReco_MC(bool isTest = true, bool makeMap = false, bool isMC =
 
   TFile * out; 
   //if(!isMC) out = TFile::Open("outJetAll.root","recreate");
-  out = TFile::Open("outJetAll_MC.root","recreate");
+  out = TFile::Open("outJetAll_MC_Scaledchi2.root","recreate");
   //TH2D * test123 = new TH2D("test123","test123",10,0,10,10,0,10);
   //test123->Write();
   HIReco->Write();

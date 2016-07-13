@@ -49,7 +49,7 @@ void getAlice276(TGraphErrors * Alice276, int centBin = 0);
 void getAtlas276(TGraphErrors * Atlas276, int centBin = 0);
 void getCMS276(TGraphErrors * CMS276, TBox ** boxes, int centBin = 0);
 void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=false, bool doWithSystBoxes=true);
-void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString, TGraph * vitev, TGraph * JiechenXu);
+void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString, TGraph * vitev, TGraph * JiechenXu, TGraph * santiago);
 
 double Quad(double a, double b)
 {
@@ -150,6 +150,15 @@ void prettyPlotting(Settings s){
   c->SaveAs("plots/pdf/HyperonCorrections.pdf");
   c->SaveAs("plots/png/HyperonCorrections.C");
 
+  std::cout << "opening fake files" << std::endl;
+  TFile * fakeFile = TFile::Open("fakeRateUncertainties/Closure_pp.root","read");
+  TH1D * fake_pp = (TH1D*)fakeFile->Get("Fake_0");
+  fake_pp->SetDirectory(0);
+  fakeFile->Close();
+  fakeFile = TFile::Open("fakeRateUncertainties/Closure_PbPb.root","read");
+  TH1D * fake_PbPb = (TH1D*)fakeFile->Get("Fake_0");
+  fake_PbPb->SetDirectory(0);
+  fakeFile->Close();
 
   setTDRStyle();
   TLine * line1;
@@ -197,38 +206,79 @@ void prettyPlotting(Settings s){
       s.PbPb_totSyst[c]->SetBinContent(i,0);
       if(c==0) s.pp_totSyst->SetBinContent(i,0);
 
+      //start of data/MC differences
       if(i<6){//low pt part
         s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));
       }else if(c==24){//30-50
         if(i<9) s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.045));
-        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% difference in data/MC (PbPb)
+        else s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% difference in data/MC (PbPb)
       }else if(c==25){//50-70
         if(i<9) s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.035));
-        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//5% difference in data/MC (PbPb)
+        else s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//5% difference in data/MC (PbPb)
       }else if(c==30){//70-90
         if(i<9) s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));
-        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//5% difference in data/MC (PbPb)
+        else s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//5% difference in data/MC (PbPb)
       }else{
         if(i<9) s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.052));
-        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% difference in data/MC (PbPb)
-        s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
+        else{
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.05));//5% difference in data/MC (PbPb)
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//4% difference in data/MC (pp)
+        }
       }
 
       s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.05));//5% difference in data/MC (PbPb)
       if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//4% difference in data/MC (pp)
-      
+      //end data/MC differences     
+ 
+      //nonclosure
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.025));//5% for nonclosure PbPb
       s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.025));//5% for nonclosure (PbPb)
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% for nonclosure pp 
       if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//1% for nonclosure in pp
       s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),0.027));//5% for nonclosure PbPb
       
+      //finite MC statistics
+      if(c==24 || c==25 || c==30){//30-50,50-70,70-90
+        if(i>23){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.03));
+        }else if(i>21){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));
+        }else if(i>19){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.02));
+        }else if(i>14){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));
+        }
+      }else{
+        if(i>27 && c!=23){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));
+        }else if(i>21 && c!=23){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.045));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.045));
+        }else if(i>16){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));
+        }
+
+        if(i>23 && c==23){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.035));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.035));
+        }else if(i>21 && c==23){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));
+        }
+      }
+
       //!this sytematic is largely bullshit since we don't know the data fake rate!
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//3% for MC-based fake rate PbPb
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.03));//3% difference in data/MC (PbPb)
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//for MC-based fake rate pp 
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.01));//for MC-based faked rate pp
-      s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),0.03));//for MC-based fake rate pp 
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),fake_PbPb->GetBinContent(fake_PbPb->FindBin(s.RAA_totSyst[c]->GetBinCenter(i)))-1));//3% for MC-based fake rate PbPb
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),fake_PbPb->GetBinContent(fake_PbPb->FindBin(s.PbPb_totSyst[c]->GetBinCenter(i)))-1));//3% difference in data/MC (PbPb)
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),fake_pp->GetBinContent(fake_pp->FindBin(s.RAA_totSyst[c]->GetBinCenter(i)))-1));//for MC-based fake rate pp 
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),fake_pp->GetBinContent(fake_pp->FindBin(s.pp_totSyst->GetBinCenter(i)))-1));//for MC-based faked rate pp
+      //s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),0.03));//for MC-based fake rate  */
       
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
       s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));//1% resolution for not unfolding
@@ -382,15 +432,19 @@ void prettyPlotting(Settings s){
       TGraph * vitev = new TGraph(2*graphPts);
       const int graphPts2 = 370;
       TGraph * jx = new TGraph(graphPts2);
-      gettheoryRAA(canv_th,s,c,"",vitev,jx);
+      const int graphPts3 = 38;
+      TGraph * santiago = new TGraph(graphPts3);
+      gettheoryRAA(canv_th,s,c,"",vitev,jx,santiago);
       vitev->SetFillStyle(3002);vitev->SetFillColor(kRed);vitev->SetLineWidth(0);
       vitev->Draw("same f");
       jx->Draw("same");
+      if(c==0 || c==31) santiago->Draw("same");
       if(c==0)  legRaa276->SetY1NDC(0.7);
-      else if(c==1) legRaa276->SetY1NDC(0.75);
+      else if(c==1 ) legRaa276->SetY1NDC(0.75);
       else legRaa276->SetY1NDC(0.8);
-      legRaa276->AddEntry(vitev,"SCET_{G} (0-10%)","F");  
-      legRaa276->AddEntry(jx,"CUJET 3.0 (h^{#pm}+#pi^{0}, 0-10%)","L");
+      legRaa276->AddEntry(vitev,"SCET_{G} 0-10%","F");  
+      legRaa276->AddEntry(jx,"CUJET 3.0 (h^{#pm}+#pi^{0}), 0-10%","L");
+      if(c==0 || c==31) legRaa276->AddEntry(santiago,"Andr#acute{e}s et al. 0-5%","L");
       legRaa276->Draw("same");
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheoryWith276.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheoryWith276.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
@@ -414,10 +468,15 @@ void prettyPlotting(Settings s){
       line1->Draw("same");
       vitev->Draw("same f");
       jx->Draw("same"); 
+      if(c==0 || c==31) santiago->Draw("same");
       TLegend  *legth = new TLegend(0.5,0.75,0.9,0.91);
-      legth->AddEntry(vitev,"SCET_{G} (0-10%)","F");  
-      legth->AddEntry(jx,"CUJET 3.0 (h^{#pm}+#pi^{0}, 0-10%)","L");
+      if(c==0 || c==1 || c==31) legth->AddEntry(vitev,"SCET_{G} (0-10%)","F");  
+      if(c==0 || c==1 || c==31) legth->AddEntry(jx,"CUJET 3.0 (h^{#pm}+#pi^{0}, 0-10%)","L");
+      if(c==24) legth->AddEntry(vitev,"SCET_{G} (30-50%)","F");  
+      if(c==24) legth->AddEntry(jx,"CUJET 3.0 (h^{#pm}+#pi^{0}, 30-50%)","L");
+      if(c==0 || c==31) legth->AddEntry(santiago,"Andr#acute{e}s et al. 0-5%","L");
       legth->Draw("same");
+      tex2->DrawLatex(0.9,0.1,Form("%d-%d%s",5*s.lowCentBin[c],5*s.highCentBin[c],"%"));
       CMS_lumi( canv, iPeriod, 11 );
  
       canv->Update();
@@ -666,8 +725,8 @@ void prettyPlotting(Settings s){
   dummyCMS->SetMarkerStyle(24);
   TH1D * dummyALICE = new TH1D("dummyALICE","dummyALICE",10,0,10);
   dummyALICE->SetMarkerStyle(27);
-  dummyALICE->SetMarkerColor(kGreen+1);
-  dummyALICE->SetLineColor(kGreen+1); 
+  dummyALICE->SetMarkerColor(kGreen+2);
+  dummyALICE->SetLineColor(kGreen+2); 
   dummyALICE->SetMarkerSize(1.7); 
   bigLegc1->AddEntry((TObject*)0,"","");  bigLegc1x->AddEntry((TObject*)0,"SPS 17.3 GeV (PbPb)","");
   bigLegc1->AddEntry(SPS,"#pi^{0} WA98 (0-7%)","p");  bigLegc1x->AddEntry((TObject*)0,"","");
@@ -714,15 +773,19 @@ void prettyPlotting(Settings s){
   TGraph * vitev = new TGraph(2*graphPts);
   const int graphPts2 = 370;
   TGraph * jx = new TGraph(graphPts2);
-  gettheoryRAA(canv3,s,0,"",vitev,jx);
+  const int graphPts3 = 38;
+  TGraph * santiago = new TGraph(graphPts3);
+  gettheoryRAA(canv3,s,0,"",vitev,jx,santiago);
   vitev->SetFillStyle(3002);vitev->SetFillColor(kRed);vitev->SetLineWidth(0);
   vitev->Draw("same f");
   jx->Draw("same");
-  bigLegc2->SetY1NDC(0.93-(0.93-0.55)/(10.0/5.0));
-  bigLegc2x->SetY1NDC(0.93-(0.93-0.55)/(10.0/5.0));
+  santiago->Draw("same");
+  bigLegc2->SetY1NDC(0.93-(0.93-0.55)/(10.0/6.0));
+  bigLegc2x->SetY1NDC(0.93-(0.93-0.55)/(10.0/6.0));
   bigLegc2->AddEntry((TObject*)0,"","");  bigLegc2x->AddEntry((TObject*)0,"Models 5.02 TeV (PbPb)","");
   bigLegc2->AddEntry(dummyVitev,"SCET_{G} (0-10%)","f");  bigLegc2x->AddEntry((TObject*)0,"","");
   bigLegc2->AddEntry(dummyCUTEP,"CUJET 3.0 (h^{#pm}+#pi^{0}, 0-10%)","l");  bigLegc2x->AddEntry((TObject*)0,"","");
+  bigLegc2->AddEntry(santiago,"Andr#acute{e}s et al. (0-5%)","L"); bigLegc2x->AddEntry((TObject*)0,"","");
   bigLegc2->Draw("same");bigLegc2x->Draw("same");
   canv3->Update();
   canv3->RedrawAxis();
@@ -886,7 +949,7 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   return;
 }
 
-void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString , TGraph * vitev, TGraph * JiechenXu){
+void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString , TGraph * vitev, TGraph * JiechenXu, TGraph * Santiago){
   //Vitev**********************************************************************************************************
   float temp_x;
   float temp_y;
@@ -964,6 +1027,30 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
   std::cout << xjx1 << xjy1 << std::endl;
   std::cout << xjx2 << xjy2 << std::endl;
   //JiechenXu->Draw("same C");
+
+  //Santiago
+  vector<float> x3;
+  vector<float> y3;
+  std::cout << "Santiago points" << std::endl;
+  ifstream input_file_Santiago("theoryPredictions/Santiago/Santiago_Group_Glauber_0_5.txt"); 
+  while(!input_file_Santiago.eof()){
+      input_file_Santiago>>temp_x;
+      input_file_Santiago>>temp_y;
+      x3.push_back(temp_x);
+      y3.push_back(temp_y);
+      std::cout << temp_x << " " << temp_y << std::endl;
+    }         
+  std::cout << "Done reading" << std::endl;
+  //put data in histogram
+  const int graphPts3 = 38;
+  //JiechenXu = TGraph::TGraph(graphPts2); 
+  for (int i=0;i<graphPts3;i++) {
+    //std::cout << x2[i] << " " << y2[i]  << std::endl;
+    Santiago->SetPoint(i,x3[i],y3[i]);
+    std::cout << i << " " << x3[i] << " " << y3[i] << std::endl;
+  }
+  Santiago->SetLineWidth(3);
+  Santiago->SetLineColor(kMagenta+1);
 
   /*TLegend * leg_th = new TLegend(0.5,0.75,0.9,0.85);
   leg_th->SetTextSize(0.03);
@@ -1078,9 +1165,9 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
 
 void getAlice276(TGraphErrors * Alice276, int centBin){
         Alice276->SetMarkerStyle(27);
-        Alice276->SetMarkerColor(kGreen+1);
+        Alice276->SetMarkerColor(kGreen+2);
         Alice276->SetMarkerSize(1.7);
-        Alice276->SetLineColor(kGreen+1);
+        Alice276->SetLineColor(kGreen+2);
 
         double p8210_d16x1y1_xval[] = { 0.175, 0.225, 0.275, 0.325, 0.375, 0.425, 0.475, 0.525, 0.575, 
     0.625, 0.675, 0.725, 0.775, 0.825, 0.875, 0.925, 0.975, 1.05, 1.15, 

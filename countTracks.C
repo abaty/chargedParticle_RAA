@@ -22,11 +22,6 @@
 
 void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool isTest = false)
 {
-  //TODO
-  //fix 19 tracks?
-  //figure out pp EPOS difference
-  //pp alignement
-  //cancelations?
 
   TH1D::SetDefaultSumw2();
   TH2D::SetDefaultSumw2();
@@ -481,9 +476,7 @@ void countTracks(std::vector<std::string> inputFiles, int jobNum, int isPP, bool
             if(!isCompatibleWithVertex) continue;
           }else{
             if(TMath::Abs(trkDz1[j]/trkDzError1[j])>3 || TMath::Abs(trkDxy1[j]/trkDxyError1[j])>3) continue;
-            //FIXME
-            //FIXME
-            //if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>((doChi2Shift)?chi2corr->getChi2Scale(hiBin,trkPt[j]):1)*0.15) continue; 
+            if(trkChi2[j]/(float)trkNdof[j]/(float)trkNlayer[j]>((doChi2Shift)?chi2corr->getChi2Scale(hiBin,trkPt[j]):1)*0.15) continue; 
             if(trkPtError[j]/trkPt[j]>0.1) continue;       
             if(trkNHit[j]<11 && trkPt[j]>0.7) continue; 
           } 
