@@ -134,19 +134,19 @@ void makePlotsPbPb(Settings s)
     s.HIJetsByTrigger[2][c]->GetXaxis()->SetTitle("Leading jet p_{T}");
     s.HIJetsByTrigger[1][c]->Draw();
     s.HIJetsByTrigger[2][c]->Draw("same");
-    if(s.doBetterHITrig && s.lowCentBin[c]<10) s.HIJetsByTrigger[3][c]->Draw("same");
-    if(s.doBetterHITrig && s.lowCentBin[c]<6)  s.HIJetsByTrigger[4][c]->Draw("same");
+    if(!s.doBetterHITrig && s.lowCentBin[c]<10) s.HIJetsByTrigger[3][c]->Draw("same");
+    if(!s.doBetterHITrig && s.lowCentBin[c]<6)  s.HIJetsByTrigger[4][c]->Draw("same");
     gStyle->SetLegendBorderSize(0); 
     leg = new TLegend(0.1779449,0.652819,0.6077694,0.8916914);
     leg->AddEntry((TObject*)0,"Anti-K_{T} Jets, |#eta|<2","");
-    if(s.doBetterHITrig && s.lowCentBin[c]>5){ 
+    if(!s.doBetterHITrig || s.lowCentBin[c]>5){ 
       leg->AddEntry(s.HIJetsByTrigger[1][c],"Jet40/Minimum Bias","p");
       leg->AddEntry(s.HIJetsByTrigger[2][c],"Jet60/Jet40","p");
     }else{
       leg->AddEntry(s.HIJetsByTrigger[2][c],"Jet60/Minimum Bias","p");
     }
-    if(s.doBetterHITrig && s.lowCentBin[c]<10)  leg->AddEntry(s.HIJetsByTrigger[3][c],"Jet80/Jet60","p");
-    if(s.doBetterHITrig && s.lowCentBin[c]<6)   leg->AddEntry(s.HIJetsByTrigger[4][c],"Jet100/Jet80","p");
+    if(!s.doBetterHITrig || s.lowCentBin[c]<10)  leg->AddEntry(s.HIJetsByTrigger[3][c],"Jet80/Jet60","p");
+    if(!s.doBetterHITrig || s.lowCentBin[c]<6)   leg->AddEntry(s.HIJetsByTrigger[4][c],"Jet100/Jet80","p");
     leg->AddEntry((TObject*)0,Form("%d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
     c1->SaveAs(Form("plots/png/HI_JetRelativeTurnOnes_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
@@ -190,18 +190,18 @@ void makePlotsPbPb(Settings s)
     line1->SetLineWidth(2);
     line1->SetLineStyle(2);
     line1->Draw("same");
-    if(s.doBetterHITrig && s.lowCentBin[c]>5) s.HIJetsByTrigger[1][c]->Draw("same p");
+    if(!s.doBetterHITrig || s.lowCentBin[c]>5) s.HIJetsByTrigger[1][c]->Draw("same p");
     s.HIJetsByTrigger[2][c]->Draw("same p");
-    if(s.doBetterHITrig && s.lowCentBin[c]<10) s.HIJetsByTrigger[3][c]->Draw("same p");
-    if(s.doBetterHITrig && s.lowCentBin[c]<6)  s.HIJetsByTrigger[4][c]->Draw("same p");
+    if(!s.doBetterHITrig || s.lowCentBin[c]<10) s.HIJetsByTrigger[3][c]->Draw("same p");
+    if(!s.doBetterHITrig || s.lowCentBin[c]<6)  s.HIJetsByTrigger[4][c]->Draw("same p");
     s.HIJetsByTrigger[2][c]->Draw("sameaxis");
     s.HIJetsByTrigger[2][c]->Draw("same");
-    if(s.doBetterHITrig && s.lowCentBin[c]>5) s.HIJetsByTrigger[1][c]->Draw("same");
+    if(!s.doBetterHITrig || s.lowCentBin[c]>5) s.HIJetsByTrigger[1][c]->Draw("same");
     leg->Draw("same");
     
     int iPeriod = 0;
     lumi_sqrtS = "404 #mub^{-1} (5.02 TeV PbPb)";
-    writeExtraText = true;  
+    writeExtraText = false;  
     extraText  = "Preliminary";
     //extraText  = "Unpublished";
     CMS_lumi( canv, iPeriod, 33 );
@@ -246,10 +246,10 @@ void makePlotsPbPb(Settings s)
     leg = new TLegend(0.51,0.61,0.95,0.9,NULL,"brNDC");
     leg->AddEntry(s.HI[c],"PbPb Uncorrected Spectrum","p");
     leg->AddEntry(s.HIUsedByTrigger[0][c],"Minimum Bias","f");
-    if(s.doBetterHITrig && s.lowCentBin[c]>5) leg->AddEntry(s.HIUsedByTrigger[1][c],"Jet40 trigger","f");
+    if(!s.doBetterHITrig || s.lowCentBin[c]>5) leg->AddEntry(s.HIUsedByTrigger[1][c],"Jet40 trigger","f");
     leg->AddEntry(s.HIUsedByTrigger[2][c],"Jet60 trigger","f");
-    if(s.doBetterHITrig && s.lowCentBin[c]<10) leg->AddEntry(s.HIUsedByTrigger[3][c],"Jet80 trigger","f");
-    if(s.doBetterHITrig && s.lowCentBin[c]<6) leg->AddEntry(s.HIUsedByTrigger[4][c],"Jet100 trigger","f");
+    if(!s.doBetterHITrig && s.lowCentBin[c]<10) leg->AddEntry(s.HIUsedByTrigger[3][c],"Jet80 trigger","f");
+    if(!s.doBetterHITrig && s.lowCentBin[c]<6) leg->AddEntry(s.HIUsedByTrigger[4][c],"Jet100 trigger","f");
     leg->AddEntry((TObject*)0,Form("|#eta|<1   %d-%d%s",s.lowCentBin[c]*5,s.highCentBin[c]*5,"%"),"");
     leg->Draw("same");
     c1->SaveAs(Form("plots/png/HITrack_FullSpectrum_%d_%d.png",s.lowCentBin[c]*5,s.highCentBin[c]*5));
@@ -304,7 +304,7 @@ void makePlotsPbPb(Settings s)
     
     int iPeriod = 0;
     lumi_sqrtS = "404 #mub^{-1} (5.02 TeV PbPb)";
-    writeExtraText = true;  
+    writeExtraText = false;  
     extraText  = "Preliminary";
     //extraText  = "Unpublished";
     CMS_lumi( canv, iPeriod, 11, true );

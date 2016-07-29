@@ -57,6 +57,8 @@ double Quad(double a, double b)
 }
 
 void prettyPlotting(Settings s){
+  bool isForDMeson = false;
+
   TFile * inputPlots = TFile::Open("Spectra.root","Update");
   TH1D * h[s.nCentBins];
   TH1D * RCP[s.nCentBins];
@@ -253,6 +255,7 @@ void prettyPlotting(Settings s){
           s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));
         }
       }else{
+        if(!isForDMeson){
         if(i>27 && c!=23){
           s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));
           s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));
@@ -262,6 +265,19 @@ void prettyPlotting(Settings s){
         }else if(i>16){
           s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));
           s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));
+        }
+        }
+        else{//added for DMeson comparison, just changes 'i' values
+        if(i>13 && c!=23){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));
+        }else if(i>7 && c!=23){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.045));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.045));
+        }else if(i>3){
+          s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.01));
+          s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.01));
+        }
         }
 
         if(i>23 && c==23){
@@ -308,6 +324,7 @@ void prettyPlotting(Settings s){
       if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//pplumi uncertainty for spectrum
       if(c==21)s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% event selection uncertainty for 0-100% RAA
     }
+    //s.RAA_totSyst[c]->Print("All");
     s.RAA_totSyst[c]->Write();
     s.PbPb_totSyst[c]->Write();
     if(c==0) s.pp_totSyst->Write();
@@ -342,7 +359,7 @@ void prettyPlotting(Settings s){
     tex->DrawLatex(1.8,0.93,"|#eta|<1");
   
     for(int i = 1; i<h[c]->GetSize()-1; i++){
-      if(i<3) continue;
+      if(i<3 && !isForDMeson) continue;
       b[i-1]->SetFillColor(kOrange);
       b[i-1]->SetX1(h[c]->GetXaxis()->GetBinLowEdge(i));
       b[i-1]->SetX2(h[c]->GetXaxis()->GetBinUpEdge(i));
@@ -564,12 +581,14 @@ void prettyPlotting(Settings s){
   pad1->SetLogy();
   pbpbSpec[0]->GetXaxis()->SetRangeUser(0.7,390);
   pbpbSpec[0]->GetYaxis()->SetTitle("#frac{1}{N_{evt}}E#frac{d^{3}N}{dp^{3}} (GeV^{-2})");
-  pbpbSpec[0]->GetYaxis()->SetTitleOffset(1.2);
-  pbpbSpec[0]->GetYaxis()->SetTitleSize(0.05);
+  pbpbSpec[0]->GetYaxis()->SetTitleOffset(1.4);
+  pbpbSpec[0]->GetYaxis()->SetTitleSize(0.045);
   pbpbSpec[0]->GetYaxis()->SetLabelSize(0.04);
+  pbpbSpec[0]->GetYaxis()->CenterTitle();
+  pbpbSpec[0]->GetYaxis()->SetLabelOffset(0.002);
   pbpbSpec[0]->SetMarkerStyle(24);
   pbpbSpec[0]->Scale(10);
-  pbpbSpec[0]->GetYaxis()->SetRangeUser(1e-17,1e4);
+  pbpbSpec[0]->GetYaxis()->SetRangeUser(1.1e-17,1e4);
   pbpbSpec[0]->Draw();
   pbpbSpec[1]->SetMarkerColor(kBlue);
   pbpbSpec[1]->SetLineColor(kBlue);
@@ -608,19 +627,21 @@ void prettyPlotting(Settings s){
  
   pad2->cd();
   pad2->SetLogx();
-  s.PbPb_totSyst[0]->GetYaxis()->SetTitleOffset(0.8);
+  s.PbPb_totSyst[0]->GetYaxis()->SetTitleOffset(0.6);
   s.PbPb_totSyst[0]->GetYaxis()->SetTitleFont(42);
-  s.PbPb_totSyst[0]->GetYaxis()->SetTitleSize(0.08);
-  s.PbPb_totSyst[0]->GetYaxis()->SetLabelSize(0.08);
+  s.PbPb_totSyst[0]->GetYaxis()->SetTitleSize(0.095);
+  s.PbPb_totSyst[0]->GetYaxis()->SetLabelSize(0.095);
   s.PbPb_totSyst[0]->GetXaxis()->SetTitleFont(42);
   s.PbPb_totSyst[0]->GetYaxis()->SetTitle(Form("Syst. Uncert. (%s)","%"));
   s.PbPb_totSyst[0]->GetXaxis()->SetRangeUser(0.7,390);
   s.PbPb_totSyst[0]->GetXaxis()->SetTitle("p_{T} (GeV)");
-  s.PbPb_totSyst[0]->GetXaxis()->SetTitleSize(0.08);
-  s.PbPb_totSyst[0]->GetXaxis()->SetLabelSize(0.08);
+  s.PbPb_totSyst[0]->GetXaxis()->SetTitleSize(0.1);
+  s.PbPb_totSyst[0]->GetXaxis()->SetLabelSize(0.1);
+  s.PbPb_totSyst[0]->GetXaxis()->SetTitleOffset(1.2);
   s.PbPb_totSyst[0]->SetFillColor(kOrange);
   s.PbPb_totSyst[0]->Scale(100);
-  s.PbPb_totSyst[0]->GetYaxis()->SetRangeUser(0.0,20);
+  s.PbPb_totSyst[0]->GetYaxis()->SetRangeUser(0.0,19.99);
+  s.PbPb_totSyst[0]->GetYaxis()->SetNdivisions(4,4,0,kTRUE);
   s.PbPb_totSyst[0]->Draw();
   s.PbPb_totSyst[30]->SetFillColor(kRed);
   s.PbPb_totSyst[30]->SetFillStyle(3004);
