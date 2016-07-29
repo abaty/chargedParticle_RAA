@@ -116,7 +116,7 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX, bool doBotLeft )
       posX_ =  1-r - relPosX*(1-l-r);
     }
   float posY_ = 1-t - relPosY*(1-t-b);
-  if(doBotLeft) posY_ = b + relPosY*(1-t-b)+0.13; 
+  if(doBotLeft) posY_ = b + relPosY*(1-t-b)+0.07; 
   if( !outOfFrame )
     {
       if( drawLogo )
