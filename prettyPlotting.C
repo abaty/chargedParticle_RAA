@@ -30,6 +30,8 @@
 
 
 inline int getHypInd(int c){
+  gStyle->SetLegendBorderSize(0);
+
   int hyperonIndex = 7;
   if(c==0) hyperonIndex=6;
   if(c==1) hyperonIndex=6;
@@ -385,6 +387,7 @@ void prettyPlotting(Settings s){
     canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
     
     TLegend * legRaa276;
+    TLegend * legRaa276_2;
     TCanvas * canv_th = (TCanvas*)canv->Clone("canv_th");
     canv->cd();
     if(c==0 || c==1 || c==23 || c==24 || c==25 || c==30){
@@ -413,21 +416,39 @@ void prettyPlotting(Settings s){
       h[c]->SetFillColor(kOrange);
       h[c]->Draw("same");
       
-      if(c==0)  legRaa276 = new TLegend(0.5,0.7,0.9,0.91);
-      else if(c==1) legRaa276 = new TLegend(0.5,0.75,0.9,0.91);
-      else legRaa276 = new TLegend(0.5,0.8,0.9,0.91);
+      //if(c==0)  legRaa276 = new TLegend(0.5,0.7,0.9,0.91);
+      //else if(c==1) legRaa276 = new TLegend(0.5,0.75,0.9,0.91);
+      //else legRaa276 = new TLegend(0.5,0.8,0.9,0.91);
+      if(c==0){  
+        legRaa276 = new TLegend(0.18,0.7,0.55,0.81);
+        legRaa276_2 = new TLegend(0.48,0.7,0.85,0.81);
+      }
+      else if(c==1){
+        legRaa276 = new TLegend(0.18,0.7,0.55,0.81);
+        legRaa276_2 = new TLegend(0.48,0.7,0.85,0.81);
+      }
+      else{
+        legRaa276 = new TLegend(0.18,0.7,0.55,0.81);
+      }
+      legRaa276->SetFillStyle(0);
+      legRaa276_2->SetFillStyle(0);
       legRaa276->AddEntry(h[c],"CMS 5.02 TeV","pf");
       legRaa276->AddEntry(cms276,"CMS 2.76 TeV","p");
       if(c==0 || c==1){
-        if(c==0){
-          legRaa276->AddEntry(atlas276,"ATLAS 2.76 TeV","p");
-        } 
         if(c==0 || c==1){
-          legRaa276->AddEntry(alice276,"ALICE 2.76 TeV","p");
+          //legRaa276->AddEntry(alice276,"ALICE 2.76 TeV","p");
+          legRaa276_2->AddEntry(alice276,"ALICE 2.76 TeV","p");
+          if(c==1) legRaa276_2->AddEntry((TObject*)0,"","");
         }
+        if(c==0){
+          //legRaa276->AddEntry(atlas276,"ATLAS 2.76 TeV","p");
+          legRaa276_2->AddEntry(atlas276,"ATLAS 2.76 TeV","p");
+        } 
       }
       legRaa276->SetTextFont(62);
+      legRaa276_2->SetTextFont(62);
       legRaa276->Draw("same");
+      if(c==0 || c==1) legRaa276_2->Draw("same");
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
@@ -914,8 +935,8 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
       bp[i-1]->SetLineWidth(1);
       bp[i-1]->SetX1(p->GetXaxis()->GetBinLowEdge(i));
       bp[i-1]->SetX2(p->GetXaxis()->GetBinUpEdge(i));
-      bp[i-1]->SetY1((p->GetBinContent(i))*(1-raavalsyst[tempCentralityBin][i-1]));
-      bp[i-1]->SetY2((p->GetBinContent(i)*(1+raavalsyst[tempCentralityBin][i-1])));
+      bp[i-1]->SetY1(p->GetBinContent(i)-raavalsyst[tempCentralityBin][i-1]);
+      bp[i-1]->SetY2(p->GetBinContent(i)+raavalsyst[tempCentralityBin][i-1]);
       bp[i-1]->Draw("same");
     }
   }else{
@@ -930,9 +951,13 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   else getAlice276(alice276);
 
   TLegend * legRaa276;
-  if(centralityBin==0)  legRaa276 = new TLegend(0.5,0.7,0.9,0.91);
+  /*if(centralityBin==0)  legRaa276 = new TLegend(0.5,0.7,0.9,0.91);
   else if(centralityBin==1) legRaa276 = new TLegend(0.5,0.75,0.9,0.91);
-  else legRaa276 = new TLegend(0.5,0.8,0.9,0.91);
+  else legRaa276 = new TLegend(0.5,0.8,0.9,0.91);*/
+  if(centralityBin==0)  legRaa276 = new TLegend(0.35,0.7,0.75,0.81);
+  else if(centralityBin==1) legRaa276 = new TLegend(0.35,0.7,0.75,0.81);
+  else legRaa276 = new TLegend(0.35,0.7,0.75,0.81);
+  legRaa276->SetFillStyle(0);
   TH1D * dummy = new TH1D("dummy","dummy",10,0,10);
   dummy->SetMarkerColor(kBlack); dummy->SetMarkerStyle(8); dummy->SetFillColor(kOrange); dummy->SetMarkerSize(1.3);
   legRaa276->AddEntry(dummy,"CMS 5.02 TeV","pf");
@@ -1121,10 +1146,10 @@ void getCMS276(TGraphErrors * CMS276, TBox ** boxes, int centBin ){
     //raaval[3][25]=0; raavalstat[3][25]=0; raavalsyst[3][25]=0; 
         for(int i = 0; i<27; i++){
             CMS276->SetPoint(i,(raaaxis[i]+raaaxis[i+1])/2.0,raaval[tempCentralityBin][i]);
-            CMS276->SetPointError(i,0,raavalsyst[tempCentralityBin][i]);
+            CMS276->SetPointError(i,0,raavalstat[tempCentralityBin][i]);
      }
-     if(tempCentralityBin==4)CMS276->RemovePoint(22);
-     if(tempCentralityBin==3)CMS276->RemovePoint(25);
+     //if(tempCentralityBin==4)CMS276->RemovePoint(22);
+     //if(tempCentralityBin==3)CMS276->RemovePoint(25);
      for(int i = 1; i<28; i++){
       if(tempCentralityBin==3 && i-1==25) continue;
       if(tempCentralityBin==4 && i-1==22) continue;
@@ -1133,8 +1158,8 @@ void getCMS276(TGraphErrors * CMS276, TBox ** boxes, int centBin ){
       boxes[i-1]->SetLineWidth(1);
       boxes[i-1]->SetX1(raaaxis[i-1]);
       boxes[i-1]->SetX2(raaaxis[i]);
-      boxes[i-1]->SetY1((raaval[tempCentralityBin][i-1])*(1-raavalsyst[tempCentralityBin][i-1]));
-      boxes[i-1]->SetY2((raaval[tempCentralityBin][i-1]*(1+raavalsyst[tempCentralityBin][i-1])));
+      boxes[i-1]->SetY1(raaval[tempCentralityBin][i-1]-raavalsyst[tempCentralityBin][i-1]);
+      boxes[i-1]->SetY2(raaval[tempCentralityBin][i-1]+raavalsyst[tempCentralityBin][i-1]);
    }
    return;
 }
