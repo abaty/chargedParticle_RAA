@@ -4,7 +4,7 @@
 #include <iostream>
 
 void 
-CMS_lumi( TPad* pad, int iPeriod, int iPosX, bool doBotLeft )
+CMS_lumi( TPad* pad, int iPeriod, int iPosX, bool doBotLeft, bool doBigLumi )
 {            
   bool outOfFrame    = false;
   if( iPosX/10==0 ) 
@@ -90,6 +90,8 @@ CMS_lumi( TPad* pad, int iPeriod, int iPosX, bool doBotLeft )
   latex.SetTextFont(42);
   latex.SetTextAlign(31); 
   latex.SetTextSize(lumiTextSize*t);    
+  if(doBigLumi) latex.SetTextSize(lumiTextSize*t*1.3);   
+  else          latex.SetTextSize(lumiTextSize*t);     
   latex.DrawLatex(1-r,1-t+lumiTextOffset*t,lumiText);
 
   if( outOfFrame )

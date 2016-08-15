@@ -87,7 +87,8 @@ void prettyPlotting(Settings s){
      s.PbPb_totSyst[c]->Reset();
      s.PbPb_totSyst[c]->SetDirectory(inputPlots);
      if(c==0){
-       s.pp_totSyst = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+       //s.pp_totSyst = (TH1D*)h[c]->Clone(Form("RAA_totSyst_%d_%d",s.lowCentBin[c]*5,s.highCentBin[c]*5));
+       s.pp_totSyst = (TH1D*)h[c]->Clone("ppSpectrum_NormSyst");
        s.pp_totSyst->Reset();
        s.pp_totSyst->SetTitle("ppSpectrum_NormSyst");
        s.pp_totSyst->SetDirectory(inputPlots);
@@ -118,6 +119,11 @@ void prettyPlotting(Settings s){
   for(int c = 0; c<s.nCentBins; c++){
     h[c]->Multiply(hyperonPbPb[getHypInd(c)]);
     h[c]->Divide(hyperonpp);
+
+    //hyperon correction for spectra
+    if(c==0) ppSpec->Multiply(hyperonpp);
+    pbpbSpec[c]->Multiply(hyperonPbPb[getHypInd(c)]);
+
     //RCP
     if(c==0 || c==1 || c==23 || c==24 || c==31){
       RCP[c]->Multiply(hyperonPbPb[getHypInd(c)]);
@@ -310,6 +316,12 @@ void prettyPlotting(Settings s){
       s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),s.h_HInormSyst[c]->GetBinContent(i)));//add in PbPb normalization uncert
       s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),s.h_HInormSyst[32]->GetBinContent(i)));//add in PbPb normalization uncert
       
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//pp uncertainty for pileup
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.03));//pp uncertainty for pileup
+      
+      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
+      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
+      
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
       s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
       s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),TMath::Max(hyperonpp->GetBinContent(i)-1,0.015)));//pp hyperon study
@@ -317,19 +329,17 @@ void prettyPlotting(Settings s){
       s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
       s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(32)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
       
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.03));//pp uncertainty for pileup
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.03));//pp uncertainty for pileup
-      
-      s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
-      s.PbPb_totSyst[c]->SetBinContent(i,Quad(s.PbPb_totSyst[c]->GetBinContent(i),0.04));//tight selection data/MC
-      
       if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//pplumi uncertainty for spectrum
-      if(c==21)s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% event selection uncertainty for 0-100% RAA
+      //if(c==21)s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% event selection uncertainty for 0-100% RAA
     }
     //s.RAA_totSyst[c]->Print("All");
+    TFile * systFile;
+    if(c!=0) systFile = TFile::Open("Spectra_syst.root","update");
+    else     systFile = TFile::Open("Spectra_syst.root","recreate");
     s.RAA_totSyst[c]->Write();
     s.PbPb_totSyst[c]->Write();
     if(c==0) s.pp_totSyst->Write();
+    systFile->Close();
     if(c==0 || c==1 || c==23 || c==24 || c==31)s.RCP_totSyst[c]->Write();
 
     //plotting
@@ -803,7 +813,7 @@ void prettyPlotting(Settings s){
   tex->DrawLatex(4.099646,0.4698491,"RHIC");
   tex->DrawLatex(49.60057,0.1850789,"LHC");
 
-  CMS_lumi( canv3,0, 11 );
+  CMS_lumi( canv3,0, 11,false,true );
   canv3->Update();
   canv3->RedrawAxis();
   canv3->SaveAs("plots/prettyPlots/RAA_Compilation_noTheory.png");
