@@ -51,7 +51,7 @@ void getAlice276(TGraphErrors * Alice276, int centBin = 0);
 void getAtlas276(TGraphErrors * Atlas276, int centBin = 0);
 void getCMS276(TGraphErrors * CMS276, TBox ** boxes, int centBin = 0);
 void get276RAA(TCanvas * c276, Settings s, int centralityBin, bool doAddTheory=false, bool doWithSystBoxes=true);
-void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString, TGraph * vitev, TGraph * JiechenXu, TGraph * santiago);
+void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString, TGraph * vitev, TGraph * JiechenXu, TGraph * santiago, TGraph * BBMG);
 
 double Quad(double a, double b)
 {
@@ -199,8 +199,8 @@ void prettyPlotting(Settings s){
   canv->SetRightMargin( R/W );
   canv->SetTopMargin( T/H );
   canv->SetBottomMargin( B/H );
-  canv->SetTickx(0);
-  canv->SetTicky(0);
+  canv->SetTickx(1);
+  canv->SetTicky(1);
  
   gStyle->SetErrorX(0);
   
@@ -383,12 +383,13 @@ void prettyPlotting(Settings s){
     h[c]->Draw("same");
   
     int iPeriod = 0;
-    lumi_sqrtS = "27.9 pb^{-1} (5.02 TeV pp) + 404 #mub^{-1} (5.02 TeV PbPb)";
+    lumi_sqrtS = "27.4 pb^{-1} (5.02 TeV pp) + 404 #mub^{-1} (5.02 TeV PbPb)";
     writeExtraText = false;  
     extraText  = "Preliminary";
     //extraText  = "Unpublished";
     CMS_lumi( canv, iPeriod, 11 );
  
+    gStyle->SetPadTickY(1);
     canv->Update();
     canv->RedrawAxis();
     canv->GetFrame()->Draw();    
@@ -457,6 +458,7 @@ void prettyPlotting(Settings s){
       }
       legRaa276->SetTextFont(62);
       legRaa276_2->SetTextFont(62);
+      gStyle->SetPadTickY(1);
       legRaa276->Draw("same");
       if(c==0 || c==1) legRaa276_2->Draw("same");
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_Compare276.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
@@ -482,11 +484,13 @@ void prettyPlotting(Settings s){
       TGraph * jx = new TGraph(graphPts2);
       const int graphPts3 = 38;
       TGraph * santiago = new TGraph(graphPts3);
-      gettheoryRAA(canv_th,s,c,"",vitev,jx,santiago);
+      const int graphPts4 = 7;
+      TGraph * BBMG = new TGraph(graphPts4);
+      gettheoryRAA(canv_th,s,c,"",vitev,jx,santiago,BBMG);
       vitev->SetFillStyle(3002);vitev->SetFillColor(kRed);vitev->SetLineWidth(0);
       vitev->Draw("same f");
       jx->Draw("same");
-      if(c==0 || c==31) santiago->Draw("same");
+      if(c==0 || c==31){BBMG->Draw("same"); santiago->Draw("same"); }
       if(c==0)  legRaa276->SetY1NDC(0.7);
       else if(c==1 ) legRaa276->SetY1NDC(0.75);
       else legRaa276->SetY1NDC(0.8);
@@ -494,6 +498,7 @@ void prettyPlotting(Settings s){
       legRaa276->AddEntry(jx,"CUJET 3.0 (h^{#pm}+#pi^{0}), 0-10%","L");
       if(c==0 || c==31) legRaa276->AddEntry(santiago,"Andr#acute{e}s et al. 0-5%","L");
       legRaa276->Draw("same");
+      gStyle->SetPadTickY(1);
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheoryWith276.C",5*s.lowCentBin[c],5*s.highCentBin[c]));
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheoryWith276.png",5*s.lowCentBin[c],5*s.highCentBin[c]));
       canv->SaveAs(Form("plots/prettyPlots/RAA_%d_%d_CompareTheoryWith276.pdf",5*s.lowCentBin[c],5*s.highCentBin[c]));
@@ -516,17 +521,19 @@ void prettyPlotting(Settings s){
       line1->Draw("same");
       vitev->Draw("same f");
       jx->Draw("same"); 
-      if(c==0 || c==31) santiago->Draw("same");
-      TLegend  *legth = new TLegend(0.5,0.75,0.9,0.91);
+      if(c==0 || c==31){  BBMG->Draw("same"); santiago->Draw("same"); }
+      TLegend  *legth = new TLegend(0.5,0.7,0.9,0.91);
       if(c==0 || c==1 || c==31) legth->AddEntry(vitev,"SCET_{G} (0-10%)","F");  
       if(c==0 || c==1 || c==31) legth->AddEntry(jx,"CUJET 3.0 (h^{#pm}+#pi^{0}, 0-10%)","L");
       if(c==24) legth->AddEntry(vitev,"SCET_{G} (30-50%)","F");  
       if(c==24) legth->AddEntry(jx,"CUJET 3.0 (h^{#pm}+#pi^{0}, 30-50%)","L");
-      if(c==0 || c==31) legth->AddEntry(santiago,"Andr#acute{e}s et al. 0-5%","L");
+      if(c==0 || c==31) legth->AddEntry(santiago,"Andr#acute{e}s et al. (0-5%)","L");
+      if(c==0 || c==31) legth->AddEntry(BBMG,"v-USPhydro+BBMG (0-5%)","L");
       legth->Draw("same");
       tex2->DrawLatex(0.9,0.1,Form("%d-%d%s",5*s.lowCentBin[c],5*s.highCentBin[c],"%"));
       CMS_lumi( canv, iPeriod, 11 );
  
+      gStyle->SetPadTickY(1);
       canv->Update();
       canv->RedrawAxis();
       canv->GetFrame()->Draw();    
@@ -582,6 +589,7 @@ void prettyPlotting(Settings s){
       //extraText  = "Unpublished";
       CMS_lumi( canv, iPeriod, 11 );
    
+      gStyle->SetPadTickY(1);
       canv->Update();
       canv->RedrawAxis();
       canv->GetFrame()->Draw();    
@@ -610,40 +618,50 @@ void prettyPlotting(Settings s){
   pad1->cd();
   pad1->SetLogx();
   pad1->SetLogy();
-  pbpbSpec[0]->GetXaxis()->SetRangeUser(0.7,390);
-  pbpbSpec[0]->GetYaxis()->SetTitle("#frac{1}{N_{evt}}E#frac{d^{3}N}{dp^{3}} (GeV^{-2})");
-  pbpbSpec[0]->GetYaxis()->SetTitleOffset(1.4);
-  pbpbSpec[0]->GetYaxis()->SetTitleSize(0.045);
-  pbpbSpec[0]->GetYaxis()->SetLabelSize(0.04);
-  pbpbSpec[0]->GetYaxis()->CenterTitle();
-  pbpbSpec[0]->GetYaxis()->SetLabelOffset(0.002);
-  pbpbSpec[0]->SetMarkerStyle(24);
-  pbpbSpec[0]->Scale(10);
-  pbpbSpec[0]->GetYaxis()->SetRangeUser(1.1e-17,1e4);
-  pbpbSpec[0]->Draw();
-  pbpbSpec[1]->SetMarkerColor(kBlue);
-  pbpbSpec[1]->SetLineColor(kBlue);
-  pbpbSpec[1]->SetMarkerStyle(25);
-  pbpbSpec[1]->Scale(3);
-  pbpbSpec[1]->Draw("same");
-  pbpbSpec[23]->SetMarkerColor(kRed);
-  pbpbSpec[23]->SetLineColor(kRed);
-  pbpbSpec[23]->SetMarkerStyle(28);
-  pbpbSpec[23]->Draw("same");
-  pbpbSpec[24]->SetMarkerStyle(20);
-  pbpbSpec[25]->SetMarkerColor(kBlue);
-  pbpbSpec[25]->SetLineColor(kBlue);
-  pbpbSpec[24]->Draw("same");
-  pbpbSpec[25]->SetMarkerStyle(21);
-  pbpbSpec[25]->Draw("same");
-  pbpbSpec[30]->SetMarkerColor(kRed);
-  pbpbSpec[30]->SetLineColor(kRed);
-  pbpbSpec[30]->SetMarkerStyle(34);
-  pbpbSpec[30]->Draw("same");
+  //pbpbSpec[0]->GetXaxis()->SetRangeUser(0.7,390);
+  TH1D * ppSpecD = new TH1D("specDummy1","",3,0.4,450);
+  ppSpecD->GetXaxis()->SetRangeUser(0.4,390);
+  ppSpecD->GetYaxis()->SetTitle("#frac{1}{N_{evt}} E #frac{d^{3}N}{dp^{3}} (GeV^{-2})");
+  ppSpecD->GetYaxis()->SetTitleOffset(1.4);
+  ppSpecD->GetYaxis()->SetTitleSize(0.045);
+  ppSpecD->GetYaxis()->SetLabelSize(0.04);
+  ppSpecD->GetYaxis()->CenterTitle();
+  ppSpecD->GetYaxis()->SetLabelOffset(0.002);
+  ppSpecD->GetYaxis()->SetRangeUser(1.1e-17,1e4);
+  ppSpecD->GetXaxis()->SetRangeUser(0.4,390);
+  ppSpecD->Draw();
   ppSpec->SetMarkerStyle(5);
   ppSpec->Scale(1/70.0);//scaled by inelastic xsection of 70 mb
   //ppSpec->Print("All");
   ppSpec->Draw("same");
+  pbpbSpec[0]->GetXaxis()->SetRangeUser(0.7,390);
+  pbpbSpec[0]->SetMarkerStyle(24);
+  pbpbSpec[0]->Scale(10);
+  pbpbSpec[0]->Draw("same");
+  pbpbSpec[1]->SetMarkerColor(kBlue);
+  pbpbSpec[1]->SetLineColor(kBlue);
+  pbpbSpec[1]->SetMarkerStyle(25);
+  pbpbSpec[1]->Scale(3);
+  pbpbSpec[1]->GetXaxis()->SetRangeUser(0.7,390);
+  pbpbSpec[1]->Draw("same");
+  pbpbSpec[23]->SetMarkerColor(kRed);
+  pbpbSpec[23]->SetLineColor(kRed);
+  pbpbSpec[23]->SetMarkerStyle(28);
+  pbpbSpec[23]->GetXaxis()->SetRangeUser(0.7,390);
+  pbpbSpec[23]->Draw("same");
+  pbpbSpec[24]->SetMarkerStyle(20);
+  pbpbSpec[24]->GetXaxis()->SetRangeUser(0.7,390);
+  pbpbSpec[25]->SetMarkerColor(kBlue);
+  pbpbSpec[25]->SetLineColor(kBlue);
+  pbpbSpec[24]->Draw("same");
+  pbpbSpec[25]->SetMarkerStyle(21);
+  pbpbSpec[25]->GetXaxis()->SetRangeUser(0.7,390);
+  pbpbSpec[25]->Draw("same");
+  pbpbSpec[30]->SetMarkerColor(kRed);
+  pbpbSpec[30]->SetLineColor(kRed);
+  pbpbSpec[30]->SetMarkerStyle(34);
+  pbpbSpec[30]->GetXaxis()->SetRangeUser(0.7,390);
+  pbpbSpec[30]->Draw("same");
   TLegend * specLeg = new TLegend(0.25,0.1,0.45,0.5);
   //specLeg->SetFillStyle(0);
   specLeg->AddEntry((TObject*)0,"|#eta|<1",""); 
@@ -658,28 +676,43 @@ void prettyPlotting(Settings s){
  
   pad2->cd();
   pad2->SetLogx();
-  s.PbPb_totSyst[0]->GetYaxis()->SetTitleOffset(0.6);
-  s.PbPb_totSyst[0]->GetYaxis()->SetTitleFont(42);
-  s.PbPb_totSyst[0]->GetYaxis()->SetTitleSize(0.095);
-  s.PbPb_totSyst[0]->GetYaxis()->SetLabelSize(0.095);
-  s.PbPb_totSyst[0]->GetXaxis()->SetTitleFont(42);
-  s.PbPb_totSyst[0]->GetYaxis()->SetTitle(Form("Syst. Uncert. (%s)","%"));
-  s.PbPb_totSyst[0]->GetXaxis()->SetRangeUser(0.7,390);
-  s.PbPb_totSyst[0]->GetXaxis()->SetTitle("p_{T} (GeV)");
-  s.PbPb_totSyst[0]->GetXaxis()->SetTitleSize(0.1);
-  s.PbPb_totSyst[0]->GetXaxis()->SetLabelSize(0.1);
-  s.PbPb_totSyst[0]->GetXaxis()->SetTitleOffset(1.2);
+  TH1D * ppSpecD2 = new TH1D("specDummy2","",3,0.4,450);
+  ppSpecD2->GetYaxis()->SetRangeUser(0.0,19.99);
+  ppSpecD2->GetYaxis()->SetNdivisions(4,4,0,kTRUE);
+  ppSpecD2->GetYaxis()->SetTitleOffset(0.6);
+  ppSpecD2->GetYaxis()->SetTitleFont(42);
+  ppSpecD2->GetYaxis()->SetTitleSize(0.095);
+  ppSpecD2->GetYaxis()->SetLabelSize(0.095);
+  ppSpecD2->GetXaxis()->SetTitleFont(42);
+  ppSpecD2->GetYaxis()->SetTitle(Form("Syst. uncert. (%s)","%"));
+  ppSpecD2->GetXaxis()->SetRangeUser(0.4,390);
+  ppSpecD2->GetXaxis()->SetTitle("p_{T} (GeV)");
+  ppSpecD2->GetXaxis()->SetTitleSize(0.1);
+  ppSpecD2->GetXaxis()->SetLabelSize(0.1);
+  ppSpecD2->GetXaxis()->SetTitleOffset(1.2);
+  ppSpecD2->GetXaxis()->CenterTitle();
+  ppSpecD2->GetXaxis()->SetTickLength(0.06);
+  ppSpecD2->Draw();
   s.PbPb_totSyst[0]->SetFillColor(kOrange);
+  s.PbPb_totSyst[0]->SetBinContent(1,0);
+  s.PbPb_totSyst[0]->SetBinError(1,0);
+  s.PbPb_totSyst[0]->SetBinContent(2,0);
+  s.PbPb_totSyst[0]->SetBinError(2,0);
   s.PbPb_totSyst[0]->Scale(100);
-  s.PbPb_totSyst[0]->GetYaxis()->SetRangeUser(0.0,19.99);
-  s.PbPb_totSyst[0]->GetYaxis()->SetNdivisions(4,4,0,kTRUE);
-  s.PbPb_totSyst[0]->Draw();
+  s.PbPb_totSyst[0]->GetXaxis()->SetRangeUser(0.7,400);
+  s.PbPb_totSyst[0]->Draw("same");
   s.PbPb_totSyst[30]->SetFillColor(kRed);
   s.PbPb_totSyst[30]->SetFillStyle(3004);
   s.PbPb_totSyst[30]->Scale(100);
+  s.PbPb_totSyst[30]->SetBinContent(1,0);
+  s.PbPb_totSyst[30]->SetBinError(1,0);
+  s.PbPb_totSyst[30]->SetBinContent(2,0);
+  s.PbPb_totSyst[30]->SetBinError(2,0);
+  s.PbPb_totSyst[30]->GetXaxis()->SetRangeUser(0.7,400);
   s.PbPb_totSyst[30]->Draw("same");
   s.pp_totSyst->SetFillColor(kBlack);
-  s.pp_totSyst->SetFillStyle(3005);
+  s.pp_totSyst->SetFillStyle(3003);
+  s.pp_totSyst->GetXaxis()->SetRangeUser(0.5,400);
   s.pp_totSyst->Scale(100);
   s.pp_totSyst->Draw("same");
   TLegend * systLeg = new TLegend(0.6,0.6,0.9,0.98);
@@ -687,11 +720,14 @@ void prettyPlotting(Settings s){
   systLeg->AddEntry(s.PbPb_totSyst[0],Form("0-5%s","%"),"f");
   systLeg->AddEntry(s.PbPb_totSyst[30],Form("70-90%s","%"),"f");
   systLeg->AddEntry(s.pp_totSyst,"pp","f");
+  gStyle->SetPadTickY(1);
   systLeg->Draw("same");
+  ppSpecD2->Draw("sameaxis");
+  ppSpecD2->GetXaxis()->Draw("same");
 
   CMS_lumi( canv2, 0,33);
-  canv2->Update();
-  canv2->RedrawAxis();
+  //canv2->Update();
+  //canv2->RedrawAxis();
   //canv2->GetFrame()->Draw();    
   canv2->SaveAs("plots/prettyPlots/Spectra_perEventYield.png");
   canv2->SaveAs("plots/prettyPlots/Spectra_perEventYield.pdf");
@@ -755,11 +791,11 @@ void prettyPlotting(Settings s){
 
   //legend
   gStyle->SetLegendBorderSize(0); 
-  TLegend * bigLegc1 = new TLegend(0.49,0.55,0.69,0.93);
+  TLegend * bigLegc1 = new TLegend(0.48,0.55,0.68,0.93);
   TLegend * bigLegc1x = new TLegend(0.44,0.55,0.64,0.93);
  //divide by number of entries on right/left
-  TLegend * bigLegc2 = new TLegend(0.7,0.93-(0.93-0.55)/(10.0/2.0),0.9,0.93);
-  TLegend * bigLegc2x = new TLegend(0.65,0.93-(0.93-0.55)/(10.0/2.0),0.85,0.93);
+  TLegend * bigLegc2 = new TLegend(0.69,0.93-(0.93-0.55)/(10.0/2.0),0.89,0.93);
+  TLegend * bigLegc2x = new TLegend(0.63,0.93-(0.93-0.55)/(10.0/2.0),0.85,0.93);
   bigLegc1->SetFillStyle(0); bigLegc1x->SetFillStyle(0);
   bigLegc2->SetFillStyle(0); bigLegc2x->SetFillStyle(0);
   bigLegc1->SetTextSize(0.4/20.0); bigLegc1x->SetTextSize(0.4/20.0);
@@ -814,6 +850,7 @@ void prettyPlotting(Settings s){
   tex->DrawLatex(49.60057,0.1850789,"LHC");
 
   CMS_lumi( canv3,0, 11,false,true );
+  gStyle->SetPadTickY(1);
   canv3->Update();
   canv3->RedrawAxis();
   canv3->SaveAs("plots/prettyPlots/RAA_Compilation_noTheory.png");
@@ -827,18 +864,24 @@ void prettyPlotting(Settings s){
   TGraph * jx = new TGraph(graphPts2);
   const int graphPts3 = 38;
   TGraph * santiago = new TGraph(graphPts3);
-  gettheoryRAA(canv3,s,0,"",vitev,jx,santiago);
+  const int graphPts4 = 7;
+  TGraph * BBMG = new TGraph(graphPts4);
+  gettheoryRAA(canv3,s,0,"",vitev,jx,santiago,BBMG);
   vitev->SetFillStyle(3002);vitev->SetFillColor(kRed);vitev->SetLineWidth(0);
   vitev->Draw("same f");
   jx->Draw("same");
   santiago->Draw("same");
-  bigLegc2->SetY1NDC(0.93-(0.93-0.55)/(10.0/6.0));
-  bigLegc2x->SetY1NDC(0.93-(0.93-0.55)/(10.0/6.0));
+  BBMG->Draw("same");
+  bigLegc2->SetY1NDC(0.93-(0.93-0.55)/(10.0/7.0));
+  bigLegc2x->SetY1NDC(0.93-(0.93-0.55)/(10.0/7.0));
   bigLegc2->AddEntry((TObject*)0,"","");  bigLegc2x->AddEntry((TObject*)0,"Models 5.02 TeV (PbPb)","");
   bigLegc2->AddEntry(dummyVitev,"SCET_{G} (0-10%)","f");  bigLegc2x->AddEntry((TObject*)0,"","");
   bigLegc2->AddEntry(dummyCUTEP,"CUJET 3.0 (h^{#pm}+#pi^{0}, 0-10%)","l");  bigLegc2x->AddEntry((TObject*)0,"","");
   bigLegc2->AddEntry(santiago,"Andr#acute{e}s et al. (0-5%)","L"); bigLegc2x->AddEntry((TObject*)0,"","");
+  BBMG->SetLineStyle(7);
+  bigLegc2->AddEntry(BBMG,"v-USPhydro+BBMG (0-5%)","L"); bigLegc2x->AddEntry((TObject*)0,"","");
   bigLegc2->Draw("same");bigLegc2x->Draw("same");
+  gStyle->SetPadTickY(1);
   canv3->Update();
   canv3->RedrawAxis();
   canv3->SaveAs("plots/prettyPlots/RAA_Compilation.png");
@@ -1005,7 +1048,7 @@ double p8800_d40x1y1_xval[] = { 0.5365, 0.615, 0.7050000000000001, 0.808, 0.9259
   return;
 }
 
-void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString , TGraph * vitev, TGraph * JiechenXu, TGraph * Santiago){
+void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string saveString , TGraph * vitev, TGraph * JiechenXu, TGraph * Santiago, TGraph * BBMG){
   //Vitev**********************************************************************************************************
   float temp_x;
   float temp_y;
@@ -1108,6 +1151,16 @@ void gettheoryRAA(TCanvas * c_th, Settings s, int centralityBin, std::string sav
   Santiago->SetLineWidth(3);
   Santiago->SetLineColor(kMagenta+1);
 
+  BBMG->SetPoint(0,5,0.0986564);
+  BBMG->SetPoint(1,10,0.169211);
+  BBMG->SetPoint(2,20,0.27274);
+  BBMG->SetPoint(3,30,0.35439);
+  BBMG->SetPoint(4,50,0.474803);
+  BBMG->SetPoint(5,75,0.576114);
+  BBMG->SetPoint(6,100,0.645441);
+  BBMG->SetLineWidth(3);
+  BBMG->SetLineColor(kGreen+3);
+  BBMG->SetLineStyle(9);
   /*TLegend * leg_th = new TLegend(0.5,0.75,0.9,0.85);
   leg_th->SetTextSize(0.03);
   //leg_th->SetFillStyle(0);
