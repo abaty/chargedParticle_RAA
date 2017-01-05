@@ -329,7 +329,7 @@ void prettyPlotting(Settings s){
       s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(c)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
       s.RCP_totSyst[c]->SetBinContent(i,Quad(s.RCP_totSyst[c]->GetBinContent(i),TMath::Max(hyperonPbPb[getHypInd(32)]->GetBinContent(i)-1,0.015)));//PbPb hyperon study
       
-      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.04));//pplumi uncertainty for spectrum
+      if(c==0)s.pp_totSyst->SetBinContent(i,Quad(s.pp_totSyst->GetBinContent(i),0.023));//pplumi uncertainty for spectrum
       //if(c==21)s.RAA_totSyst[c]->SetBinContent(i,Quad(s.RAA_totSyst[c]->GetBinContent(i),0.02));//2% event selection uncertainty for 0-100% RAA
     }
     //s.RAA_totSyst[c]->Print("All");
@@ -351,7 +351,7 @@ void prettyPlotting(Settings s){
     h[c]->Draw();
  
     TAAUncert = s.TAAuncert[c]/100.0;
-    lumiUncert = 0.04;//12% for pp lumi
+    lumiUncert = 0.023;//12% for pp lumi
     bLumi->SetFillColor(kGray);
     bTAA->SetFillColor(kBlue-9);
     bLumi->SetLineWidth(0);
